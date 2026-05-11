@@ -1,4 +1,3 @@
-import React from 'react';
 import FounderProfile from './components/FounderProfile';
 
 function App() {
