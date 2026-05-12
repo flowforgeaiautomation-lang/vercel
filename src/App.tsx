@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginNew from './components/LoginNew';
-import RoleSelection from './components/RoleSelection';
+import RoleSelectionNew from './components/RoleSelectionNew';
 import Home from './components/Home';
 import ProfileNew from './components/ProfileNew';
 import './App.css';
@@ -86,7 +86,7 @@ function App() {
         } />
         <Route path="/role-selection" element={
           <AppWithUniverse>
-            <RoleSelection />
+            <RoleSelectionNew />
           </AppWithUniverse>
         } />
         <Route path="/profile" element={
