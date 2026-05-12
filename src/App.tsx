@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginNew from './components/LoginNew';
 import RoleSelection from './components/RoleSelection';
 import Home from './components/Home';
 import ProfileNew from './components/ProfileNew';
@@ -78,6 +79,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={
+          <AppWithUniverse>
+            <LoginNew />
+          </AppWithUniverse>
+        } />
         <Route path="/role-selection" element={
           <AppWithUniverse>
             <RoleSelection />
