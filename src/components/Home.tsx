@@ -185,6 +185,13 @@ const Home: React.FC = () => {
                   </svg>
                   Share Update
                 </button>
+                <button className="action-btn profile" onClick={() => navigate('/profile')}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="13" r="4" strokeWidth="2"/>
+                  </svg>
+                  View Profile
+                </button>
               </div>
             </div>
           </div>
