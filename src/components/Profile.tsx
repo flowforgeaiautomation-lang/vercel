@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user has proper navigation flow
+    const hasRoleSelection = localStorage.getItem('selectedRole');
+    if (!hasRoleSelection) {
+      // Redirect to role selection if no role is set
+      navigate('/role-selection');
+    return;
+    }
+  }, [navigate]);
 
   const handleBackToNetwork = () => {
     navigate('/home');
