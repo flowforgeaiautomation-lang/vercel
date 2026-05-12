@@ -4,6 +4,7 @@ import './Profile.css';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = React.useState(true);
 
   useEffect(() => {
     // Check if user has proper navigation flow
@@ -11,8 +12,17 @@ const Profile: React.FC = () => {
     if (!hasRoleSelection) {
       // Redirect to role selection if no role is set
       navigate('/role-selection');
-    return;
+      return;
     }
+    
+    // Simulate loading and then show profile
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [navigate]);
 
   const handleBackToNetwork = () => {
@@ -60,31 +70,39 @@ const Profile: React.FC = () => {
 
   return (
     <div className="profile-container">
-      {/* Header */}
-      <header className="profile-header">
-        <button className="back-button" onClick={handleBackToNetwork}>
-          ← Back to Network
-        </button>
-        <button className="share-button" onClick={handleShareProfile}>
-          Share Profile
-        </button>
-        <div className="logo">
-          <img 
-            src="/images/triventa-logo.png" 
-            alt="TRIVENTA" 
-            className="logo-image"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              target.nextElementSibling?.classList.remove('hidden');
-            }}
-          />
-          <div className="logo-fallback hidden">◆</div>
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner">◆</div>
+          <p className="loading-text">Loading profile...</p>
         </div>
-      </header>
+      ) : (
+        <>
+          {/* Header */}
+          <header className="profile-header">
+            <button className="back-button" onClick={handleBackToNetwork}>
+              ← Back to Network
+            </button>
+            <button className="share-button" onClick={handleShareProfile}>
+              Share Profile
+            </button>
+            <div className="logo">
+              <img 
+                src="/images/triventa-logo.png" 
+                alt="TRIVENTA" 
+                className="logo-image"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="logo-fallback hidden">◆</div>
+            </div>
+          </header>
 
-      {/* Profile Summary */}
-      <div className="profile-summary">
+          {/* Profile Summary */}
+          <div className="profile-summary">
         <div className="profile-info">
           <div className="profile-image-container">
             <img 
@@ -193,6 +211,10 @@ const Profile: React.FC = () => {
               Share Update
             </button>
           </div>
+        </div>
+      </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
