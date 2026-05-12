@@ -78,17 +78,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={
-          <AppWithUniverse>
-            <Login />
-          </AppWithUniverse>
-        } />
+        <Route path="/" element={<Home />} />
         <Route path="/role-selection" element={
           <AppWithUniverse>
             <RoleSelection />
           </AppWithUniverse>
         } />
-        <Route path="/home" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
