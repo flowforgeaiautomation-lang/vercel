@@ -9,6 +9,14 @@
       }
     }
   ],
+  "buildCommand": "npm run build && rm -rf dist && npm run build",
+  "installCommand": "npm install",
+  "cleanUrls": true,
+  "functions": {
+    "cache": {
+      "maxAge": 0
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
