@@ -5,15 +5,77 @@ import './Profile.css';
 const Profile: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleBackToHome = () => {
+  const handleBackToNetwork = () => {
     navigate('/home');
   };
 
+  const handleShareProfile = () => {
+    // Share profile functionality
+    alert('Profile shared!');
+  };
+
+  const trendingStartups = [
+    { name: 'Synthara', description: 'AI infrastructure for product teams', change: '+12%' },
+    { name: 'Pixelic', description: 'Design automation platform', change: '+8%' },
+    { name: 'Datumo', description: 'Data intelligence for AI teams', change: '+15%' },
+    { name: 'Nexora', description: 'Next-gen cloud solutions', change: '+6%' }
+  ];
+
+  const feedItems = [
+    {
+      id: 1,
+      type: 'funding',
+      title: 'Synthara raises $2M Pre-Seed',
+      description: 'Led by top-tier VCs to scale AI infrastructure',
+      time: '2 hours ago',
+      author: 'Arjun Mehta'
+    },
+    {
+      id: 2,
+      type: 'milestone',
+      title: 'Pixelic hits 10K users',
+      description: 'Design automation platform reaches major milestone',
+      time: '4 hours ago',
+      author: 'Team Pixelic'
+    },
+    {
+      id: 3,
+      type: 'partnership',
+      title: 'Datumo partners with AWS',
+      description: 'Strategic partnership to enhance data capabilities',
+      time: '6 hours ago',
+      author: 'Raj Kumar'
+    }
+  ];
+
   return (
     <div className="profile-container">
-      <div className="profile-content">
-        {/* Profile Header */}
-        <div className="profile-header">
+      {/* Header */}
+      <header className="profile-header">
+        <button className="back-button" onClick={handleBackToNetwork}>
+          ← Back to Network
+        </button>
+        <button className="share-button" onClick={handleShareProfile}>
+          Share Profile
+        </button>
+        <div className="logo">
+          <img 
+            src="/images/triventa-logo.png" 
+            alt="TRIVENTA" 
+            className="logo-image"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+          <div className="logo-fallback hidden">◆</div>
+        </div>
+      </header>
+
+      {/* Profile Summary */}
+      <div className="profile-summary">
+        <div className="profile-info">
           <div className="profile-image-container">
             <img 
               src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" 
@@ -22,15 +84,13 @@ const Profile: React.FC = () => {
             />
             <div className="verification-badge">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#D4AF37"/>
+                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10C20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L8 12.17L15 6L8 15Z" fill="#D4AF37"/>
               </svg>
             </div>
           </div>
-          <div className="profile-info">
-            <div className="name-row">
-              <h1 className="founder-name">Arjun Mehta</h1>
-              <span className="founder-badge">Founder</span>
-            </div>
+          <div className="profile-details">
+            <h1 className="founder-name">Arjun Mehta</h1>
+            <span className="founder-badge">Founder</span>
             <p className="founder-headline">Founder & CEO @ Synthara</p>
             <p className="founder-description">Building AI infrastructure for next-gen product teams.</p>
             <div className="founder-meta">
@@ -67,62 +127,62 @@ const Profile: React.FC = () => {
             <span className="credibility-value">Top 10%</span>
           </div>
         </div>
+      </div>
 
-        {/* Metrics Grid */}
-        <div className="metrics-grid">
-          <div className="metric-card">
-            <div className="metric-icon">🚀</div>
-            <div className="metric-content">
-              <div className="metric-value">7</div>
-              <div className="metric-label">Startups Built / Backed</div>
-            </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-icon">⭐</div>
-            <div className="metric-content">
-              <div className="metric-value">4.7/5</div>
-              <div className="metric-label">Avg Feedback Score (Top 15%)</div>
-            </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-icon">🤝</div>
-            <div className="metric-content">
-              <div className="metric-value">23</div>
-              <div className="metric-label">Successful Matches</div>
-            </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-icon">📈</div>
-            <div className="metric-content">
-              <div className="metric-value">Top 5%</div>
-              <div className="metric-label">Community Impact</div>
-            </div>
+      {/* Main Content Grid */}
+      <div className="profile-content-grid">
+        {/* Left Column - Feed */}
+        <div className="profile-feed">
+          <h3 className="section-title">Activity Feed</h3>
+          <div className="feed-list">
+            {feedItems.map((item) => (
+              <div key={item.id} className="feed-item">
+                <div className="feed-item-header">
+                  <div className="feed-item-meta">
+                    <span className="feed-type">{item.type}</span>
+                    <span className="feed-time">{item.time}</span>
+                  </div>
+                </div>
+                <h4 className="feed-title">{item.title}</h4>
+                <p className="feed-description">{item.description}</p>
+                <div className="feed-author">by {item.author}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* About Section */}
-        <div className="about-section">
-          <h3 className="section-title">About</h3>
-          <p className="about-description">
-            I'm building Synthara to simplify how product teams deploy and scale AI systems. Passionate about developer tools, infra, and solving hard problems with elegant systems.
-          </p>
-          <div className="expertise-tags">
-            <span className="tag">AI / ML</span>
-            <span className="tag">Developer Tools</span>
-            <span className="tag">SaaS</span>
-            <span className="tag">Product Strategy</span>
-            <span className="tag">Open Source</span>
+        {/* Right Column - Sidebar */}
+        <div className="profile-sidebar">
+          <div className="trending-section">
+            <h3>Trending Startups</h3>
+            <div className="trending-list">
+              {trendingStartups.map((startup, index) => (
+                <div key={index} className="trending-item">
+                  <h4>{startup.name}</h4>
+                  <p>{startup.description}</p>
+                  <span className={`trending-change ${startup.change.startsWith('+') ? 'positive' : 'negative'}`}>
+                    {startup.change}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Back Button */}
-        <div className="profile-actions">
-          <button className="back-button" onClick={handleBackToHome}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M19 12H5M12 19L5 12L12 5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Back to Home
-          </button>
+          <div className="quick-actions">
+            <h3>Quick Actions</h3>
+            <button className="action-btn primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 5V19M5 12H19" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              New Post
+            </button>
+            <button className="action-btn secondary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 15V19A2 2 0 0 1 19 17H5A2 2 0 0 1 3 15V19A2 2 0 0 1 5 21H19A2 2 0 0 1 21 15Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Share Update
+            </button>
+          </div>
         </div>
       </div>
     </div>

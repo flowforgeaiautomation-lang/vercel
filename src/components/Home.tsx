@@ -59,7 +59,8 @@ const Home: React.FC = () => {
     { icon: '🔍', label: 'Discover', active: false },
     { icon: '💬', label: 'Messages', active: false },
     { icon: '📊', label: 'Analytics', active: false },
-    { icon: '⚙️', label: 'Settings', active: false }
+    { icon: '⚙️', label: 'Settings', active: false },
+    { icon: '👤', label: 'Profile', active: false, path: '/profile' }
   ];
 
   return (
@@ -85,7 +86,11 @@ const Home: React.FC = () => {
         
         <nav className="sidebar-nav">
           {menuItems.map((item, index) => (
-            <button key={index} className={`nav-item ${item.active ? 'active' : ''}`}>
+            <button 
+              key={index} 
+              className={`nav-item ${item.active ? 'active' : ''}`}
+              onClick={() => item.path && navigate(item.path)}
+            >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
             </button>
@@ -184,13 +189,6 @@ const Home: React.FC = () => {
                     <path d="M21 15V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V15M17 8L12 3L7 8M12 3V15" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   Share Update
-                </button>
-                <button className="action-btn profile" onClick={() => navigate('/profile')}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="13" r="4" strokeWidth="2"/>
-                  </svg>
-                  View Profile
                 </button>
               </div>
             </div>
