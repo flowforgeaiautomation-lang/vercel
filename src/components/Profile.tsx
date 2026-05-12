@@ -1,28 +1,102 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user has proper navigation flow
-    const hasRoleSelection = localStorage.getItem('selectedRole');
-    if (!hasRoleSelection) {
-      // Redirect to role selection if no role is set
-      navigate('/role-selection');
-      return;
-    }
-    
-    // Simulate loading and then show profile
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    // Initialize Firebase from CDN and fetch profile
+    const initFirebase = async () => {
+      try {
+        // Load Firebase from CDN
+        const firebaseScript = document.createElement('script');
+        firebaseScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        document.head.appendChild(firebaseScript);
 
-    return () => {
-      clearTimeout(timer);
+        firebaseScript.onload = async () => {
+          const authScript = document.createElement('script');
+          authScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+          document.head.appendChild(authScript);
+
+          authScript.onload = async () => {
+            const firestoreScript = document.createElement('script');
+            firestoreScript.src = 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+            document.head.appendChild(firestoreScript);
+
+            firestoreScript.onload = async () => {
+              // Initialize Firebase
+              const firebase = (window as any).firebase;
+              const app = firebase.initializeApp({
+                apiKey: "AIzaSyBkZ8P7Y3Q2rLmX9t1W5vK6nG7hJ4fQ",
+                authDomain: "triventa.firebaseapp.com",
+                projectId: "triventa",
+                storageBucket: "triventa.appspot.com",
+                messagingSenderId: "123456789",
+                appId: "1:123456789:web:abcdef123456"
+              });
+
+              const auth = firebase.getAuth(app);
+              const db = firebase.getFirestore(app);
+
+              // Listen for auth state
+              auth.onAuthStateChanged(async (user: any) => {
+                if (user) {
+                  // Fetch profile from Firestore
+                  try {
+                    const docRef = firebase.doc(db, "users", user.uid);
+                    const docSnap = await firebase.getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                      setProfileData(docSnap.data());
+                    } else {
+                      // Create default profile if none exists
+                      const defaultProfile = {
+                        uid: user.uid,
+                        displayName: user.displayName || 'New User',
+                        email: user.email,
+                        role: localStorage.getItem('selectedRole') || 'Explorer',
+                        bio: 'Building amazing things.',
+                        profileImage: user.photoURL || null,
+                        proofScore: 0,
+                        startupName: '',
+                        links: [],
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                      };
+                      
+                      await firebase.setDoc(docRef, defaultProfile);
+                      setProfileData(defaultProfile);
+                    }
+                  } catch (error) {
+                    console.error('Error fetching profile:', error);
+                    // Fallback to localStorage
+                    const fallbackProfile = {
+                      displayName: localStorage.getItem('displayName') || 'User',
+                      role: localStorage.getItem('selectedRole') || 'Explorer',
+                      bio: localStorage.getItem('bio') || 'Building amazing things.'
+                    };
+                    setProfileData(fallbackProfile);
+                  }
+                } else {
+                  // No user - redirect to role selection
+                  navigate('/role-selection');
+                  return;
+                }
+                setLoading(false);
+              });
+            };
+          };
+        };
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        setLoading(false);
+      }
     };
+
+    initFirebase();
   }, [navigate]);
 
   const handleBackToNetwork = () => {
@@ -45,69 +119,98 @@ const Profile: React.FC = () => {
     {
       id: 1,
       type: 'funding',
-      title: 'Synthara raises $2M Pre-Seed',
-      description: 'Led by top-tier VCs to scale AI infrastructure',
-      time: '2 hours ago',
-      author: 'Arjun Mehta'
-    },
-    {
-      id: 2,
-      type: 'milestone',
-      title: 'Pixelic hits 10K users',
-      description: 'Design automation platform reaches major milestone',
-      time: '4 hours ago',
-      author: 'Team Pixelic'
-    },
-    {
-      id: 3,
-      type: 'partnership',
-      title: 'Datumo partners with AWS',
-      description: 'Strategic partnership to enhance data capabilities',
-      time: '6 hours ago',
-      author: 'Raj Kumar'
+      title: profileData?.startupName ? `${profileData.startupName} raises funding` : 'Building something amazing',
+      description: profileData?.bio || 'Building innovative solutions',
+      time: 'Just now',
+      author: profileData?.displayName || 'User'
     }
   ];
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          flexDirection: 'column',
+          color: '#D4AF37',
+          fontSize: '18px'
+        }}>
+          <div style={{ fontSize: '24px', marginBottom: '16px' }}>◆</div>
+          <p>Loading Profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No profile data fallback
+  if (!profileData) {
+    return (
+      <div className="profile-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          flexDirection: 'column',
+          color: '#9CA3AF',
+          fontSize: '18px'
+        }}>
+          <p>Profile not found</p>
+          <button 
+            onClick={() => navigate('/role-selection')}
+            style={{
+              marginTop: '16px',
+              padding: '12px 24px',
+              backgroundColor: '#D4AF37',
+              color: '#0A0A0F',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+          >
+            Go to Role Selection
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="profile-container">
-      {/* Loading State */}
-      {isLoading ? (
-        <div className="loading-container">
-          <div className="loading-spinner">◆</div>
-          <p className="loading-text">Loading profile...</p>
+      {/* Header */}
+      <header className="profile-header">
+        <button className="back-button" onClick={handleBackToNetwork}>
+          ← Back to Network
+        </button>
+        <button className="share-button" onClick={handleShareProfile}>
+          Share Profile
+        </button>
+        <div className="logo">
+          <img 
+            src="/images/triventa-logo.png" 
+            alt="TRIVENTA" 
+            className="logo-image"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              target.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+          <div className="logo-fallback hidden">◆</div>
         </div>
-      ) : (
-        <>
-          {/* Header */}
-          <header className="profile-header">
-            <button className="back-button" onClick={handleBackToNetwork}>
-              ← Back to Network
-            </button>
-            <button className="share-button" onClick={handleShareProfile}>
-              Share Profile
-            </button>
-            <div className="logo">
-              <img 
-                src="/images/triventa-logo.png" 
-                alt="TRIVENTA" 
-                className="logo-image"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="logo-fallback hidden">◆</div>
-            </div>
-          </header>
+      </header>
 
-          {/* Profile Summary */}
-          <div className="profile-summary">
+      {/* Profile Summary */}
+      <div className="profile-summary">
         <div className="profile-info">
           <div className="profile-image-container">
             <img 
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" 
-              alt="Arjun Mehta" 
+              src={profileData?.profileImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"} 
+              alt={profileData?.displayName || 'User'} 
               className="profile-image"
             />
             <div className="verification-badge">
@@ -117,13 +220,13 @@ const Profile: React.FC = () => {
             </div>
           </div>
           <div className="profile-details">
-            <h1 className="founder-name">Arjun Mehta</h1>
-            <span className="founder-badge">Founder</span>
-            <p className="founder-headline">Founder & CEO @ Synthara</p>
-            <p className="founder-description">Building AI infrastructure for next-gen product teams.</p>
+            <h1 className="founder-name">{profileData?.displayName || 'User'}</h1>
+            <span className="founder-badge">{profileData?.role || 'Explorer'}</span>
+            <p className="founder-headline">{profileData?.startupName ? `Founder & CEO @ ${profileData.startupName}` : 'Building something amazing'}</p>
+            <p className="founder-description">{profileData?.bio || 'Building innovative solutions.'}</p>
             <div className="founder-meta">
-              <span className="location">📍 Bengaluru, India</span>
-              <span className="website">🔗 synthara.ai</span>
+              <span className="location">📍 {profileData?.location || 'Location'}</span>
+              {profileData?.links?.[0] && <span className="website">🔗 {profileData.links[0]}</span>}
             </div>
           </div>
         </div>
@@ -132,27 +235,27 @@ const Profile: React.FC = () => {
         <div className="credibility-strip">
           <div className="credibility-item">
             <span className="credibility-label">Prestige Level</span>
-            <span className="credibility-value">Catalyst</span>
+            <span className="credibility-value">{profileData?.prestigeLevel || 'Explorer'}</span>
           </div>
           <div className="credibility-separator"></div>
           <div className="credibility-item">
             <span className="credibility-label">Expertise Score</span>
-            <span className="credibility-value">92/100</span>
+            <span className="credibility-value">{profileData?.expertiseScore || '0'}/100</span>
           </div>
           <div className="credibility-separator"></div>
           <div className="credibility-item">
             <span className="credibility-label">Trust Index</span>
-            <span className="credibility-value">4.8/5</span>
+            <span className="credibility-value">{profileData?.trustIndex || '0'}/5</span>
           </div>
           <div className="credibility-separator"></div>
           <div className="credibility-item">
             <span className="credibility-label">Impact Score</span>
-            <span className="credibility-value">87/100</span>
+            <span className="credibility-value">{profileData?.impactScore || '0'}/100</span>
           </div>
           <div className="credibility-separator"></div>
           <div className="credibility-item">
             <span className="credibility-label">Consistency</span>
-            <span className="credibility-value">Top 10%</span>
+            <span className="credibility-value">{profileData?.consistencyRank || 'A+'}</span>
           </div>
         </div>
       </div>
@@ -211,10 +314,6 @@ const Profile: React.FC = () => {
               Share Update
             </button>
           </div>
-        </div>
-      </div>
-        </div>
-      </div>
         </div>
       </div>
     </div>

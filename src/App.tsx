@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './components/Login';
 import RoleSelection from './components/RoleSelection';
 import Home from './components/Home';
-import Profile from './components/Profile';
+import ProfileNew from './components/ProfileNew';
 import './App.css';
 
 function AppWithUniverse({ children }: { children: React.ReactNode }) {
@@ -84,7 +83,11 @@ function App() {
             <RoleSelection />
           </AppWithUniverse>
         } />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={
+          <AppWithUniverse>
+            <ProfileNew />
+          </AppWithUniverse>
+        } />
       </Routes>
     </Router>
   );
