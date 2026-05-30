@@ -1,9 +1,9 @@
-/* TRIVENTA ROLE SELECTION - PREMIUM UNIVERSE THEME */
+/* TRIVEON ROLE SELECTION - PREMIUM UNIVERSE THEME */
 
 :root {
-  --primary-gold: #D4AF37;
-  --secondary-gold: #B8941F;
-  --light-gold: #F4E4C1;
+  --primary-gold: #FFD700;
+  --secondary-gold: #FFC107;
+  --light-gold: #FFEB3B;
   --bg-dark: #0a0a0a;
   --bg-medium: #1a1a1a;
   --bg-light: #2a2a2a;
@@ -47,7 +47,7 @@ body {
   font-weight: 800;
   color: var(--primary-gold);
   margin-bottom: 16px;
-  text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
   letter-spacing: 2px;
 }
 
@@ -68,7 +68,7 @@ body {
 
 .role-card {
   background: rgba(255, 255, 255, 0.03);
-  border: 2px solid rgba(212, 175, 55, 0.2);
+  border: 2px solid rgba(255, 215, 0, 0.2);
   border-radius: 16px;
   padding: 40px 32px;
   cursor: pointer;
@@ -85,7 +85,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -93,7 +93,7 @@ body {
 .role-card:hover {
   border-color: var(--primary-gold);
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
 }
 
 .role-card:hover::before {
@@ -109,9 +109,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(255, 215, 0, 0.1);
   border-radius: 20px;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .role-title {
@@ -155,7 +155,7 @@ body {
   left: 5%;
   width: 100px;
   height: 100px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
   border-radius: 50%;
   animation: float 8s ease-in-out infinite;
 }
@@ -167,7 +167,7 @@ body {
   right: 8%;
   width: 150px;
   height: 150px;
-  background: radial-gradient(circle, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
   border-radius: 50%;
   animation: float 10s ease-in-out infinite reverse;
 }

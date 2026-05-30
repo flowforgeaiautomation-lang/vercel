@@ -70,8 +70,8 @@ const Home: React.FC = () => {
         <div className="sidebar-header">
           <div className="logo">
             <img 
-              src="/images/triventa-logo.png" 
-              alt="TRIVENTA" 
+              src="/images/triveon-logo.png" 
+              alt="TRIVEON" 
               className="logo-image"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -81,7 +81,7 @@ const Home: React.FC = () => {
             />
             <div className="logo-fallback hidden">◆</div>
           </div>
-          <span className="logo-text">TRIVENTA</span>
+          <span className="logo-text">TRIVEON</span>
         </div>
         
         <nav className="sidebar-nav">
@@ -117,7 +117,7 @@ const Home: React.FC = () => {
       <div className="main-content">
         <header className="content-header">
           <h1>Welcome back, {selectedRole}</h1>
-          <p>Here's what's happening in the TRIVENTA ecosystem</p>
+          <p>Here's what's happening in the TRIVEON ecosystem</p>
         </header>
 
         <div className="content-grid">

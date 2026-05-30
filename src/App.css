@@ -36,10 +36,10 @@ body {
 
 /* Golden theme colors */
 :root {
-  --primary-gold: #D4AF37;
-  --secondary-gold: #B8941F;
-  --light-gold: #F4E5C2;
-  --dark-gold: #8B7320;
+  --primary-gold: #FFD700;
+  --secondary-gold: #FFC107;
+  --light-gold: #FFEB3B;
+  --dark-gold: #FFB300;
   --bg-dark: #000814;
   --bg-medium: #001D3D;
   --bg-light: #003566;
@@ -81,7 +81,7 @@ body {
 .btn-primary:hover {
   background: var(--secondary-gold);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
 }
 
 .btn-secondary {
@@ -104,7 +104,7 @@ body {
 /* Input styles */
 input, textarea {
   background: var(--bg-medium);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.2);
   color: var(--text-primary);
   padding: 12px 16px;
   border-radius: 8px;
@@ -115,20 +115,20 @@ input, textarea {
 input:focus, textarea:focus {
   outline: none;
   border-color: var(--primary-gold);
-  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
 }
 
 /* Card styles */
 .card {
   background: var(--bg-medium);
-  border: 1px solid rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.1);
   border-radius: 12px;
   padding: 20px;
   transition: all 0.3s ease;
 }
 
 .card:hover {
-  border-color: rgba(212, 175, 55, 0.3);
+  border-color: rgba(255, 215, 0, 0.3);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
@@ -185,4 +185,57 @@ input:focus, textarea:focus {
   .card {
     padding: 16px;
   }
+}
+
+/* Auth Loader Styles */
+.auth-loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #000814 0%, #001D3D 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.auth-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.auth-loader-spinner {
+  width: 64px;
+  height: 64px;
+  border: 3px solid rgba(255, 215, 0, 0.2);
+  border-top-color: #FFD700;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-loader-title {
+  font-size: 48px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 4px;
+}
+
+.auth-loader-text {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 2px;
 }

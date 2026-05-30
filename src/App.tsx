@@ -1,9 +1,13 @@
 import React, { useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginNew from './components/LoginNew';
+import TriveonLogin from './components/TriveonLogin';
 import RoleSelectionNew from './components/RoleSelectionNew';
-import Home from './components/Home';
-import ProfileNew from './components/ProfileNew';
+import RoleSelection from './components/RoleSelection';
+import HomeDashboard from './components/HomeDashboard';
+import ProfilePremium from './components/ProfilePremium';
+import { UserProvider } from './contexts/UserContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './App.css';
 
 function AppWithUniverse({ children }: { children: React.ReactNode }) {
@@ -76,28 +80,43 @@ function AppWithUniverse({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={
-          <AppWithUniverse>
-            <LoginNew />
-          </AppWithUniverse>
-        } />
-        <Route path="/role-selection" element={
-          <AppWithUniverse>
-            <RoleSelectionNew />
-          </AppWithUniverse>
-        } />
-        <Route path="/profile" element={
-          <AppWithUniverse>
-            <ProfileNew />
-          </AppWithUniverse>
-        } />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <UserProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </UserProvider>
+    </AuthProvider>
   );
 }
 
-// TRIVENTA - The Operating System of Ambition
+function AppRoutes() {
+  const { user, profile, loading } = useAuth();
+  const isDemoMode = localStorage.getItem('currentUserId') === 'demo-user' || localStorage.getItem('selectedRole');
+  const hasDemoUserId = localStorage.getItem('currentUserId') === 'demo-user';
+  const hasSelectedRole = localStorage.getItem('selectedRole') !== null;
+
+  if (loading && !isDemoMode) {
+    return (
+      <div className="auth-loader-container">
+        <div className="auth-loader-content">
+          <div className="auth-loader-spinner"></div>
+          <h1 className="auth-loader-title">TRIVEON</h1>
+          <p className="auth-loader-text">Initializing ecosystem...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<TriveonLogin />} />
+      <Route path="/role-selection" element={<RoleSelection />} />
+      <Route path="/home" element={<HomeDashboard />} />
+      <Route path="/profile" element={<ProfilePremium />} />
+    </Routes>
+  );
+}
+
+// TRIVEON - The Operating System of Ambition
 export default App;
