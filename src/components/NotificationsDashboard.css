@@ -1,0 +1,38 @@
+/* Notifications Dashboard Styles */
+:root {
+  --gold-primary: #FFD700;
+  --gold-secondary: #FFC107;
+  --gold-light: #FFEB3B;
+  --dark-bg: #050510;
+  --dark-card: rgba(10, 10, 20, 0.98);
+  --text-white: #ffffff;
+  --text-gray: #9ca3af;
+  --border-subtle: rgba(255, 255, 255, 0.15);
+  --glass-blur: 24px;
+}
+
+.notifications-container {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: 100vh;
+  padding: 16px;
+  gap: 16px;
+  background: var(--dark-bg);
+}
+
+.notifications-sidebar {
+  background: var(--dark-card);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.notifications-main {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}

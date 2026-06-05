@@ -12,13 +12,13 @@ const TriveonLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
   const [forgotSuccess, setForgotSuccess] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
-  const { login, signup, googleLogin, resetPassword, profile } = useAuth();
-
-
+  const { login, signup, googleLogin, quickResetPassword, profile } = useAuth();
 
   const handleDemoClick = () => {
     localStorage.removeItem('selectedRole');
@@ -34,7 +34,7 @@ const TriveonLogin: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [forgotPasswordOpen, forgotSuccess, forgotEmail]);
+  }, [forgotPasswordOpen, forgotSuccess, forgotEmail, forgotNewPassword, forgotConfirmPassword]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -262,7 +262,7 @@ const TriveonLogin: React.FC = () => {
     setErrors({});
 
     if (!forgotEmail.trim()) {
-      setErrors({ forgotEmail: 'Enter your email.' });
+      setErrors({ forgotEmail: 'Please enter your email address.' });
       return;
     }
 
@@ -271,22 +271,36 @@ const TriveonLogin: React.FC = () => {
       return;
     }
 
+    if (forgotNewPassword.length < 6) {
+      setErrors({ forgotNewPassword: 'Password must be at least 6 characters.' });
+      return;
+    }
+
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setErrors({ forgotConfirmPassword: 'Passwords do not match.' });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await resetPassword(forgotEmail);
+      await quickResetPassword(forgotEmail, forgotNewPassword);
       setForgotSuccess(true);
       setTimeout(() => {
         setForgotPasswordOpen(false);
         setForgotSuccess(false);
         setForgotEmail('');
+        setForgotNewPassword('');
+        setForgotConfirmPassword('');
       }, 3000);
     } catch (error: any) {
       console.error('[Forgot Password] Error:', error);
-      let errorMessage = 'Error sending reset email.';
+      let errorMessage = 'An error occurred. Please try again.';
       if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No account found.';
+        errorMessage = 'No account found with this email.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Please choose a stronger password.';
       }
-      setErrors({ forgotEmail: errorMessage });
+      setErrors({ general: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -452,6 +466,8 @@ const TriveonLogin: React.FC = () => {
                     setForgotPasswordOpen(true);
                     setForgotSuccess(false);
                     setForgotEmail('');
+                    setForgotNewPassword('');
+                    setForgotConfirmPassword('');
                     setErrors({});
                   }}>
                     Forgot Password?
@@ -507,12 +523,12 @@ const TriveonLogin: React.FC = () => {
                   <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00C896" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
-                  <h4>Reset Link Sent</h4>
-                  <p>Check your email inbox.</p>
+                  <h4>Password Updated Successfully</h4>
+                  <p>You can now log in with your new password.</p>
                 </div>
               ) : (
                 <form onSubmit={handleForgotPassword} className="edit-profile-form">
-                  <p className="forgot-description">Enter your email to receive a reset link.</p>
+                  <p className="forgot-description">Reset your password instantly.</p>
                   <div className="form-group">
                     <label className="form-label">Email Address</label>
                     <input
@@ -524,6 +540,29 @@ const TriveonLogin: React.FC = () => {
                     />
                     {errors.forgotEmail && <p className="form-error">{errors.forgotEmail}</p>}
                   </div>
+                  <div className="form-group">
+                    <label className="form-label">New Password</label>
+                    <input
+                      type="password"
+                      className={`form-input ${errors.forgotNewPassword ? 'error' : ''}`}
+                      value={forgotNewPassword}
+                      onChange={(e) => setForgotNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                    />
+                    {errors.forgotNewPassword && <p className="form-error">{errors.forgotNewPassword}</p>}
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Confirm New Password</label>
+                    <input
+                      type="password"
+                      className={`form-input ${errors.forgotConfirmPassword ? 'error' : ''}`}
+                      value={forgotConfirmPassword}
+                      onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                      placeholder="Confirm new password"
+                    />
+                    {errors.forgotConfirmPassword && <p className="form-error">{errors.forgotConfirmPassword}</p>}
+                  </div>
+                  {errors.general && <div className="auth-error">{errors.general}</div>}
                   <div className="form-actions">
                     <button 
                       type="button"
@@ -537,7 +576,7 @@ const TriveonLogin: React.FC = () => {
                       className="form-btn save"
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Sending...' : 'Send Reset Link'}
+                      {isLoading ? 'Resetting...' : 'Reset Password'}
                     </button>
                   </div>
                 </form>

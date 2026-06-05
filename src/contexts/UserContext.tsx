@@ -5,10 +5,96 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '../firebase';
 
+// TRIVEON PRESTIGE STAR SYSTEM
+interface PrestigeStar {
+  id: number;
+  name: string;
+  displayName: string;
+  color: string;
+}
+
+export const PRESTIGE_STARS: PrestigeStar[] = [
+  { id: 1, name: 'ASTRA', displayName: 'ASTRA', color: '#9CA3AF' },
+  { id: 2, name: 'NOVA', displayName: 'NOVA', color: '#3B82F6' },
+  { id: 3, name: 'REGULUS', displayName: 'REGULUS', color: '#10B981' },
+  { id: 4, name: 'BELLATRIX', displayName: 'BELLATRIX', color: '#F59E0B' },
+  { id: 5, name: 'CASTOR', displayName: 'CASTOR', color: '#EF4444' },
+  { id: 6, name: 'ALTAIR', displayName: 'ALTAIR', color: '#8B5CF6' },
+  { id: 7, name: 'VEGA', displayName: 'VEGA', color: '#EC4899' },
+  { id: 8, name: 'CENTAURI', displayName: 'CENTAURI', color: '#06B6D4' },
+  { id: 9, name: 'CANOPUS', displayName: 'CANOPUS', color: '#F97316' },
+  { id: 10, name: 'SIRIUS', displayName: 'SIRIUS', color: '#FFD700' },
+];
+
+interface ArchitectProfile {
+  score: number;
+  scoreTier: string;
+  credibilityScore: number;
+  credibilityTier: string;
+  executionScore: number;
+  executionTier: string;
+  contributionScore: number;
+  contributionTier: string;
+  ecosystemTrust: number;
+  ecosystemTrustLevel: string;
+  founderPrestige: number;
+  founderPrestigeLevel: string;
+  reputationTrend: number;
+  startupsBuilt: number;
+  startupsBuiltDetail: string;
+  startupsBacked: number;
+  startupsBackedDetail: string;
+  avgFeedbackScore: number;
+  feedbackCount: number;
+  successfulMatches: number;
+  successfulMatchesDetail: string;
+}
+
+interface CatalystProfile {
+  score: number;
+  scoreTier: string;
+  memberSince: string;
+  totalInvestments: number;
+  portfolioCompanies: number;
+  ecosystemImpact: string;
+  trustScore: number;
+  savedStartups: number;
+  investmentRange: string;
+  investmentInterests: string[];
+  preferredStartupStages: string[];
+  geographicFocus: string[];
+  investmentThesis: string;
+  capitalDeployed: string;
+  activeInvestments: number;
+  exits: number;
+  roi: string;
+  topSectors: Array<{ name: string; percentage: number }>;
+  areasOfExpertise: string[];
+  openToMentorship: boolean;
+  mentorshipFocus: string;
+  portfolioHighlights: Array<{ name: string; stage: string; sector: string }>;
+}
+
+interface ExplorerProfile {
+  score: number;
+  scoreTier: string;
+  communitiesJoined: number;
+  discussionsParticipated: number;
+  feedbackGiven: number;
+  connections: number;
+  aboutMe: string;
+  interests: string[];
+  skills: string[];
+  learningGoals: string[];
+  communities: Array<{ name: string; icon: string }>;
+  recentActivity: Array<{ id: string; title: string; time: string }>;
+}
+
 interface UserData {
   uid: string;
   mainRole: string;
   extraRole: string | null;
+  activeProfileView: string;
   isDemo: boolean;
   displayName?: string;
   username?: string;
@@ -16,13 +102,11 @@ interface UserData {
   coverImage?: string;
   skills?: string[];
   industries?: string[];
-  startupCount?: number;
-  investmentCount?: number;
-  feedbackScore?: number;
-  successfulMatches?: number;
-  trustScore?: number;
-  executionScore?: number;
-  prestigeLevel?: string;
+  prestigeSystem: {
+    currentStarId: number;
+    currentStarName: string;
+    progressPercent: number;
+  };
   profile: {
     name: string;
     title: string;
@@ -33,9 +117,9 @@ interface UserData {
     website: string;
     twitter: string;
   };
-  architectProfile?: any;
-  catalystProfile?: any;
-  explorerProfile?: any;
+  architectProfile: ArchitectProfile;
+  catalystProfile: CatalystProfile;
+  explorerProfile: ExplorerProfile;
   activities?: any[];
   assets?: any[];
 }
@@ -52,6 +136,9 @@ interface UserContextType {
   switchToReal: () => void;
   uploadImage: (file: File, path: string) => Promise<string>;
   deleteImage: (path: string) => Promise<void>;
+  addExtraRole: (role: string) => void;
+  deleteExtraRole: () => void;
+  switchProfile: (role: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -75,8 +162,8 @@ interface RoleData {
 
 const ROLE_DATA: Record<string, RoleData> = {
   ARCHITECT: {
-    name: "Arjun Malhotra",
-    title: "Founder & CEO at Nexora AI",
+    name: "Arjun Patel",
+    title: "Architect",
     bio: "Building the intelligence layer for modern startups.",
     location: "Bangalore, India",
     badges: ["Founder", "Builder", "AI Enthusiast"],
@@ -133,7 +220,13 @@ const getDemoUserData = (): UserData => {
     uid: 'demo-user',
     mainRole: role,
     extraRole: null,
+    activeProfileView: role,
     isDemo: true,
+    prestigeSystem: {
+      currentStarId: 5,
+      currentStarName: 'CASTOR',
+      progressPercent: 45
+    },
     profile: {
       name: roleData.name,
       title: roleData.title,
@@ -157,20 +250,139 @@ const getDemoUserData = (): UserData => {
       ecosystemTrustLevel: 'High',
       founderPrestige: 90,
       founderPrestigeLevel: 'Global',
-      reputationTrend: 5,
+      reputationTrend: 18,
       startupsBuilt: 3,
-      startupsBuiltDetail: '3 startups built',
-      startupsBacked: 0,
-      startupsBackedDetail: 'No backing yet',
+      startupsBuiltDetail: '2 Exited • 1 Active',
+      startupsBacked: 7,
+      startupsBackedDetail: '2 Unicorns • 1 Soonicorn',
       avgFeedbackScore: 4.8,
-      feedbackCount: 47,
-      successfulMatches: 12,
-      successfulMatchesDetail: '12 successful matches'
+      feedbackCount: 128,
+      successfulMatches: 23,
+      successfulMatchesDetail: 'Founders • Investors • Mentors'
     },
-    catalystProfile: {},
-    explorerProfile: {},
-    activities: [],
-    assets: []
+    catalystProfile: {
+      score: 96,
+      scoreTier: 'Sovereign',
+      memberSince: 'Jan 2022',
+      totalInvestments: 48,
+      portfolioCompanies: 23,
+      ecosystemImpact: 'High',
+      trustScore: 98,
+      savedStartups: 12,
+      investmentRange: '$500K - $15M',
+      investmentInterests: ['SaaS', 'AI/ML', 'FinTech', 'Web3', 'HealthTech'],
+      preferredStartupStages: ['Seed', 'Series A', 'Series B'],
+      geographicFocus: ['North America', 'Europe', 'Asia'],
+      investmentThesis: 'Backing visionary founders building scalable solutions with massive global impact. Focus on innovation, team, and execution.',
+      capitalDeployed: '$42.8M',
+      activeInvestments: 23,
+      exits: 7,
+      roi: '3.7x',
+      topSectors: [
+        { name: 'SaaS', percentage: 38 },
+        { name: 'AI/ML', percentage: 24 },
+        { name: 'FinTech', percentage: 18 },
+        { name: 'Web3', percentage: 12 },
+        { name: 'HealthTech', percentage: 8 }
+      ],
+      areasOfExpertise: ['Deep Tech', 'Climate', 'Enterprise SaaS', 'BioTech', 'AI'],
+      openToMentorship: true,
+      mentorshipFocus: 'Helping early-stage founders with fundraising, product strategy, and go-to-market.',
+      portfolioHighlights: [
+        { name: 'NextGen AI', stage: 'Series A', sector: 'AI Platform' },
+        { name: 'FinFlow', stage: 'Series B', sector: 'FinTech' },
+        { name: 'WebVerse', stage: 'Seed', sector: 'Web3' },
+        { name: 'Health Plus', stage: 'Series A', sector: 'HealthTech' }
+      ]
+    },
+    explorerProfile: {
+      score: 90,
+      scoreTier: 'Elite',
+      communitiesJoined: 12,
+      discussionsParticipated: 28,
+      feedbackGiven: 34,
+      connections: 156,
+      aboutMe: 'I love exploring new ideas, supporting amazing founders, and learning something new every day.',
+      interests: ['AI', 'Web3', 'FinTech', 'Sustainability', 'HealthTech'],
+      skills: ['Community Support', 'Research', 'Feedback'],
+      learningGoals: ['Understand startups', 'Invest wisely', 'Build connections'],
+      communities: [
+        { name: 'AI Innovators', icon: 'brain' },
+        { name: 'Web3 Builders', icon: 'web3' },
+        { name: 'Startup Supporters', icon: 'rocket' },
+        { name: 'Sustainability Leaders', icon: 'leaf' }
+      ],
+      recentActivity: [
+        { id: '1', title: 'Joined AI Innovators Community', time: '1h ago' },
+        { id: '2', title: 'Gave feedback on 3 startups', time: '3h ago' },
+        { id: '3', title: 'Participated in Web3 discussion', time: '5h ago' },
+        { id: '4', title: 'Saved 2 new startups', time: '1d ago' }
+      ]
+    },
+    activities: [
+      {
+        id: '1',
+        title: 'Nexora AI raised $2.4M Pre-Seed',
+        description: '',
+        year: '2024'
+      },
+      {
+        id: '2',
+        title: 'Shared a deep dive: AI in Early Stage Startups',
+        description: '',
+        year: '2024'
+      },
+      {
+        id: '3',
+        title: 'Provided feedback on 5 startups',
+        description: '',
+        year: '2024'
+      },
+      {
+        id: '4',
+        title: 'Spoke at TRIVEON Summit \'24',
+        description: '',
+        year: '2024'
+      },
+      {
+        id: '5',
+        title: 'Exited NexStack (Acquired by BrowserStack)',
+        description: '',
+        year: '2023'
+      },
+      {
+        id: '6',
+        title: 'Joined TRIVEON',
+        description: '',
+        year: '2022'
+      }
+    ],
+    assets: [
+      {
+        id: '1',
+        title: 'Pitch Deck - Nexora AI',
+        description: 'Investor pitch deck for our AI-powered SaaS platform',
+        fileUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31',
+        fileType: 'PDF',
+        uploadTime: new Date(2024, 4, 29)
+      },
+      {
+        id: '2',
+        title: 'Product Demo Video',
+        description: 'Quick 2-minute product walkthrough',
+        fileUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728',
+        fileType: 'Video',
+        uploadTime: new Date(2024, 3, 15)
+      },
+      {
+        id: '3',
+        title: 'Business Plan 2024',
+        description: 'Comprehensive business plan and roadmap',
+        fileUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+        fileType: 'Docs',
+        uploadTime: new Date(2024, 2, 1)
+      }
+    ]
   };
 };
 
@@ -181,9 +393,15 @@ const getEmptyRealUserData = (userId: string, role: string, name: string = '', e
     uid: userId,
     mainRole: selectedRole.toUpperCase(),
     extraRole: null,
+    activeProfileView: selectedRole.toUpperCase(),
     isDemo: false,
     displayName: name,
     email: email,
+    prestigeSystem: {
+      currentStarId: 1,
+      currentStarName: 'ASTRA',
+      progressPercent: 0
+    },
     profile: {
       name: name || '',
       title: '',
@@ -217,8 +435,44 @@ const getEmptyRealUserData = (userId: string, role: string, name: string = '', e
       successfulMatches: 0,
       successfulMatchesDetail: 'No matches yet'
     },
-    catalystProfile: {},
-    explorerProfile: {},
+    catalystProfile: {
+      score: 0,
+      scoreTier: 'Beginner',
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      totalInvestments: 0,
+      portfolioCompanies: 0,
+      ecosystemImpact: 'Building',
+      trustScore: 0,
+      savedStartups: 0,
+      investmentRange: '',
+      investmentInterests: [],
+      preferredStartupStages: [],
+      geographicFocus: [],
+      investmentThesis: '',
+      capitalDeployed: '$0',
+      activeInvestments: 0,
+      exits: 0,
+      roi: '0x',
+      topSectors: [],
+      areasOfExpertise: [],
+      openToMentorship: false,
+      mentorshipFocus: '',
+      portfolioHighlights: []
+    },
+    explorerProfile: {
+      score: 0,
+      scoreTier: 'Beginner',
+      communitiesJoined: 0,
+      discussionsParticipated: 0,
+      feedbackGiven: 0,
+      connections: 0,
+      aboutMe: '',
+      interests: [],
+      skills: [],
+      learningGoals: [],
+      communities: [],
+      recentActivity: []
+    },
     activities: [],
     assets: []
   };
@@ -289,7 +543,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           console.log('[UserContext] Loading logged-in user from Firestore');
           const userRef = doc(db, 'userProfiles', user.uid);
           const docSnap = await getDoc(userRef);
-          let firestoreData;
+          let firestoreData: UserData;
           if (!docSnap.exists()) {
             firestoreData = getEmptyRealUserData(user.uid, authProfile?.role || '', authProfile?.name || '', authProfile?.email || '');
             await setDoc(userRef, firestoreData);
@@ -299,9 +553,34 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUserData(firestoreData);
           setCurrentUserId(user.uid);
         } else {
-          // Demo user: reset to demo data on refresh
-          console.log('[UserContext] Initializing with demo data');
-          const demoData = getDemoUserData();
+          // Demo user: check localStorage first, else use demo data
+          console.log('[UserContext] Initializing demo mode');
+          let demoData: UserData;
+          const savedDemoProfile = localStorage.getItem('user-demo-user');
+          if (savedDemoProfile) {
+            try {
+              demoData = JSON.parse(savedDemoProfile);
+              // Parse dates
+              if (demoData.activities) {
+                demoData.activities = demoData.activities.map((a: any) => ({
+                  ...a,
+                  uploadTime: a.uploadTime ? new Date(a.uploadTime) : undefined
+                }));
+              }
+              if (demoData.assets) {
+                demoData.assets = demoData.assets.map((a: any) => ({
+                  ...a,
+                  uploadTime: a.uploadTime ? new Date(a.uploadTime) : new Date()
+                }));
+              }
+              console.log('[UserContext] Loaded saved demo profile from localStorage');
+            } catch (e) {
+              console.log('[UserContext] Failed to parse saved demo profile, using default');
+              demoData = getDemoUserData();
+            }
+          } else {
+            demoData = getDemoUserData();
+          }
           setUserData(demoData);
           setCurrentUserId('demo-user');
           localStorage.setItem('currentUserId', 'demo-user');
@@ -358,6 +637,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUserId(realUserId);
   };
 
+  const addExtraRole = (role: string) => {
+    updateUserData({ extraRole: role });
+  };
+
+  const deleteExtraRole = () => {
+    updateUserData({ extraRole: null, activeProfileView: userData?.mainRole || 'ARCHITECT' });
+  };
+
+  const switchProfile = (role: string) => {
+    updateUserData({ activeProfileView: role });
+  };
+
   return (
     <UserContext.Provider value={{ 
       userData, 
@@ -370,7 +661,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       switchToDemo,
       switchToReal,
       uploadImage,
-      deleteImage
+      deleteImage,
+      addExtraRole,
+      deleteExtraRole,
+      switchProfile
     }}>
       {children}
     </UserContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreatePost from './CreatePost';
 import './HomeDashboard.css';
@@ -113,27 +113,11 @@ const ShareIcon = () => (
   </svg>
 );
 
-const ArrowUpIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="19" x2="12" y2="5"></line>
-    <polyline points="5 12 12 5 19 12"></polyline>
-  </svg>
-);
-
 const HomeDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('for-you');
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [userRole, setUserRole] = useState<'ARCHITECT' | 'EXPLORER' | 'CATALYST'>('ARCHITECT');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const savedRole = localStorage.getItem('selectedRole');
-    if (savedRole) {
-      setUserRole(savedRole.toUpperCase() as 'ARCHITECT' | 'EXPLORER' | 'CATALYST');
-    }
-  }, []);
 
   return (
     <div className="dashboard-container">
@@ -145,31 +129,31 @@ const HomeDashboard: React.FC = () => {
           </div>
 
           <nav className="sidebar-nav">
-            <div className="nav-item active">
+            <div className="nav-item active" onClick={() => navigate('/home')}>
               <HomeIcon />
               {!sidebarCollapsed && <span>Home</span>}
             </div>
-            <div className="nav-item">
-              <CompassIcon />
-              {!sidebarCollapsed && <span>Explore</span>}
-            </div>
-            <div className="nav-item">
+            <div className="nav-item" onClick={() => navigate('/startups')}>
               <RocketIcon />
               {!sidebarCollapsed && <span>Startups</span>}
             </div>
-            <div className="nav-item">
+            <div className="nav-item" onClick={() => navigate('/investors')}>
               <UsersIcon />
               {!sidebarCollapsed && <span>Investors</span>}
             </div>
-            <div className="nav-item">
+            <div className="nav-item" onClick={() => navigate('/explorers')}>
+              <CompassIcon />
+              {!sidebarCollapsed && <span>Explorer</span>}
+            </div>
+            <div className="nav-item" onClick={() => navigate('/messages')}>
               <MessageIcon />
               {!sidebarCollapsed && <span>Messages</span>}
             </div>
-            <div className="nav-item">
+            <div className="nav-item" onClick={() => navigate('/bookmarks')}>
               <BookmarkIcon />
               {!sidebarCollapsed && <span>Bookmarks</span>}
             </div>
-            <div className="nav-item">
+            <div className="nav-item" onClick={() => navigate('/notifications')}>
               <BellIcon />
               {!sidebarCollapsed && <span>Notifications</span>}
             </div>
@@ -198,10 +182,9 @@ const HomeDashboard: React.FC = () => {
             <div className="search-bar">
               <SearchIcon />
               <input type="text" placeholder="Search startups, people, ideas…" />
-              <SearchIcon />
             </div>
 
-            <div className="profile-section" onClick={() => setProfileDrawerOpen(!profileDrawerOpen)}>
+            <div className="profile-section">
               <div className="notification-badge">
                 <BellIcon />
               </div>
@@ -218,18 +201,24 @@ const HomeDashboard: React.FC = () => {
             </div>
           </header>
 
-          <div className="premium-create-card">
-            <button className="create-signal-button" onClick={() => setCreatePostOpen(true)}>
-              <div className="button-icon">🚀</div>
-              <div className="button-text">
-                <span className="button-title">Create Signal</span>
-                <span className="button-subtitle">Share an update with the ecosystem</span>
+          <div className="post-creation-card" onClick={() => setCreatePostOpen(true)}>
+            <div className="post-avatar">AP</div>
+            <input type="text" placeholder="Share your idea, progress or insight…" className="post-input" readOnly />
+            <div className="post-options">
+              <div className="post-option">
+                <ImageIcon />
+                <span>Media</span>
               </div>
-              <svg className="button-arrow" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
+              <div className="post-option">
+                <BarChartIcon />
+                <span>Poll</span>
+              </div>
+              <div className="post-option">
+                <TagIcon />
+                <span>Tag</span>
+              </div>
+              <button className="post-button">Post</button>
+            </div>
           </div>
 
           <div className="feed-tabs">
@@ -387,32 +376,33 @@ const HomeDashboard: React.FC = () => {
                   <div className="author-avatar">KM</div>
                   <div className="author-info">
                     <div className="author-name">
-                      Kabir Mehta
-                      <span className="role-badge cyan">Explorer</span>
+                      Kavi Mehta
+                      <span className="role-badge blue">Explorer</span>
                     </div>
-                    <div className="post-time">7h ago</div>
+                    <div className="post-time">1d ago</div>
                   </div>
                 </div>
               </div>
               
               <div className="post-content">
-                <h3 className="post-title">Thoughts on the future of Web3 Social?</h3>
+                <h3 className="post-title">Just found the most amazing team working on decentralized AI!</h3>
                 <div className="post-tags">
-                  <span className="post-tag">#Insight #Thought</span>
+                  <span className="post-tag">#Discovery</span>
+                  <span className="post-tag">#Web3</span>
                 </div>
                 <p className="post-text">
-                  Curious to know what builders and investors think about the next wave of decentralized social platforms.
+                  Spent the whole weekend talking to the team at DecentraMind. Their approach to decentralized training of models is game-changing. Need to connect more founders here!
                 </p>
               </div>
 
               <div className="post-actions">
                 <div className="post-action">
                   <HeartIcon />
-                  <span>64</span>
+                  <span>203</span>
                 </div>
                 <div className="post-action">
                   <CommentIcon />
-                  <span>18</span>
+                  <span>56</span>
                 </div>
                 <div className="post-action">
                   <ShareIcon />
@@ -422,206 +412,9 @@ const HomeDashboard: React.FC = () => {
             </article>
           </div>
         </main>
-
-        <aside className="right-sidebar">
-          <div className="signal-card">
-            <div className="card-header">
-              <h4>Today's Signal</h4>
-              <span className="view-all">View all</span>
-            </div>
-            <div className="signal-items">
-              <div className="signal-item">
-                <div className="signal-dot gold"></div>
-                <div className="signal-text">Sequoia India invests in healthtech startup Niramai</div>
-              </div>
-              <div className="signal-item">
-                <div className="signal-dot green"></div>
-                <div className="signal-text">AI tools market to reach $126B by 2025</div>
-              </div>
-              <div className="signal-item">
-                <div className="signal-dot purple"></div>
-                <div className="signal-text">Web3 funding increased 42% this quarter</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="overview-card">
-            <div className="card-header">
-              <h4>Ecosystem Overview</h4>
-            </div>
-            <div className="overview-metrics">
-              <div className="overview-metric">
-                <div className="metric-label">Startups</div>
-                <div className="metric-value-row">
-                  <span className="metric-number">2,451</span>
-                  <span className="metric-change positive">
-                    <ArrowUpIcon />
-                    +12%
-                  </span>
-                </div>
-                <div className="metric-chart gold-chart"></div>
-              </div>
-              <div className="overview-metric">
-                <div className="metric-label">Active Investors</div>
-                <div className="metric-value-row">
-                  <span className="metric-number">523</span>
-                  <span className="metric-change positive">
-                    <ArrowUpIcon />
-                    +8%
-                  </span>
-                </div>
-                <div className="metric-chart green-chart"></div>
-              </div>
-              <div className="overview-metric">
-                <div className="metric-label">Community Members</div>
-                <div className="metric-value-row">
-                  <span className="metric-number">18,732</span>
-                  <span className="metric-change positive">
-                    <ArrowUpIcon />
-                    +15%
-                  </span>
-                </div>
-                <div className="metric-chart purple-chart"></div>
-              </div>
-              <div className="overview-metric">
-                <div className="metric-label">Capital Deployed</div>
-                <div className="metric-value-row">
-                  <span className="metric-number">$42.6M</span>
-                  <span className="metric-change positive">
-                    <ArrowUpIcon />
-                    +18%
-                  </span>
-                </div>
-                <div className="metric-chart gold-chart"></div>
-              </div>
-            </div>
-            <button className="view-report-btn">View full report →</button>
-          </div>
-
-          <div className="trending-card">
-            <div className="card-header">
-              <h4>Trending Startups</h4>
-              <span className="view-all">View all</span>
-            </div>
-            <div className="trending-startups">
-              <div className="trending-item">
-                <div className="startup-icon purple">N</div>
-                <div className="startup-info">
-                  <div className="startup-name">Nebula AI</div>
-                  <div className="startup-sub">AI Co-Founder Platform</div>
-                </div>
-                <div className="startup-rating">
-                  <span>★</span>
-                  <span>4.8</span>
-                </div>
-              </div>
-              <div className="trending-item">
-                <div className="startup-icon cyan">C</div>
-                <div className="startup-info">
-                  <div className="startup-name">ClipPay</div>
-                  <div className="startup-sub">Fintech Infrastructure</div>
-                </div>
-                <div className="startup-rating">
-                  <span>★</span>
-                  <span>4.6</span>
-                </div>
-              </div>
-              <div className="trending-item">
-                <div className="startup-icon green">G</div>
-                <div className="startup-info">
-                  <div className="startup-name">GreenGrid</div>
-                  <div className="startup-sub">Clean Energy Tech</div>
-                </div>
-                <div className="startup-rating">
-                  <span>★</span>
-                  <span>4.7</span>
-                </div>
-              </div>
-              <div className="trending-item">
-                <div className="startup-icon gold">S</div>
-                <div className="startup-info">
-                  <div className="startup-name">Shopora</div>
-                  <div className="startup-sub">E-commerce Platform</div>
-                </div>
-                <div className="startup-rating">
-                  <span>★</span>
-                  <span>4.5</span>
-                </div>
-              </div>
-              <div className="trending-item">
-                <div className="startup-icon blue">H</div>
-                <div className="startup-info">
-                  <div className="startup-name">HealthyAI</div>
-                  <div className="startup-sub">AI Health Assistant</div>
-                </div>
-                <div className="startup-rating">
-                  <span>★</span>
-                  <span>4.6</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="follow-card">
-            <div className="card-header">
-              <h4>Who to Follow</h4>
-              <span className="view-all">View all</span>
-            </div>
-            <div className="follow-users">
-              <div className="follow-user">
-                <div className="follow-avatar">RS</div>
-                <div className="follow-info">
-                  <div className="follow-name">Riya Sharma</div>
-                  <div className="follow-role">Architect</div>
-                </div>
-                <button className="follow-btn">Follow</button>
-              </div>
-              <div className="follow-user">
-                <div className="follow-avatar">AM</div>
-                <div className="follow-info">
-                  <div className="follow-name">Arjun Malhotra</div>
-                  <div className="follow-role">Catalyst</div>
-                </div>
-                <button className="follow-btn">Follow</button>
-              </div>
-              <div className="follow-user">
-                <div className="follow-avatar">KM</div>
-                <div className="follow-info">
-                  <div className="follow-name">Kabir Mehta</div>
-                  <div className="follow-role">Explorer</div>
-                </div>
-                <button className="follow-btn">Follow</button>
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
 
-      {profileDrawerOpen && (
-        <div className="profile-drawer-overlay" onClick={() => setProfileDrawerOpen(false)}>
-          <div className="profile-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="drawer-header">
-              <div className="drawer-avatar">AP</div>
-              <div className="drawer-name">Arjun Patel</div>
-              <div className="drawer-role">Architect</div>
-            </div>
-            <div className="drawer-menu">
-              <div className="drawer-item">Profile Settings</div>
-              <div className="drawer-item">Account</div>
-              <div className="drawer-item">Billing</div>
-              <div className="drawer-item">Help Center</div>
-              <div className="drawer-item divider">Log Out</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {createPostOpen && (
-        <CreatePost 
-          role={userRole} 
-          onClose={() => setCreatePostOpen(false)} 
-        />
-      )}
+      {createPostOpen && <CreatePost onClose={() => setCreatePostOpen(false)} />}
     </div>
   );
 };
