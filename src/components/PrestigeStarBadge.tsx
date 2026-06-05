@@ -1,3 +1,5 @@
+import { PRESTIGE_STARS } from '../contexts/UserContext';
+
 interface PrestigeStarBadgeProps {
   starId: number;
   size: 'small' | 'medium' | 'large';
@@ -11,18 +13,9 @@ const PrestigeStarBadge = ({ starId, size, color }: PrestigeStarBadgeProps) => {
     large: '32px'
   };
 
-  const starNames = [
-    'Bronze',
-    'Silver',
-    'Gold',
-    'Platinum',
-    'Diamond',
-    'Master',
-    'Grandmaster',
-    'Legendary'
-  ];
-
-  const currentStarName = starNames[Math.min(starId, starNames.length - 1)] || 'Newbie';
+  // Find the star from PRESTIGE_STARS array
+  const star = PRESTIGE_STARS.find(s => s.id === starId);
+  const currentStarName = star ? star.displayName : PRESTIGE_STARS[0].displayName;
 
   return (
     <div
