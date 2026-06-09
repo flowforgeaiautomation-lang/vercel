@@ -1220,7 +1220,7 @@ const ProfilePremium: React.FC = () => {
         ) : null}
 
         <div className="premium-sidebar-bottom">
-          <div className="premium-nav-item" onClick={() => setSettingsModalOpen(true)}>
+          <div className="premium-nav-item" onClick={() => navigate('/settings')}>
             <SettingsIcon />
             <span>Settings</span>
           </div>
