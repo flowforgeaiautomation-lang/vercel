@@ -227,7 +227,7 @@ const HomeDashboard: React.FC = () => {
               {!sidebarCollapsed && <span>Explorer</span>}
             </div>
             {/* Discover Dropdown */}
-          <div className="nav-item relative" onClick={(e) => {
+          <div className="nav-item" onClick={(e) => {
                 e.stopPropagation();
                 setDiscoverDropdownOpen(!discoverDropdownOpen);
               }}>
@@ -235,16 +235,16 @@ const HomeDashboard: React.FC = () => {
               {!sidebarCollapsed && <span>Discover</span>}
               {!sidebarCollapsed && (
                 <svg 
-                  className={`w-4 h-4 ml-auto transition-transform ${discoverDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`discover-chevron ${discoverDropdownOpen ? 'open' : ''}`}
                   width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                 >
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               )}
             {!sidebarCollapsed && discoverDropdownOpen && (
-              <div className="absolute left-full top-0 ml-2 w-48 bg-[#0d1117] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl z-50 overflow-hidden">
+              <div className="discover-dropdown-content">
                 <div 
-                  className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                  className="discover-dropdown-item"
                   onClick={() => {
                     setDiscoverDropdownOpen(false);
                     navigate('/atlas');
@@ -254,7 +254,7 @@ const HomeDashboard: React.FC = () => {
                   <span>Atlas</span>
                 </div>
                 <div 
-                  className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                  className="discover-dropdown-item"
                   onClick={() => {
                     setDiscoverDropdownOpen(false);
                     navigate('/exchange');
@@ -264,7 +264,7 @@ const HomeDashboard: React.FC = () => {
                   <span>Exchange</span>
                 </div>
                 <div 
-                  className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                  className="discover-dropdown-item"
                   onClick={() => {
                     setDiscoverDropdownOpen(false);
                     navigate('/circles');
@@ -274,7 +274,7 @@ const HomeDashboard: React.FC = () => {
                   <span>Circles</span>
                 </div>
                 <div 
-                  className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                  className="discover-dropdown-item"
                   onClick={() => {
                     setDiscoverDropdownOpen(false);
                     navigate('/insights');
