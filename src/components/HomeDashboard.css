@@ -1448,6 +1448,82 @@ body {
   color: #ef4444;
 }
 
+.eco-overview-card {
+  background: var(--dark-card);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.eco-overview-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #FFF8DC, #FFD700, #FFC107);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.03em;
+}
+
+.eco-overview-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.eco-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.eco-pillar {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eco-pillar:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,215,0,0.25);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(245,158,11,0.15);
+}
+
+.eco-pillar-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.eco-pillar-content h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-white);
+}
+
+.eco-pillar-content p {
+  font-size: 0.78rem;
+  color: var(--text-gray);
+  line-height: 1.4;
+}
+
 .startup-premium-create-card {
   background: var(--dark-card);
   backdrop-filter: blur(var(--glass-blur));
