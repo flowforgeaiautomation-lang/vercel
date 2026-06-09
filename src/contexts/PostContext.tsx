@@ -139,6 +139,64 @@ export interface Post {
   timestamp: Date;
   engagementScore?: number;
   isSaved?: boolean;
+  isPinned?: boolean;
+  isArchived?: boolean;
+  isEdited?: boolean;
+  editedAt?: Date;
+  analytics?: {
+    views: number;
+    reach: number;
+    engagement: number;
+    profileVisits: number;
+    startupVisits: number;
+    investorInterest: number;
+  };
+}
+
+export interface Draft {
+  id: string;
+  userId: string;
+  role: string;
+  postType: string;
+  intent: string;
+  description: string;
+  tags: string[];
+  visibility: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ScheduledPost {
+  id: string;
+  userId: string;
+  postType: string;
+  intent: string;
+  description: string;
+  tags: string[];
+  visibility: string;
+  scheduledAt: Date;
+  createdAt: Date;
+}
+
+export interface Report {
+  id: string;
+  postId: string;
+  reporterId: string;
+  reason: string;
+  details?: string;
+  createdAt: Date;
+  status: 'pending' | 'reviewed' | 'resolved';
+}
+
+export interface Repost {
+  id: string;
+  originalPostId: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  userRole: string;
+  comment?: string;
+  createdAt: Date;
 }
 
 export interface HashtagData {
@@ -168,6 +226,14 @@ interface PostContextType {
   trendingHashtags: HashtagData[];
   savedPosts: string[];
   savedCollections: SavedCollection[];
+  drafts: Draft[];
+  scheduledPosts: ScheduledPost[];
+  reposts: Repost[];
+  reports: Report[];
+  mutedUsers: string[];
+  hiddenPosts: string[];
+  notInterestedTopics: string[];
+  pinnedPostIds: string[];
   addPost: (post: Omit<Post, 'id' | 'likes' | 'comments' | 'shares' | 'timestamp' | 'engagementScore' | 'isSaved'>) => void;
   likePost: (postId: string) => void;
   addComment: (postId: string, comment: Omit<Comment, 'id' | 'timestamp'>, parentId?: string) => void;
@@ -181,6 +247,40 @@ interface PostContextType {
   addToCollection: (collectionId: string, postId: string) => void;
   removeFromCollection: (collectionId: string, postId: string) => void;
   getIntelligentFeed: (userRole: string, userTags?: string[]) => Post[];
+  // New functions
+  editPost: (postId: string, updates: Partial<Omit<Post, 'id' | 'timestamp'>>) => void;
+  deletePost: (postId: string) => void;
+  pinPost: (postId: string) => void;
+  unpinPost: (postId: string) => void;
+  archivePost: (postId: string) => void;
+  unarchivePost: (postId: string) => void;
+  repost: (originalPostId: string, comment?: string) => void;
+  reportPost: (postId: string, reason: string, details?: string) => void;
+  muteUser: (userId: string) => void;
+  unmuteUser: (userId: string) => void;
+  hidePost: (postId: string) => void;
+  unhidePost: (postId: string) => void;
+  markNotInterested: (topics: string[]) => void;
+  // Draft functions
+  saveDraft: (draft: Omit<Draft, 'id' | 'createdAt'>) => void;
+  updateDraft: (draftId: string, updates: Partial<Draft>) => void;
+  deleteDraft: (draftId: string) => void;
+  publishDraft: (draftId: string) => void;
+  getDraftsByUser: (userId: string) => Draft[];
+  // Scheduled posts
+  schedulePost: (post: Omit<ScheduledPost, 'id' | 'createdAt'>) => void;
+  cancelScheduledPost: (postId: string) => void;
+  publishScheduledPost: (postId: string) => void;
+  editScheduledPost: (postId: string, updates: Partial<ScheduledPost>) => void;
+  // Get functions
+  getUserPosts: (userId: string) => Post[];
+  getPinnedPosts: () => Post[];
+  getArchivedPosts: (userId: string) => Post[];
+  getScheduledPosts: (userId: string) => ScheduledPost[];
+  getReposts: () => Repost[];
+  // Copy functions
+  copyPostLink: (postId: string) => string;
+  copyPostText: (postId: string) => string;
 }
 
 const PostContext = createContext<PostContextType | undefined>(undefined);
@@ -977,6 +1077,100 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   });
 
+  const [drafts, setDrafts] = useState<Draft[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-drafts');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return parsed.map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+        updatedAt: new Date(item.updatedAt)
+      }));
+    } catch {
+      return [];
+    }
+  });
+
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-scheduled');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return parsed.map((item: any) => ({
+        ...item,
+        scheduledAt: new Date(item.scheduledAt),
+        createdAt: new Date(item.createdAt)
+      }));
+    } catch {
+      return [];
+    }
+  });
+
+  const [reposts, setReposts] = useState<Repost[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-reposts');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return parsed.map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt)
+      }));
+    } catch {
+      return [];
+    }
+  });
+
+  const [reports, setReports] = useState<Report[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-reports');
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return parsed.map((item: any) => ({
+        ...item,
+        createdAt: new Date(item.createdAt)
+      }));
+    } catch {
+      return [];
+    }
+  });
+
+  const [mutedUsers, setMutedUsers] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-muted-users');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [hiddenPosts, setHiddenPosts] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-hidden-posts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [notInterestedTopics, setNotInterestedTopics] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-not-interested');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [pinnedPostIds, setPinnedPostIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('triveon-pinned-posts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const upvoteProductLaunch = (launchId: string) => {
     setProductLaunches(prev => prev.map(launch => 
       launch.id === launchId ? { ...launch, upvotes: launch.upvotes + 1 } : launch
@@ -1142,6 +1336,38 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('triveon-saved-collections', JSON.stringify(savedCollections));
   }, [savedCollections]);
 
+  useEffect(() => {
+    localStorage.setItem('triveon-drafts', JSON.stringify(drafts));
+  }, [drafts]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-scheduled', JSON.stringify(scheduledPosts));
+  }, [scheduledPosts]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-reposts', JSON.stringify(reposts));
+  }, [reposts]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-reports', JSON.stringify(reports));
+  }, [reports]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-muted-users', JSON.stringify(mutedUsers));
+  }, [mutedUsers]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-hidden-posts', JSON.stringify(hiddenPosts));
+  }, [hiddenPosts]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-not-interested', JSON.stringify(notInterestedTopics));
+  }, [notInterestedTopics]);
+
+  useEffect(() => {
+    localStorage.setItem('triveon-pinned-posts', JSON.stringify(pinnedPostIds));
+  }, [pinnedPostIds]);
+
   const addPost = (postData: Omit<Post, 'id' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'timestamp' | 'engagementScore' | 'isSaved'>) => {
     const newPost: Post = {
       ...postData,
@@ -1210,6 +1436,225 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     ));
   };
 
+  // --- New Functions ---
+  const editPost = (postId: string, updates: Partial<Omit<Post, 'id' | 'timestamp'>>) => {
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        return {
+          ...post,
+          ...updates,
+          isEdited: true,
+          editedAt: new Date()
+        };
+      }
+      return post;
+    }));
+  };
+
+  const deletePost = (postId: string) => {
+    setPosts(prev => prev.filter(post => post.id !== postId));
+    setPinnedPostIds(prev => prev.filter(id => id !== postId));
+    setHiddenPosts(prev => prev.filter(id => id !== postId));
+  };
+
+  const pinPost = (postId: string) => {
+    setPinnedPostIds(prev => {
+      const newPinned = [...prev, postId];
+      // Max 3 pins
+      if (newPinned.length > 3) {
+        return newPinned.slice(-3);
+      }
+      return newPinned;
+    });
+    setPosts(prev => prev.map(post => 
+      post.id === postId ? { ...post, isPinned: true } : post
+    ));
+  };
+
+  const unpinPost = (postId: string) => {
+    setPinnedPostIds(prev => prev.filter(id => id !== postId));
+    setPosts(prev => prev.map(post => 
+      post.id === postId ? { ...post, isPinned: false } : post
+    ));
+  };
+
+  const archivePost = (postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId ? { ...post, isArchived: true } : post
+    ));
+  };
+
+  const unarchivePost = (postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId ? { ...post, isArchived: false } : post
+    ));
+  };
+
+  const repost = (originalPostId: string, comment?: string) => {
+    const userId = userData?.uid || 'current-user';
+    const user = userData;
+    const newRepost: Repost = {
+      id: Date.now().toString(),
+      originalPostId,
+      userId,
+      userName: user?.profile?.name || 'User',
+      userAvatar: user?.profile?.avatar,
+      userRole: user?.profile?.role || 'EXPLORER',
+      comment,
+      createdAt: new Date()
+    };
+    setReposts(prev => [...prev, newRepost]);
+    setPosts(prev => prev.map(post => 
+      post.id === originalPostId ? { ...post, shares: post.shares + 1 } : post
+    ));
+  };
+
+  const reportPost = (postId: string, reason: string, details?: string) => {
+    const userId = userData?.uid || 'current-user';
+    const newReport: Report = {
+      id: Date.now().toString(),
+      postId,
+      reporterId: userId,
+      reason,
+      details,
+      createdAt: new Date(),
+      status: 'pending'
+    };
+    setReports(prev => [...prev, newReport]);
+  };
+
+  const muteUser = (userId: string) => {
+    setMutedUsers(prev => [...prev, userId]);
+  };
+
+  const unmuteUser = (userId: string) => {
+    setMutedUsers(prev => prev.filter(id => id !== userId));
+  };
+
+  const hidePost = (postId: string) => {
+    setHiddenPosts(prev => [...prev, postId]);
+  };
+
+  const unhidePost = (postId: string) => {
+    setHiddenPosts(prev => prev.filter(id => id !== postId));
+  };
+
+  const markNotInterested = (topics: string[]) => {
+    setNotInterestedTopics(prev => [...new Set([...prev, ...topics])]);
+  };
+
+  const saveDraft = (draft: Omit<Draft, 'id' | 'createdAt'>) => {
+    const newDraft: Draft = {
+      ...draft,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    setDrafts(prev => [...prev, newDraft]);
+  };
+
+  const updateDraft = (draftId: string, updates: Partial<Draft>) => {
+    setDrafts(prev => prev.map(draft => 
+      draft.id === draftId ? { ...draft, ...updates, updatedAt: new Date() } : draft
+    ));
+  };
+
+  const deleteDraft = (draftId: string) => {
+    setDrafts(prev => prev.filter(draft => draft.id !== draftId));
+  };
+
+  const publishDraft = (draftId: string) => {
+    const draft = drafts.find(d => d.id === draftId);
+    if (draft) {
+      addPost({
+        userId: draft.userId,
+        userName: userData?.profile?.name || 'User',
+        userAvatar: userData?.profile?.avatar,
+        userRole: draft.role,
+        userTitle: userData?.profile?.title,
+        postType: draft.postType,
+        intent: draft.intent,
+        description: draft.description,
+        tags: draft.tags
+      });
+      deleteDraft(draftId);
+    }
+  };
+
+  const getDraftsByUser = (userId: string) => {
+    return drafts.filter(d => d.userId === userId);
+  };
+
+  const schedulePost = (post: Omit<ScheduledPost, 'id' | 'createdAt'>) => {
+    const newScheduled: ScheduledPost = {
+      ...post,
+      id: Date.now().toString(),
+      createdAt: new Date()
+    };
+    setScheduledPosts(prev => [...prev, newScheduled]);
+  };
+
+  const cancelScheduledPost = (postId: string) => {
+    setScheduledPosts(prev => prev.filter(p => p.id !== postId));
+  };
+
+  const publishScheduledPost = (postId: string) => {
+    const scheduled = scheduledPosts.find(p => p.id === postId);
+    if (scheduled) {
+      addPost({
+        userId: scheduled.userId,
+        userName: userData?.profile?.name || 'User',
+        userAvatar: userData?.profile?.avatar,
+        userRole: userData?.profile?.role || 'EXPLORER',
+        userTitle: userData?.profile?.title,
+        postType: scheduled.postType,
+        intent: scheduled.intent,
+        description: scheduled.description,
+        tags: scheduled.tags
+      });
+      cancelScheduledPost(postId);
+    }
+  };
+
+  const editScheduledPost = (postId: string, updates: Partial<ScheduledPost>) => {
+    setScheduledPosts(prev => prev.map(p => 
+      p.id === postId ? { ...p, ...updates } : p
+    ));
+  };
+
+  const getUserPosts = (userId: string) => {
+    return posts.filter(p => p.userId === userId && !p.isArchived);
+  };
+
+  const getPinnedPosts = () => {
+    return posts.filter(p => pinnedPostIds.includes(p.id));
+  };
+
+  const getArchivedPosts = (userId: string) => {
+    return posts.filter(p => p.userId === userId && p.isArchived);
+  };
+
+  const getScheduledPosts = (userId: string) => {
+    return scheduledPosts.filter(p => p.userId === userId);
+  };
+
+  const getReposts = () => {
+    return reposts;
+  };
+
+  const copyPostLink = (postId: string) => {
+    const link = `${window.location.origin}/post/${postId}`;
+    navigator.clipboard.writeText(link);
+    return link;
+  };
+
+  const copyPostText = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    const text = post?.description || '';
+    navigator.clipboard.writeText(text);
+    return text;
+  };
+
   // AI-Powered Discovery: Filter and rank posts based on role and interests
   const getFilteredFeed = (userRole: string, userTags?: string[]): Post[] => {
     // Define role-specific priority tags
@@ -1273,6 +1718,14 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       trendingHashtags,
       savedPosts,
       savedCollections,
+      drafts,
+      scheduledPosts,
+      reposts,
+      reports,
+      mutedUsers,
+      hiddenPosts,
+      notInterestedTopics,
+      pinnedPostIds,
       addPost, 
       likePost, 
       addComment, 
@@ -1285,7 +1738,36 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       createCollection,
       addToCollection,
       removeFromCollection,
-      getIntelligentFeed
+      getIntelligentFeed,
+      editPost,
+      deletePost,
+      pinPost,
+      unpinPost,
+      archivePost,
+      unarchivePost,
+      repost,
+      reportPost,
+      muteUser,
+      unmuteUser,
+      hidePost,
+      unhidePost,
+      markNotInterested,
+      saveDraft,
+      updateDraft,
+      deleteDraft,
+      publishDraft,
+      getDraftsByUser,
+      schedulePost,
+      cancelScheduledPost,
+      publishScheduledPost,
+      editScheduledPost,
+      getUserPosts,
+      getPinnedPosts,
+      getArchivedPosts,
+      getScheduledPosts,
+      getReposts,
+      copyPostLink,
+      copyPostText
     }}>
       {children}
     </PostContext.Provider>

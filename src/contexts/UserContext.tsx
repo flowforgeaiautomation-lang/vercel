@@ -90,6 +90,219 @@ interface ExplorerProfile {
   recentActivity: Array<{ id: string; title: string; time: string }>;
 }
 
+interface SettingsData {
+  accountPreferences: {
+    username?: string;
+  };
+  signInSecurity: {
+    twoFactorEnabled: boolean;
+    connectedAccounts: {
+      google: boolean;
+      apple: boolean;
+      microsoft: boolean;
+      github: boolean;
+    };
+  };
+  visibility: {
+    profile: 'public' | 'connections' | 'private';
+    startup: 'public' | 'investors' | 'private';
+    investment: 'public' | 'connections' | 'private';
+    explorer: 'public' | 'connections' | 'private';
+    post: 'public' | 'connections' | 'private';
+    search: boolean;
+    externalDiscovery: boolean;
+  };
+  dataPrivacy: {
+    downloadData: boolean;
+    exportData: boolean;
+    deleteData: boolean;
+    activityControls: {
+      postHistory: boolean;
+      searchHistory: boolean;
+      interactionHistory: boolean;
+    };
+    dataPermissions: {
+      analytics: boolean;
+      recommendations: boolean;
+      aiTraining: boolean;
+    };
+    cookies: {
+      essential: boolean;
+      analytics: boolean;
+      personalization: boolean;
+    };
+  };
+  feedPreferences: {
+    contentInterests: string[];
+    feedControls: {
+      moreStartup: boolean;
+      moreInvestor: boolean;
+      moreExplorer: boolean;
+    };
+    contentDensity: 'compact' | 'comfortable' | 'expanded';
+    resetRecommendations: boolean;
+    improveRecommendations: boolean;
+  };
+  aiSettings: {
+    enabled: boolean;
+    features: {
+      startupAssistant: boolean;
+      investorAssistant: boolean;
+      explorerAssistant: boolean;
+      messagingAssistant: boolean;
+    };
+    suggestions: {
+      post: boolean;
+      startup: boolean;
+      investor: boolean;
+      explorer: boolean;
+      funding: boolean;
+    };
+    memory: {
+      view: boolean;
+      clear: boolean;
+      export: boolean;
+    };
+    privacy: {
+      allowContextLearning: boolean;
+    };
+  };
+  notifications: {
+    push: {
+      messages: boolean;
+      mentions: boolean;
+      comments: boolean;
+      replies: boolean;
+      reposts: boolean;
+      saves: boolean;
+      connections: boolean;
+    };
+    startup: {
+      fundingUpdates: boolean;
+      startupUpdates: boolean;
+      productLaunches: boolean;
+    };
+    investor: {
+      dealFlow: boolean;
+      investmentOpportunities: boolean;
+      syndicates: boolean;
+    };
+    explorer: {
+      reviews: boolean;
+      feedbackRequests: boolean;
+      contributionAlerts: boolean;
+    };
+    community: {
+      communities: boolean;
+      events: boolean;
+      challenges: boolean;
+    };
+    delivery: {
+      push: boolean;
+      email: boolean;
+      inApp: boolean;
+    };
+  };
+  connections: {
+    requests: 'everyone' | 'verified' | 'nobody';
+    messages: 'everyone' | 'connections';
+    blocked: string[];
+    muted: string[];
+    hidden: string[];
+  };
+  architectSettings: {
+    startupProfile: {
+      edit: boolean;
+      visibility: 'public' | 'connections' | 'private';
+      fundingStatus: string;
+      hiringStatus: string;
+    };
+    startupTeam: string[];
+    startupPreferences: {
+      fundraising: boolean;
+      partnerships: boolean;
+      hiring: boolean;
+    };
+  };
+  catalystSettings: {
+    investmentProfile: {
+      preferredIndustries: string[];
+      preferredGeography: string[];
+      ticketSize: string;
+      investmentStrategy: string;
+      riskPreference: string;
+      investmentStage: string[];
+    };
+    dealFlowPreferences: {
+      aiRecommendations: boolean;
+      fundingAlerts: boolean;
+    };
+  };
+  explorerSettings: {
+    explorerProfile: {
+      contributionVisibility: 'public' | 'connections' | 'private';
+      reviewVisibility: 'public' | 'connections' | 'private';
+      feedbackVisibility: 'public' | 'connections' | 'private';
+    };
+    explorerInterests: {
+      startupCategories: string[];
+      industries: string[];
+    };
+  };
+  contentManagement: {
+    myContent: {
+      posts: any[];
+      drafts: any[];
+      scheduled: any[];
+      archived: any[];
+      pinned: any[];
+    };
+    savedContent: {
+      collections: any[];
+      bookmarks: any[];
+      reposts: any[];
+    };
+  };
+  analyticsExport: {
+    downloads: {
+      profileData: boolean;
+      posts: boolean;
+      messages: boolean;
+      connections: boolean;
+      investments: boolean;
+      startupData: boolean;
+    };
+    exportFormats: ('pdf' | 'csv' | 'json')[];
+  };
+  appearance: {
+    theme: 'dark' | 'light' | 'system';
+    layout: 'compact' | 'comfortable';
+    accessibility: {
+      fontSize: 'small' | 'medium' | 'large' | 'extra-large';
+      highContrast: boolean;
+      reducedMotion: boolean;
+    };
+  };
+  advertising: {
+    adPreferences: {
+      personalized: boolean;
+      generic: boolean;
+    };
+    promotions: {
+      startup: boolean;
+      investor: boolean;
+    };
+    sponsoredContentControls: boolean;
+  };
+  languageRegion: {
+    language: string;
+    country: string;
+    timeZone: string;
+    dateFormat: string;
+    currency: string;
+  };
+}
+
 interface UserData {
   uid: string;
   mainRole: string;
@@ -122,6 +335,7 @@ interface UserData {
   explorerProfile: ExplorerProfile;
   activities?: any[];
   assets?: any[];
+  settings: SettingsData;
 }
 
 interface UserContextType {
@@ -130,6 +344,7 @@ interface UserContextType {
   isDemo: boolean;
   setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
   updateUserData: (newData: Partial<UserData>) => void;
+  updateSettings: (newSettings: Partial<SettingsData>) => void;
   setCurrentUserId: (userId: string) => void;
   createNewUserProfile: () => void;
   switchToDemo: () => void;
@@ -210,6 +425,219 @@ const ROLE_DATA: Record<string, RoleData> = {
     }
   }
 };
+
+const getDefaultSettings = (): SettingsData => ({
+  accountPreferences: {
+    username: ''
+  },
+  signInSecurity: {
+    twoFactorEnabled: false,
+    connectedAccounts: {
+      google: false,
+      apple: false,
+      microsoft: false,
+      github: false
+    }
+  },
+  visibility: {
+    profile: 'public',
+    startup: 'public',
+    investment: 'connections',
+    explorer: 'public',
+    post: 'public',
+    search: true,
+    externalDiscovery: true
+  },
+  dataPrivacy: {
+    downloadData: false,
+    exportData: false,
+    deleteData: false,
+    activityControls: {
+      postHistory: true,
+      searchHistory: true,
+      interactionHistory: true
+    },
+    dataPermissions: {
+      analytics: true,
+      recommendations: true,
+      aiTraining: true
+    },
+    cookies: {
+      essential: true,
+      analytics: true,
+      personalization: true
+    }
+  },
+  feedPreferences: {
+    contentInterests: ['AI', 'SaaS', 'FinTech', 'HealthTech', 'ClimateTech'],
+    feedControls: {
+      moreStartup: true,
+      moreInvestor: false,
+      moreExplorer: false
+    },
+    contentDensity: 'comfortable',
+    resetRecommendations: false,
+    improveRecommendations: true
+  },
+  aiSettings: {
+    enabled: true,
+    features: {
+      startupAssistant: true,
+      investorAssistant: true,
+      explorerAssistant: true,
+      messagingAssistant: true
+    },
+    suggestions: {
+      post: true,
+      startup: true,
+      investor: true,
+      explorer: true,
+      funding: true
+    },
+    memory: {
+      view: true,
+      clear: false,
+      export: false
+    },
+    privacy: {
+      allowContextLearning: true
+    }
+  },
+  notifications: {
+    push: {
+      messages: true,
+      mentions: true,
+      comments: true,
+      replies: true,
+      reposts: true,
+      saves: true,
+      connections: true
+    },
+    startup: {
+      fundingUpdates: true,
+      startupUpdates: true,
+      productLaunches: true
+    },
+    investor: {
+      dealFlow: true,
+      investmentOpportunities: true,
+      syndicates: true
+    },
+    explorer: {
+      reviews: true,
+      feedbackRequests: true,
+      contributionAlerts: true
+    },
+    community: {
+      communities: true,
+      events: true,
+      challenges: true
+    },
+    delivery: {
+      push: true,
+      email: true,
+      inApp: true
+    }
+  },
+  connections: {
+    requests: 'everyone',
+    messages: 'everyone',
+    blocked: [],
+    muted: [],
+    hidden: []
+  },
+  architectSettings: {
+    startupProfile: {
+      edit: true,
+      visibility: 'public',
+      fundingStatus: 'actively-raising',
+      hiringStatus: 'hiring'
+    },
+    startupTeam: [],
+    startupPreferences: {
+      fundraising: true,
+      partnerships: true,
+      hiring: true
+    }
+  },
+  catalystSettings: {
+    investmentProfile: {
+      preferredIndustries: ['AI', 'SaaS', 'FinTech'],
+      preferredGeography: ['North America', 'Europe'],
+      ticketSize: '$500K - $5M',
+      investmentStrategy: 'growth',
+      riskPreference: 'medium',
+      investmentStage: ['Seed', 'Series A']
+    },
+    dealFlowPreferences: {
+      aiRecommendations: true,
+      fundingAlerts: true
+    }
+  },
+  explorerSettings: {
+    explorerProfile: {
+      contributionVisibility: 'public',
+      reviewVisibility: 'public',
+      feedbackVisibility: 'public'
+    },
+    explorerInterests: {
+      startupCategories: ['AI', 'SaaS'],
+      industries: ['Technology', 'Healthcare']
+    }
+  },
+  contentManagement: {
+    myContent: {
+      posts: [],
+      drafts: [],
+      scheduled: [],
+      archived: [],
+      pinned: []
+    },
+    savedContent: {
+      collections: [],
+      bookmarks: [],
+      reposts: []
+    }
+  },
+  analyticsExport: {
+    downloads: {
+      profileData: true,
+      posts: true,
+      messages: false,
+      connections: true,
+      investments: false,
+      startupData: false
+    },
+    exportFormats: ['pdf', 'csv', 'json']
+  },
+  appearance: {
+    theme: 'dark',
+    layout: 'comfortable',
+    accessibility: {
+      fontSize: 'medium',
+      highContrast: false,
+      reducedMotion: false
+    }
+  },
+  advertising: {
+    adPreferences: {
+      personalized: true,
+      generic: false
+    },
+    promotions: {
+      startup: true,
+      investor: true
+    },
+    sponsoredContentControls: false
+  },
+  languageRegion: {
+    language: 'en',
+    country: 'US',
+    timeZone: 'America/New_York',
+    dateFormat: 'MM/DD/YYYY',
+    currency: 'USD'
+  }
+});
 
 const getDemoUserData = (): UserData => {
   const selectedRole = localStorage.getItem('selectedRole') || 'ARCHITECT';
@@ -382,7 +810,8 @@ const getDemoUserData = (): UserData => {
         fileType: 'Docs',
         uploadTime: new Date(2024, 2, 1)
       }
-    ]
+    ],
+    settings: getDefaultSettings()
   };
 };
 
@@ -474,7 +903,8 @@ const getEmptyRealUserData = (userId: string, role: string, name: string = '', e
       recentActivity: []
     },
     activities: [],
-    assets: []
+    assets: [],
+    settings: getDefaultSettings()
   };
 };
 
@@ -549,6 +979,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await setDoc(userRef, firestoreData);
           } else {
             firestoreData = docSnap.data() as UserData;
+            // Ensure settings exist
+            if (!firestoreData.settings) {
+              firestoreData.settings = getDefaultSettings();
+            }
           }
           setUserData(firestoreData);
           setCurrentUserId(user.uid);
@@ -560,6 +994,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           if (savedDemoProfile) {
             try {
               demoData = JSON.parse(savedDemoProfile);
+              // Ensure settings exist
+              if (!demoData.settings) {
+                demoData.settings = getDefaultSettings();
+              }
               // Parse dates
               if (demoData.activities) {
                 demoData.activities = demoData.activities.map((a: any) => ({
@@ -618,6 +1056,28 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  const updateSettings = (newSettings: Partial<SettingsData>) => {
+    console.log('[UserContext] updateSettings called with:', newSettings);
+    setUserData(prev => {
+      if (!prev) return null;
+      const updated = {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          ...newSettings
+        }
+      };
+      console.log('[UserContext] Saving updated settings:', updated);
+      
+      if (user) {
+        // Logged-in user: save to Firestore and localStorage
+        saveUserProfileToFirestore(user.uid, updated);
+      }
+      saveUserProfile(currentUserId, updated);
+      return updated;
+    });
+  };
+
   const createNewUserProfile = () => {
     const newUserId = `user-${Date.now()}`;
     setCurrentUserId(newUserId);
@@ -656,6 +1116,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isDemo: userData?.isDemo || false,
       setUserData, 
       updateUserData, 
+      updateSettings,
       setCurrentUserId, 
       createNewUserProfile,
       switchToDemo,

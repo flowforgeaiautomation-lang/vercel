@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import LoginNew from './components/LoginNew';
 import TriveonLogin from './components/TriveonLogin';
 import RoleSelectionNew from './components/RoleSelectionNew';
@@ -12,6 +12,8 @@ import ExplorerDashboard from './components/ExplorerDashboard';
 import NotificationsDashboard from './components/NotificationsDashboard';
 import BookmarksDashboard from './components/BookmarksDashboard';
 import MessagesDashboard from './components/MessagesDashboard';
+import TriveonSettings from './components/TriveonSettings';
+import AICopilot from './components/AICopilot';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
 import { PostProvider } from './contexts/PostContext';
@@ -85,24 +87,81 @@ function AppWithUniverse({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Global AI button component
+function GlobalAICopilot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  
+  // Don't show on login pages
+  const isAuthPage = location.pathname === '/' || location.pathname.includes('login') || location.pathname.includes('role-selection');
+  
+  if (isAuthPage) return null;
+
+  return (
+    <>
+      {/* Floating AI Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+          border: 'none',
+          boxShadow: '0 6px 20px rgba(255, 165, 0, 0.4)',
+          cursor: 'pointer',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.3s, box-shadow 0.3s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 165, 0, 0.5)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 165, 0, 0.4)';
+        }}
+      >
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" />
+        </svg>
+      </button>
+      
+      {/* AI Copilot Panel */}
+      {isOpen && <AICopilot isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+    </>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <UserProvider>
         <PostProvider>
           <Router>
-            <Routes>
-              <Route path="/" element={<TriveonLogin />} />
-              <Route path="/home" element={<HomeDashboard />} />
-              <Route path="/role-selection" element={<RoleSelection />} />
-              <Route path="/profile" element={<ProfilePremium />} />
-              <Route path="/startups" element={<StartupDashboard />} />
-              <Route path="/investors" element={<InvestorDashboard />} />
-              <Route path="/explorers" element={<ExplorerDashboard />} />
-              <Route path="/notifications" element={<NotificationsDashboard />} />
-              <Route path="/bookmarks" element={<BookmarksDashboard />} />
-              <Route path="/messages" element={<MessagesDashboard />} />
-            </Routes>
+            <AppWithUniverse>
+              <Routes>
+                <Route path="/" element={<TriveonLogin />} />
+                <Route path="/home" element={<HomeDashboard />} />
+                <Route path="/role-selection" element={<RoleSelection />} />
+                <Route path="/profile" element={<ProfilePremium />} />
+                <Route path="/settings" element={<TriveonSettings />} />
+                <Route path="/startups" element={<StartupDashboard />} />
+                <Route path="/investors" element={<InvestorDashboard />} />
+                <Route path="/explorers" element={<ExplorerDashboard />} />
+                <Route path="/notifications" element={<NotificationsDashboard />} />
+                <Route path="/bookmarks" element={<BookmarksDashboard />} />
+                <Route path="/messages" element={<MessagesDashboard />} />
+              </Routes>
+              <GlobalAICopilot />
+            </AppWithUniverse>
           </Router>
         </PostProvider>
       </UserProvider>

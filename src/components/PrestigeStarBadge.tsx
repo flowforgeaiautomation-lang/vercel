@@ -8,7 +8,7 @@ interface PrestigeStarBadgeProps {
 
 const PrestigeStarBadge = ({ starId, size, color }: PrestigeStarBadgeProps) => {
   const sizeMap = {
-    small: '16px',
+    small: '14px',
     medium: '24px',
     large: '32px'
   };
@@ -23,11 +23,11 @@ const PrestigeStarBadge = ({ starId, size, color }: PrestigeStarBadgeProps) => {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '4px',
-        padding: '2px 6px',
+        padding: '1px 6px',
         background: `linear-gradient(135deg, ${color}20, ${color}10)`,
-        borderRadius: '12px',
+        borderRadius: '10px',
         border: `1px solid ${color}40`,
-        fontSize: '0.65rem',
+        fontSize: '0.6rem',
         color: color,
         fontWeight: 600
       }}

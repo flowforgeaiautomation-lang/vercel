@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
-import { UserProfile } from '../contexts/PostContext';
+import { UserProfile, usePosts } from '../contexts/PostContext';
 import AICopilot from './AICopilot';
+import PrestigeStarBadge from './PrestigeStarBadge';
 import './MessagesDashboard.css';
 
 const SearchIcon = () => (
@@ -13,9 +14,18 @@ const SearchIcon = () => (
   </svg>
 );
 
+const getRoleColor = (role: string): string => {
+  const roleUpperCase = role.toUpperCase();
+  if (roleUpperCase === 'ARCHITECT') return '#FFD700';
+  if (roleUpperCase === 'CATALYST') return '#00C896';
+  if (roleUpperCase === 'EXPLORER') return '#06b6d4';
+  return '#9CA3AF';
+};
+
 const MessagesDashboard = () => {
   const { profile } = useAuth();
   const { userData } = useUser();
+  const { demoUsers } = usePosts();
   const navigate = useNavigate();
   const [activeConversation, setActiveConversation] = useState('all');
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
@@ -445,11 +455,22 @@ const MessagesDashboard = () => {
                 )}
               </div>
               <div className="drawer-name">{getUserName()}</div>
-              <div className="drawer-role">{getUserRole()}</div>
+              <div className="drawer-role">
+                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                </span>
+                {userData?.prestigeSystem && (
+                  <PrestigeStarBadge
+                    starId={userData.prestigeSystem.currentStarId}
+                    size="small"
+                    color={getRoleColor(getUserRole())}
+                  />
+                )}
+              </div>
             </div>
             <div className="drawer-menu">
               <div className="drawer-item" onClick={() => navigate('/profile')}>Profile</div>
-              <div className="drawer-item">Settings</div>
+              <div className="drawer-item" onClick={() => navigate('/settings')}>Settings</div>
               <div className="drawer-item">Account</div>
               <div className="drawer-item">Upgradation</div>
               <div className="drawer-item">Support & Feedback</div>
@@ -473,7 +494,18 @@ const MessagesDashboard = () => {
                   ) : getInitials(viewProfilePopUp.userName)}
                 </div>
               </div>
-              <div style={{ marginBottom: '0.5rem' }}><span style={{ display: 'inline-block', padding: '0.3rem 0.8rem', borderRadius: '20px', fontSize: '12px', fontWeight: '600', background: 'rgba(184, 140, 11, 0.15)', color: '#DAA520' }}>Founder</span></div>
+              <div style={{ marginBottom: '0.5rem', display: 'flex', gap: '0.5rem', justifyContent: 'center', alignItems: 'center' }}>
+                <span className={`role-badge ${viewProfilePopUp.userRole === 'ARCHITECT' ? 'gold' : viewProfilePopUp.userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {viewProfilePopUp.userRole.charAt(0).toUpperCase() + viewProfilePopUp.userRole.slice(1).toLowerCase()}
+                </span>
+                {viewProfilePopUp.prestigeSystem && (
+                  <PrestigeStarBadge
+                    starId={viewProfilePopUp.prestigeSystem.currentStarId}
+                    size="small"
+                    color={getRoleColor(viewProfilePopUp.userRole)}
+                  />
+                )}
+              </div>
               <h2 style={{ color: '#fff', fontSize: '20px', fontWeight: 700, marginBottom: '0.3rem' }}>{viewProfilePopUp.userName}</h2>
               <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', marginBottom: '1.5rem' }}>{viewProfilePopUp.userTitle}</p>
             </div>

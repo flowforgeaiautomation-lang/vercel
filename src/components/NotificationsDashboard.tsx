@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import AICopilot from './AICopilot';
 import './NotificationsDashboard.css';
+import PrestigeStarBadge from './PrestigeStarBadge';
 
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -12,6 +13,14 @@ const SearchIcon = () => (
     <path d="m21 21-4.3-4.3"></path>
   </svg>
 );
+
+const getRoleColor = (role: string): string => {
+  const roleUpperCase = role.toUpperCase();
+  if (roleUpperCase === 'ARCHITECT') return '#FFD700';
+  if (roleUpperCase === 'CATALYST') return '#00C896';
+  if (roleUpperCase === 'EXPLORER') return '#06b6d4';
+  return '#9CA3AF';
+};
 
 interface Notification {
   id: string;
@@ -265,14 +274,44 @@ const NotificationsDashboard = () => {
                 ) : (
                   getInitials(getUserName())
                 )}
+                <div className="star-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
+                </div>
               </div>
               <div className="user-info">
                 <div className="user-name">{getUserName()}</div>
-                <div className="user-role">{getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}</div>
+                <div className="user-role">
+                  <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
+                    {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                  </span>
+                  {userData?.prestigeSystem && (
+                    <PrestigeStarBadge
+                      starId={userData.prestigeSystem.currentStarId}
+                      size="small"
+                      color={getRoleColor(getUserRole())}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </header>
+
+        <div className="startup-premium-create-card">
+          <button className="startup-create-signal-button" onClick={() => navigate('/home')}>
+            <div className="startup-button-icon">🚀</div>
+            <div className="startup-button-text">
+              <span className="startup-button-title">Create Signal</span>
+              <span className="startup-button-subtitle">Share an update with the ecosystem</span>
+            </div>
+            <svg className="startup-button-arrow" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
 
         <div className="nd-content">
           <div className="nd-main-col">
@@ -342,7 +381,7 @@ const NotificationsDashboard = () => {
             </div>
             <div className="drawer-menu">
               <div className="drawer-item" onClick={() => navigate('/profile')}>Profile</div>
-              <div className="drawer-item">Settings</div>
+              <div className="drawer-item" onClick={() => navigate('/settings')}>Settings</div>
               <div className="drawer-item">Account</div>
               <div className="drawer-item">Upgradation</div>
               <div className="drawer-item">Support & Feedback</div>

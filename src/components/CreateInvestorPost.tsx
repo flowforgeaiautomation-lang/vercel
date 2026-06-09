@@ -1,12 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { usePosts } from '../contexts/PostContext';
-import PrestigeStarBadge from './PrestigeStarBadge';
-import './CreatePost.css';
+import './CreateInvestorPost.css';
 
-interface CreatePostProps {
-  role?: 'ARCHITECT' | 'EXPLORER' | 'CATALYST';
+interface CreateInvestorPostProps {
   onClose?: () => void;
 }
 
@@ -14,8 +11,8 @@ interface HashtagSuggestion {
   tag: string;
   isTrending: boolean;
   ecosystemReach: string;
-  investorInterest: number; // 0-100
-  trendVelocity: number; // 0-100
+  investorInterest: number;
+  trendVelocity: number;
   category: string;
 }
 
@@ -27,37 +24,34 @@ interface UploadedFile {
   type: string;
 }
 
-const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
-  console.log("CreatePost RENDERED!");
+const CreateInvestorPost: React.FC<CreateInvestorPostProps> = ({ onClose }) => {
+  console.log('CreateInvestorPost RENDERED!');
   const { userData } = useUser();
   const { addPost } = usePosts();
-  
-  const role = userData?.mainRole || propRole || 'ARCHITECT';
-  
-  // Load draft from localStorage on initial render
+
   const loadDraft = () => {
-    const savedDraft = localStorage.getItem('createPostDraft');
+    const savedDraft = localStorage.getItem('investorCreatePostDraft');
     if (savedDraft) {
       const parsed = JSON.parse(savedDraft);
       return {
-        selectedPostType: parsed.selectedPostType || 'Startup Launch',
-        selectedIntent: parsed.selectedIntent || 'Seeking Investment',
+        selectedPostType: parsed.selectedPostType || 'Investment Opportunity',
+        selectedIntent: parsed.selectedIntent || 'Seeking Startups',
         description: parsed.description || '',
         visibility: parsed.visibility || 'Public',
-        selectedTags: parsed.selectedTags || ['EdTech', 'StudentLife', 'TimeManagement']
+        selectedTags: parsed.selectedTags || ['AI', 'FinTech', 'SeedRound']
       };
     }
     return {
-      selectedPostType: 'Startup Launch',
-      selectedIntent: 'Seeking Investment',
+      selectedPostType: 'Investment Opportunity',
+      selectedIntent: 'Seeking Startups',
       description: '',
       visibility: 'Public',
-      selectedTags: ['EdTech', 'StudentLife', 'TimeManagement']
+      selectedTags: ['AI', 'FinTech', 'SeedRound']
     };
   };
-  
+
   const draft = loadDraft();
-  
+
   const [selectedPostType, setSelectedPostType] = useState(draft.selectedPostType);
   const [selectedIntent, setSelectedIntent] = useState(draft.selectedIntent);
   const [description, setDescription] = useState(draft.description);
@@ -72,12 +66,10 @@ const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  const userName = userData?.profile?.name || 'Unnati Chaudhary';
+  const userName = userData?.profile?.name || 'Sarah Chen';
   const userAvatar = userData?.profile?.profileImage;
-  const userRole = userData?.mainRole || role;
-  const userTitle = 'Founder & CEO @ Nexora';
-  
-  // Auto-save draft to localStorage
+  const userTitle = 'Partner @ GreenVentures';
+
   useEffect(() => {
     const draftData = {
       selectedPostType,
@@ -86,97 +78,73 @@ const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
       visibility,
       selectedTags
     };
-    localStorage.setItem('createPostDraft', JSON.stringify(draftData));
+    localStorage.setItem('investorCreatePostDraft', JSON.stringify(draftData));
   }, [selectedPostType, selectedIntent, description, visibility, selectedTags]);
 
-  // Simulated AI hashtag suggestions database
   const hashtagDatabase: HashtagSuggestion[] = [
-    { tag: 'AI', isTrending: true, ecosystemReach: '12.4K', investorInterest: 92, trendVelocity: 88, category: 'Category' },
-    { tag: 'Fintech', isTrending: true, ecosystemReach: '8.7K', investorInterest: 85, trendVelocity: 72, category: 'Category' },
-    { tag: 'EdTech', isTrending: true, ecosystemReach: '18.3K', investorInterest: 90, trendVelocity: 95, category: 'Category' },
-    { tag: 'StudentLife', isTrending: true, ecosystemReach: '22.1K', investorInterest: 75, trendVelocity: 89, category: 'Category' },
-    { tag: 'TimeManagement', isTrending: true, ecosystemReach: '15.6K', investorInterest: 70, trendVelocity: 80, category: 'Category' },
-    { tag: 'HealthyHabits', isTrending: true, ecosystemReach: '14.2K', investorInterest: 68, trendVelocity: 78, category: 'Category' },
-    { tag: 'Productivity', isTrending: true, ecosystemReach: '16.8K', investorInterest: 72, trendVelocity: 83, category: 'Category' },
-    { tag: 'StudyTips', isTrending: true, ecosystemReach: '13.4K', investorInterest: 65, trendVelocity: 77, category: 'Category' },
-    { tag: 'ClimateTech', isTrending: true, ecosystemReach: '7.3K', investorInterest: 88, trendVelocity: 81, category: 'Category' },
-    { tag: 'Web3', isTrending: false, ecosystemReach: '5.2K', investorInterest: 65, trendVelocity: 45, category: 'Category' },
-    { tag: 'HealthTech', isTrending: true, ecosystemReach: '6.8K', investorInterest: 78, trendVelocity: 76, category: 'Category' },
-    { tag: 'StartupLaunch', isTrending: true, ecosystemReach: '15.2K', investorInterest: 95, trendVelocity: 90, category: 'Status' },
-    { tag: 'SeekingInvestment', isTrending: true, ecosystemReach: '11.8K', investorInterest: 98, trendVelocity: 85, category: 'Status' },
-    { tag: 'ProductUpdate', isTrending: false, ecosystemReach: '4.3K', investorInterest: 60, trendVelocity: 52, category: 'Status' },
-    { tag: 'Seed', isTrending: true, ecosystemReach: '9.5K', investorInterest: 90, trendVelocity: 82, category: 'Stage' },
-    { tag: 'SeriesA', isTrending: false, ecosystemReach: '7.1K', investorInterest: 88, trendVelocity: 68, category: 'Stage' },
-    { tag: 'DeFi', isTrending: false, ecosystemReach: '4.1K', investorInterest: 55, trendVelocity: 40, category: 'Category' },
-    { tag: 'SaaS', isTrending: true, ecosystemReach: '8.9K', investorInterest: 82, trendVelocity: 75, category: 'Category' },
+    { tag: 'AI', isTrending: true, ecosystemReach: '15.3K', investorInterest: 95, trendVelocity: 92, category: 'Category' },
+    { tag: 'FinTech', isTrending: true, ecosystemReach: '12.8K', investorInterest: 90, trendVelocity: 85, category: 'Category' },
+    { tag: 'SeedRound', isTrending: true, ecosystemReach: '14.2K', investorInterest: 97, trendVelocity: 88, category: 'Stage' },
+    { tag: 'Investment', isTrending: true, ecosystemReach: '18.5K', investorInterest: 98, trendVelocity: 90, category: 'Status' },
+    { tag: 'VentureCapital', isTrending: true, ecosystemReach: '16.7K', investorInterest: 96, trendVelocity: 87, category: 'Status' },
+    { tag: 'SaaS', isTrending: true, ecosystemReach: '11.5K', investorInterest: 88, trendVelocity: 82, category: 'Category' },
+    { tag: 'ClimateTech', isTrending: true, ecosystemReach: '9.3K', investorInterest: 91, trendVelocity: 84, category: 'Category' },
+    { tag: 'SeriesA', isTrending: false, ecosystemReach: '8.1K', investorInterest: 93, trendVelocity: 78, category: 'Stage' },
+    { tag: 'Web3', isTrending: false, ecosystemReach: '7.2K', investorInterest: 85, trendVelocity: 70, category: 'Category' },
+    { tag: 'HealthTech', isTrending: true, ecosystemReach: '8.8K', investorInterest: 89, trendVelocity: 81, category: 'Category' },
   ];
 
   const [tagSuggestions, setTagSuggestions] = useState<HashtagSuggestion[]>(hashtagDatabase.slice(0, 5));
 
   const postTypes = [
-    'Startup Launch',
-    'Product Launch',
-    'Founder Update',
-    'Fundraising Announcement',
-    'Startup Milestone',
-    'Startup Case Study',
-    'Founder Lessons',
-    'Startup Hiring',
-    'Startup Partnership',
-    'Startup Acquisition',
-    'Idea / Concept',
-    'Progress Update',
     'Investment Opportunity',
-    'Feedback Request',
-    'Collaboration Request',
-    'Insight / Research'
+    'Market Insight',
+    'Investment Thesis',
+    'Portfolio Update',
+    'Funding Announcement',
+    'Investor Lessons',
+    'Research Report',
+    'Startup Recommendation',
+    'Co-Investor Request',
+    'Syndicate Opportunity'
   ];
 
   const intents = [
-    'Seeking Investment',
-    'Seeking Feedback',
-    'Hiring',
-    'Partnerships',
-    'Sharing Insight'
+    'Seeking Startups',
+    'Seeking Co-Investors',
+    'Sharing Insight',
+    'Open to Opportunities',
+    'Portfolio Update'
   ];
 
   const categoryTags = [
     { name: 'AI', color: 'purple' },
-    { name: 'Fintech', color: 'blue' },
-    { name: 'EdTech', color: 'orange' },
-    { name: 'StudentLife', color: 'pink' },
-    { name: 'TimeManagement', color: 'cyan' },
-    { name: 'HealthyHabits', color: 'green' },
-    { name: 'Productivity', color: 'gold' },
-    { name: 'StudyTips', color: 'purple' },
+    { name: 'FinTech', color: 'blue' },
+    { name: 'HealthTech', color: 'pink' },
     { name: 'ClimateTech', color: 'green' },
-    { name: 'Web3', color: 'cyan' },
-    { name: 'HealthTech', color: 'pink' }
+    { name: 'SaaS', color: 'cyan' },
+    { name: 'Web3', color: 'orange' },
   ];
 
   const statusTags = [
-    { name: 'StartupLaunch', color: 'gold' },
-    { name: 'SeekingInvestment', color: 'green' },
-    { name: 'ProductUpdate', color: 'blue' },
-    { name: 'ResearchSignal', color: 'purple' },
-    { name: 'FounderJourney', color: 'pink' },
-    { name: 'FutureOfAI', color: 'cyan' }
+    { name: 'Investment', color: 'green' },
+    { name: 'VentureCapital', color: 'gold' },
+    { name: 'SeedRound', color: 'green' },
+    { name: 'SeriesA', color: 'blue' },
+    { name: 'Portfolio', color: 'purple' },
   ];
 
   const stageTags = [
-    { name: 'Pre-Seed', color: 'blue' },
+    { name: 'PreSeed', color: 'orange' },
     { name: 'Seed', color: 'green' },
-    { name: 'SeriesA', color: 'purple' },
-    { name: 'EarlyStage', color: 'orange' },
-    { name: 'Bootstrapped', color: 'pink' },
-    { name: 'VC-Backed', color: 'cyan' }
+    { name: 'SeriesA', color: 'blue' },
+    { name: 'SeriesB', color: 'purple' },
   ];
 
-  // AI suggestion logic
   useEffect(() => {
     if (customTagInput.length > 0) {
       setShowTagSuggestions(true);
-      const filtered = hashtagDatabase.filter(h => 
+      const filtered = hashtagDatabase.filter(h =>
         h.tag.toLowerCase().includes(customTagInput.toLowerCase())
       );
       setTagSuggestions(filtered.length > 0 ? filtered : hashtagDatabase.slice(0, 5));
@@ -199,7 +167,7 @@ const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
   const getTagColor = (tagName: string) => {
     const allTags = [...categoryTags, ...statusTags, ...stageTags];
     const found = allTags.find(t => t.name === tagName);
-    return found?.color || 'gold';
+    return found?.color || 'green';
   };
 
   const MAX_TAG_LENGTH = 30;
@@ -208,25 +176,25 @@ const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
   const addCustomTag = () => {
     const trimmed = customTagInput.trim();
     if (!trimmed) return;
-    
+
     if (trimmed.length > MAX_TAG_LENGTH) {
       setValidationErrors([`Tag "${trimmed}" is too long (max ${MAX_TAG_LENGTH} characters)`]);
       setTimeout(() => setValidationErrors([]), 5000);
       return;
     }
-    
+
     if (selectedTags.includes(trimmed)) {
       setValidationErrors([`Tag "${trimmed}" already exists`]);
       setTimeout(() => setValidationErrors([]), 5000);
       return;
     }
-    
+
     if (selectedTags.length >= MAX_TAGS) {
       setValidationErrors([`Maximum ${MAX_TAGS} tags allowed`]);
       setTimeout(() => setValidationErrors([]), 5000);
       return;
     }
-    
+
     setSelectedTags(prev => [...prev, trimmed]);
     setCustomTagInput('');
     setShowTagSuggestions(false);
@@ -253,65 +221,20 @@ const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
     return '📉';
   };
 
-  // AI Copilot Post Writer
   const handleAiWrite = () => {
     if (!aiInput.trim()) return;
     setIsAiTyping(true);
     setTimeout(() => {
       let generatedPost = '';
-      
-      if (selectedPostType === 'Startup Launch') {
-        generatedPost = `🚀 We're LIVE and excited to share our journey!
 
-${aiInput}
-
-Our team has been working tirelessly to bring this vision to life, and we can't wait to see the impact we'll make together. We're actively looking for:
-• Early adopters to test our product
-• Strategic partners who share our mission
-• Investors passionate about ${selectedTags[0] || 'innovation'}
-
-Let's connect and build something extraordinary!
-
-#StartupLaunch ${selectedTags.map(t => `#${t}`).join(' ')} #FounderJourney`;
-      } else if (selectedPostType === 'Investment Opportunity') {
-        generatedPost = `💰 Exciting investment opportunity!
-
-${aiInput}
-
-Key Highlights:
-• Market size: $50B+ TAM
-• Team with proven track record
-• Early traction and strong unit economics
-• Clear path to profitability
-
-We're raising ${selectedTags.includes('Seed') ? 'seed' : selectedTags.includes('SeriesA') ? 'Series A' : ''} capital to scale product development and go-to-market.
-
-Looking forward to connecting with angel investors and VCs!
-
-#SeekingInvestment ${selectedTags.map(t => `#${t}`).join(' ')} #VC`;
-      } else if (selectedPostType === 'Progress Update') {
-        generatedPost = `📈 Major milestone alert!
-
-${aiInput}
-
-What we've accomplished:
-• [Add your key metrics]
-• [Add your product updates]
-• [Add your team growth]
-
-Thank you to our incredible community for your support — this is just the beginning!
-
-#ProgressUpdate ${selectedTags.map(t => `#${t}`).join(' ')} #StartupGrowth`;
+      if (selectedPostType === 'Investment Opportunity') {
+        generatedPost = `💼 Exciting investment opportunity in ${selectedTags[0] || 'tech'} space!\n\n${aiInput}\n\nWe're looking to invest between [Amount] in this space. Let's connect if you're building something impactful!\n\n#Investment #VentureCapital ${selectedTags.map(t => `#${t}`).join(' ')}`;
+      } else if (selectedPostType === 'Market Insight') {
+        generatedPost = `📊 Interesting market shift I'm observing in ${selectedTags[0] || 'tech'}.\n\n${aiInput}\n\nWould love to hear others' perspectives!\n\n#SharingInsight ${selectedTags.map(t => `#${t}`).join(' ')}`;
       } else {
-        generatedPost = `💡 ${selectedPostType}!
-
-${aiInput}
-
-We'd love to hear your thoughts, feedback, and insights. Let's start a conversation!
-
-${selectedTags.map(t => `#${t}`).join(' ')} #Innovation #Community`;
+        generatedPost = `💡 ${selectedPostType}!\n\n${aiInput}\n\nLet's start a conversation!\n\n${selectedTags.map(t => `#${t}`).join(' ')}`;
       }
-      
+
       setDescription(generatedPost);
       setIsAiTyping(false);
       setAiCopilotOpen(false);
@@ -322,9 +245,8 @@ ${selectedTags.map(t => `#${t}`).join(' ')} #Innovation #Community`;
     if (!description.trim()) return;
     setIsAiTyping(true);
     setTimeout(() => {
-      // AI improvements
       let improvements = '';
-      
+
       if (description.length < 100) {
         improvements += '\n• Expanded content for better engagement';
       }
@@ -334,16 +256,9 @@ ${selectedTags.map(t => `#${t}`).join(' ')} #Innovation #Community`;
       if (!/[.!?]$/.test(description.trim())) {
         improvements += '\n• Improved sentence structure';
       }
-      
-      const improvedPost = description + `
 
----
-✨ Enhanced by TRIVEON AI:${improvements || '\n• Optimized readability and flow'}
-• Added clear call-to-action
-• Improved engagement potential
+      const improvedPost = description + `\n\n---\n✨ Enhanced by TRIVEON AI:${improvements || '\n• Optimized readability and flow'}\n• Added clear call-to-action\n• Improved engagement potential\n\n${selectedTags.map(t => `#${t}`).join(' ')}`;
 
-${selectedTags.map(t => `#${t}`).join(' ')}`;
-      
       setDescription(improvedPost);
       setIsAiTyping(false);
       setAiCopilotOpen(false);
@@ -367,14 +282,12 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
     setIsAiTyping(true);
     setTimeout(() => {
       let cta = '';
-      if (selectedIntent === 'Seeking Investment') {
-        cta = '\n\nInterested investors, please reach out — let\'s discuss!\n';
-      } else if (selectedIntent === 'Seeking Feedback') {
-        cta = '\n\nWould love your thoughts in the comments below!\n';
-      } else if (selectedIntent === 'Hiring') {
-        cta = '\n\nWe\'re hiring! Check out our careers page or DM for details.\n';
+      if (selectedIntent === 'Seeking Startups') {
+        cta = '\n\nIf you\'re building something interesting, please reach out!';
+      } else if (selectedIntent === 'Seeking Co-Investors') {
+        cta = '\n\nLooking for co-investors in this space - let\'s connect!';
       } else {
-        cta = '\n\nLet\'s connect and collaborate!\n';
+        cta = '\n\nWould love to hear thoughts in comments!';
       }
       setDescription(description + cta);
       setIsAiTyping(false);
@@ -386,7 +299,6 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
     if (!description.trim()) return;
     setIsAiTyping(true);
     setTimeout(() => {
-      // Simple simulated fixes
       let fixedPost = description
         .replace(/\bi\b/g, 'I')
         .replace(/\bu\b/g, 'you')
@@ -396,12 +308,11 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
         .replace(/\bcant\b/g, "can't")
         .replace(/\bisnt\b/g, "isn't")
         .replace(/\bwerent\b/g, "weren't");
-      
-      // Capitalize first letter of sentences
+
       fixedPost = fixedPost.replace(/(^|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
-      
+
       fixedPost += '\n\n✨ Checked and improved by TRIVEON AI';
-      
+
       setDescription(fixedPost);
       setIsAiTyping(false);
       setAiCopilotOpen(false);
@@ -410,10 +321,10 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
 
   const handlePublish = () => {
     addPost({
-      userId: userData?.uid || 'demo-user',
+      userId: userData?.uid || 'demo-investor',
       userName,
       userAvatar,
-      userRole,
+      userRole: 'CATALYST',
       userTitle,
       postType: selectedPostType,
       intent: selectedIntent,
@@ -425,28 +336,7 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
     }
   };
 
-  const getRoleColors = (role: string) => {
-    if (role === 'CATALYST') {
-      return ['#00C896', '#34D399', '#059669', '#10B981', '#065F46'];
-    } else if (role === 'EXPLORER') {
-      return ['#3B82F6', '#60A5FA', '#2563EB', '#38BDF8', '#0284C7'];
-    } else {
-      return ['#B8860B', '#DAA520', '#8B6914', '#FFD700', '#CD853F'];
-    }
-  };
-
-  const roleColors = getRoleColors(role);
-
-  const traction = [
-    { label: 'Users', value: '10,000+', color: roleColors[0] },
-    { label: 'Revenue', value: '$120K MRR', color: roleColors[1] },
-    { label: 'Growth', value: '48% MoM', color: roleColors[2] },
-    { label: 'Waitlist', value: '5,200+', color: roleColors[3] },
-    { label: 'Partnerships', value: '12', color: roleColors[4] }
-  ];
-
-  // File validation: max 10MB per file, allowed types
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
   const ALLOWED_TYPES = [
     'image/jpeg',
     'image/png',
@@ -462,7 +352,7 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
   const validateFiles = (files: File[]): { valid: File[], errors: string[] } => {
     const valid: File[] = [];
     const errors: string[] = [];
-    
+
     files.forEach(file => {
       if (file.size > MAX_FILE_SIZE) {
         errors.push(`${file.name}: File size exceeds 10MB limit`);
@@ -472,19 +362,18 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
         valid.push(file);
       }
     });
-    
+
     return { valid, errors };
   };
 
   const processFiles = (files: File[]) => {
     const { valid, errors } = validateFiles(files);
-    
+
     if (errors.length > 0) {
       setValidationErrors(errors);
-      // Clear errors after 5 seconds
       setTimeout(() => setValidationErrors([]), 5000);
     }
-    
+
     if (valid.length > 0) {
       const newFiles: UploadedFile[] = valid.map(file => ({
         id: Math.random().toString(36).substr(2, 9),
@@ -500,7 +389,6 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     processFiles(files);
-    // Reset input to allow selecting the same file again
     e.target.value = '';
   };
 
@@ -514,7 +402,6 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
     });
   };
 
-  // Drag and drop handlers
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
@@ -533,21 +420,21 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
   };
 
   const clearDraft = () => {
-    localStorage.removeItem('createPostDraft');
-    setSelectedPostType('Startup Launch');
-    setSelectedIntent('Seeking Investment');
+    localStorage.removeItem('investorCreatePostDraft');
+    setSelectedPostType('Investment Opportunity');
+    setSelectedIntent('Seeking Startups');
     setDescription('');
     setVisibility('Public');
-    setSelectedTags(['EdTech', 'StudentLife', 'TimeManagement']);
+    setSelectedTags(['AI', 'FinTech', 'SeedRound']);
   };
 
   return (
-    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => console.log("Overlay clicked!")}>
-      <div className={`create-post-modal role-${role.toLowerCase()}`}>
+    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => console.log('Overlay clicked!')}>
+      <div className="create-post-modal role-catalyst">
         <div className="create-post-header">
           <div className="create-post-header-left">
-            <h1 className="create-post-title">Create Post</h1>
-            <p className="create-post-subtitle">Publish a signal to the ecosystem ✨</p>
+            <h1 className="create-post-title">Create Signal</h1>
+            <p className="create-post-subtitle">Share an investment update with the ecosystem 💚</p>
           </div>
           <div className="create-post-header-right">
             <button className="ai-copilot-trigger-btn" onClick={() => setAiCopilotOpen(!aiCopilotOpen)}>
@@ -597,30 +484,14 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
                 ✅ Fix grammar & mistakes
               </button>
               <button className="ai-action-btn" onClick={() => {
-                setDescription(`🚀 We're thrilled to announce our official launch! 
-
-After months of hard work, we're ready to share our vision with the world. Our mission is to transform how founders and investors connect, collaborate, and build the future.
-
-We'd love to hear your thoughts and connect with like-minded individuals!
-
-#StartupLaunch ${selectedTags.map(t => `#${t}`).join(' ')}`);
+                setDescription(`💼 Investment focus update:\n\nWe're actively looking for startups in ${selectedTags[0] || 'AI/ML'} space!\n\nIf you're building something interesting, please reach out.\n\n#Investment #SeekingStartups ${selectedTags.map(t => `#${t}`).join(' ')}`);
               }}>
-                🚀 Generate launch post
+                💼 Generate investment post
               </button>
               <button className="ai-action-btn" onClick={() => {
-                setDescription(`📈 Exciting progress update! 
-
-We've achieved significant milestones this month:
-• 50% month-over-month growth
-• Added 20+ new team members
-• Launched 3 key features
-• Expanded to 5 new markets
-
-Grateful for our incredible community!
-
-#ProgressUpdate ${selectedTags.map(t => `#${t}`).join(' ')}`);
+                setDescription(`📊 Interesting market trend in ${selectedTags[0] || 'fintech'}:\n\n[Add your insight here]\n\nCurious to hear other investors' thoughts!\n\n#SharingInsight ${selectedTags.map(t => `#${t}`).join(' ')}`);
               }}>
-                📈 Generate progress update
+                📊 Generate market insight
               </button>
             </div>
 
@@ -628,7 +499,7 @@ Grateful for our incredible community!
               <input
                 type="text"
                 className="ai-copilot-input"
-                placeholder="Tell AI what to write (e.g., 'Create a post about our seed round')"
+                placeholder="Tell AI what to write (e.g., 'Create a post about my investment thesis')"
                 value={aiInput}
                 onChange={(e) => setAiInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -668,7 +539,7 @@ Grateful for our incredible community!
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #B8860B, #DAA520)',
+                background: 'linear-gradient(135deg, #10B981, #34D399)',
                 color: 'white',
                 fontWeight: 'bold',
                 fontSize: '1.2rem'
@@ -680,21 +551,14 @@ Grateful for our incredible community!
           <div className="user-info">
             <div className="user-name-row">
               <h2 className="user-name">{userName}</h2>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#B8860B' }}>
-                <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#10B981' }}>
+                <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" />
               </svg>
             </div>
             <p className="user-title">{userTitle}</p>
-            <div className="user-badges" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <span className="user-badge">{userRole === 'ARCHITECT' ? 'Architect' : userRole === 'EXPLORER' ? 'Explorer' : 'Catalyst'}</span>
-              {userData?.prestigeSystem && (
-                <PrestigeStarBadge
-                  starId={userData.prestigeSystem.currentStarId}
-                  size="small"
-                  color={userRole === 'ARCHITECT' ? '#FFD700' : userRole === 'CATALYST' ? '#00C896' : '#06b6d4'}
-                />
-              )}
-              <span className="user-meta">👑 Sovereign Tier • Trust Index 94</span>
+            <div className="user-badges">
+              <span className="user-badge">Catalyst</span>
+              <span className="user-meta">💚 Sovereign Tier • Trust Index 94</span>
             </div>
           </div>
         </div>
@@ -706,48 +570,55 @@ Grateful for our incredible community!
               className={`post-type-card ${selectedPostType === type ? 'selected' : ''}`}
               onClick={() => setSelectedPostType(type)}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                {type === 'Startup Launch' && (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {type === 'Investment Opportunity' && (
                   <>
-                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
-                    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                    <path d="M12 2L20 7L12 12L4 7L12 2Z" />
+                    <path d="M4 17L12 22L20 17" />
+                    <path d="M4 12L12 17L20 12" />
                   </>
                 )}
-                {type === 'Product Launch' && (
+                {type === 'Market Insight' && (
                   <>
-                    <path d="M12 2L15 8H21L16 12L18 19L12 15L6 19L8 12L3 8H9L12 2z" />
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17l-4-4-4 4-6-6" />
                   </>
                 )}
-                {type === 'Founder Update' && (
-                  <>
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                  </>
-                )}
-                {type === 'Fundraising Announcement' && (
-                  <>
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  </>
-                )}
-                {type === 'Startup Milestone' && (
-                  <>
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                    <path d="M12 2v10" />
-                    <circle cx="12" cy="12" r="4" />
-                  </>
-                )}
-                {type === 'Startup Case Study' && (
+                {type === 'Investment Thesis' && (
                   <>
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                     <polyline points="14 2 14 8 20 8" />
                   </>
                 )}
-                {type === 'Founder Lessons' && (
+                {type === 'Portfolio Update' && (
                   <>
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" />
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                   </>
                 )}
-                {type === 'Startup Hiring' && (
+                {type === 'Funding Announcement' && (
+                  <>
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                  </>
+                )}
+                {type === 'Investor Lessons' && (
+                  <>
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                  </>
+                )}
+                {type === 'Research Report' && (
+                  <>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </>
+                )}
+                {type === 'Startup Recommendation' && (
+                  <>
+                    <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+                    <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+                  </>
+                )}
+                {type === 'Co-Investor Request' && (
                   <>
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                     <circle cx="9" cy="7" r="4" />
@@ -755,54 +626,10 @@ Grateful for our incredible community!
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </>
                 )}
-                {type === 'Startup Partnership' && (
+                {type === 'Syndicate Opportunity' && (
                   <>
-                    <circle cx="12" cy="5" r="3" />
-                    <circle cx="5" cy="19" r="3" />
-                    <circle cx="19" cy="19" r="3" />
-                    <line x1="12" y1="8" x2="5" y2="16" />
-                    <line x1="12" y1="8" x2="19" y2="16" />
-                  </>
-                )}
-                {type === 'Startup Acquisition' && (
-                  <>
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                  </>
-                )}
-                {type === 'Idea / Concept' && (
-                  <>
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" />
-                  </>
-                )}
-                {type === 'Progress Update' && (
-                  <>
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                  </>
-                )}
-                {type === 'Investment Opportunity' && (
-                  <>
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  </>
-                )}
-                {type === 'Feedback Request' && (
-                  <>
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </>
-                )}
-                {type === 'Collaboration Request' && (
-                  <>
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </>
-                )}
-                {type === 'Insight / Research' && (
-                  <>
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                   </>
                 )}
               </svg>
@@ -824,7 +651,7 @@ Grateful for our incredible community!
           <div className="textarea-wrapper">
             <textarea
               className="description-textarea"
-              placeholder="Describe your startup, vision, traction, or the opportunity you're building…"
+              placeholder="Share an investment opportunity, market insight, portfolio update, or funding announcement..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={2000}
@@ -841,113 +668,42 @@ Grateful for our incredible community!
                 <line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               </svg>
-              Investment Opportunity Details
+              Investment Details
             </h3>
           </div>
           <div className="investment-grid">
             <div className="investment-field">
-              <label className="field-label">Funding Stage</label>
+              <label className="field-label">Investment Stage</label>
               <select className="field-select">
+                <option>Pre-Seed</option>
                 <option>Seed</option>
                 <option>Series A</option>
-                <option>Series B</option>
+                <option>Series B+</option>
+                <option>Any Stage</option>
               </select>
             </div>
             <div className="investment-field">
               <label className="field-label">Ticket Size</label>
               <select className="field-select">
-                <option>$250K — $1M</option>
-                <option>$1M — $5M</option>
-                <option>$5M — $10M</option>
+                <option>&lt; $25K</option>
+                <option>$25K — $100K</option>
+                <option>$100K — $500K</option>
+                <option>$500K+</option>
               </select>
             </div>
             <div className="investment-field">
-              <label className="field-label">Industry / Focus (Select up to 3)</label>
+              <label className="field-label">Industry Focus</label>
               <select className="field-select">
-                <option>Fintech • SaaS • Infra</option>
-              </select>
-              <div className="selected-tags">
-                <span className="selected-tag">Fintech</span>
-                <span className="selected-tag">SaaS</span>
-                <span className="selected-tag">Infra</span>
-              </div>
-            </div>
-            <div className="investment-field">
-              <label className="field-label">Funding Purpose</label>
-              <select className="field-select">
-                <option>Product Scaling</option>
-                <option>Marketing</option>
-                <option>Hiring</option>
+                <option>AI</option>
+                <option>SaaS</option>
+                <option>FinTech</option>
+                <option>HealthTech</option>
+                <option>ClimateTech</option>
+                <option>Web3</option>
+                <option>Robotics</option>
+                <option>More</option>
               </select>
             </div>
-            <div className="investment-field">
-              <label className="field-label">Investment Status</label>
-              <select className="field-select">
-                <option>Raising Now</option>
-                <option>Upcoming Round</option>
-              </select>
-            </div>
-            <div className="investment-field">
-              <label className="field-label">Target Investors</label>
-              <select className="field-select">
-                <option>Angels, VCs, Strategic Investors</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="traction-section">
-          <div className="section-title-row">
-            <h3 className="section-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 3v18h18" />
-                <path d="m19 9 12 16 5 9" />
-              </svg>
-              Traction Snapshot (Optional)
-            </h3>
-          </div>
-          <div className="traction-grid">
-            {traction.map((item, index) => (
-              <div key={index} className="traction-card" style={{ '--accent-color': item.color } as React.CSSProperties}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" strokeWidth="2">
-                  {index === 0 && (
-                    <>
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                    </>
-                  )}
-                  {index === 1 && (
-                    <>
-                      <line x1="12" y1="1" x2="12" y2="23" />
-                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h8a3.5 3.5 0 0 0 0-7zM21 19H2.99" />
-                    </>
-                  )}
-                  {index === 2 && (
-                    <>
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </>
-                  )}
-                  {index === 3 && (
-                    <>
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </>
-                  )}
-                  {index === 4 && (
-                    <>
-                      <circle cx="12" cy="5" r="3" />
-                      <circle cx="5" cy="19" r="3" />
-                      <circle cx="19" cy="19" r="3" />
-                      <line x1="12" y1="8" x2="5" y2="16" />
-                      <line x1="12" y1="8" x2="19" y2="16" />
-                    </>
-                  )}
-                </svg>
-                <div className="traction-value">{item.value}</div>
-                <div className="traction-label">{item.label}</div>
-              </div>
-            ))}
           </div>
         </div>
 
@@ -971,8 +727,8 @@ Grateful for our incredible community!
             <h3 className="section-title small">Visibility</h3>
             <select className="visibility-select" value={visibility} onChange={(e) => setVisibility(e.target.value)}>
               <option>Public</option>
-              <option>Private</option>
-              <option>Followers Only</option>
+              <option>Connections</option>
+              <option>Private Draft</option>
             </select>
           </div>
         </div>
@@ -988,7 +744,7 @@ Grateful for our incredible community!
                 ))}
               </div>
             )}
-            <div 
+            <div
               className={`assets-grid ${isDragOver ? 'drag-over' : ''}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -1024,10 +780,10 @@ Grateful for our incredible community!
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 <span>Add More</span>
-                <input 
-                  type="file" 
-                  multiple 
-                  onChange={handleFileUpload} 
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
                   style={{ display: 'none' }}
                   accept="image/*,application/pdf,video/*,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 />
@@ -1038,15 +794,15 @@ Grateful for our incredible community!
           <div className="tags-section">
             <h3 className="section-title small">Premium Hashtags</h3>
             <p className="section-subtitle">AI-powered tags to maximize your reach</p>
-            
+
             <div className="selected-tags-display">
               {selectedTags.map(tag => (
-                <span 
-                  key={tag} 
-                  className={`selected-tag-premium ${getTagColor(tag)}`}
+                <span
+                  key={tag}
+                  className="selected-tag-premium"
                   onClick={() => toggleTag(tag)}
                 >
-                  <span className="tag-hash">#</span>
+                  <span className="tag-hash-small">#</span>
                   {tag}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -1069,7 +825,7 @@ Grateful for our incredible community!
                 <input
                   type="text"
                   className="custom-tag-input"
-                  placeholder="e.g., DeFi, Crypto, SaaS"
+                  placeholder="e.g., ClimateTech, SeedStage"
                   value={customTagInput}
                   onChange={(e) => setCustomTagInput(e.target.value)}
                   onKeyDown={handleCustomTagKeyDown}
@@ -1082,7 +838,7 @@ Grateful for our incredible community!
                   </svg>
                 </button>
               </div>
-              
+
               {showTagSuggestions && (
                 <div className="tag-suggestions-dropdown">
                   <div className="suggestions-header">
@@ -1090,8 +846,8 @@ Grateful for our incredible community!
                     <span className="suggestions-subtitle">Trending in ecosystem</span>
                   </div>
                   {tagSuggestions.map((suggestion, idx) => (
-                    <div 
-                      key={suggestion.tag} 
+                    <div
+                      key={suggestion.tag}
                       className="tag-suggestion-item"
                       onClick={() => {
                         toggleTag(suggestion.tag);
@@ -1100,31 +856,29 @@ Grateful for our incredible community!
                       }}
                     >
                       <div className="suggestion-tag-main">
-                        <span className={`suggestion-tag ${getTagColor(suggestion.tag)}`}>
-                          #
+                        <span className="suggestion-tag">
+                          <span className="tag-hash-small">#</span>
                           {suggestion.tag}
+                          {suggestion.isTrending && <span className="trending-badge">🔥 Trending</span>}
                         </span>
-                        {suggestion.isTrending && <span className="trending-badge">🔥 Trending</span>}
                       </div>
                       <div className="suggestion-metrics">
                         <span className="metric-item">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                             <circle cx="9" cy="7" r="4" />
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                           </svg>
-                          {suggestion.ecosystemReach} reach
+                          {suggestion.ecosystemReach}
                         </span>
                         <span className="metric-item">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <line x1="12" y1="1" x2="12" y2="23" />
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h8a3.5 3.5 0 0 0 0-7zM21 19H2.99" />
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                           </svg>
-                          {getInterestLevel(suggestion.investorInterest)} investor interest
+                          {getInterestLevel(suggestion.investorInterest)}
                         </span>
                         <span className="metric-item">
-                          {getVelocityIndicator(suggestion.trendVelocity)} {suggestion.trendVelocity} velocity
+                          {getVelocityIndicator(suggestion.trendVelocity)}
+                          {suggestion.trendVelocity}
                         </span>
                       </div>
                     </div>
@@ -1134,66 +888,23 @@ Grateful for our incredible community!
             </div>
 
             <div className="tags-categories">
-              <div className="tag-category">
+              <div>
                 <div className="tag-category-title">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3" />
                   </svg>
-                  Categories
+                  Quick Add (Click to Toggle)
                 </div>
                 <div className="tag-pills-group">
-                  {categoryTags.map(tag => (
-                    <button
+                  {[...categoryTags, ...statusTags, ...stageTags].map(tag => (
+                    <span
                       key={tag.name}
-                      className={`tag-pill-premium ${tag.color} ${selectedTags.includes(tag.name) ? 'active' : ''}`}
+                      className={`tag-pill-premium ${selectedTags.includes(tag.name) ? 'active' : ''}`}
                       onClick={() => toggleTag(tag.name)}
                     >
                       <span className="tag-hash-small">#</span>
                       {tag.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="tag-category">
-                <div className="tag-category-title">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2z" />
-                  </svg>
-                  Status & Signals
-                </div>
-                <div className="tag-pills-group">
-                  {statusTags.map(tag => (
-                    <button
-                      key={tag.name}
-                      className={`tag-pill-premium ${tag.color} ${selectedTags.includes(tag.name) ? 'active' : ''}`}
-                      onClick={() => toggleTag(tag.name)}
-                    >
-                      <span className="tag-hash-small">#</span>
-                      {tag.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="tag-category">
-                <div className="tag-category-title">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 1a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  </svg>
-                  Stage
-                </div>
-                <div className="tag-pills-group">
-                  {stageTags.map(tag => (
-                    <button
-                      key={tag.name}
-                      className={`tag-pill-premium ${tag.color} ${selectedTags.includes(tag.name) ? 'active' : ''}`}
-                      onClick={() => toggleTag(tag.name)}
-                    >
-                      <span className="tag-hash-small">#</span>
-                      {tag.name}
-                    </button>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -1202,34 +913,24 @@ Grateful for our incredible community!
         </div>
 
         <div className="preview-section">
-          <div className="section-title-row">
-            <h3 className="section-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              Live Preview
-            </h3>
-            <span className="preview-subtitle">This is how your post will appear in the feed</span>
-          </div>
+          <h3 className="section-title small">Live Preview</h3>
+          <p className="preview-subtitle">How your post will appear in the feed</p>
           <div className="preview-card">
             <div className="preview-header">
               <div className="preview-avatar-wrapper">
                 {userAvatar ? (
-                  <img
-                    src={userAvatar}
-                    alt={userName}
-                    className="preview-avatar"
-                  />
+                  <img src={userAvatar} alt={userName} className="preview-avatar" />
                 ) : (
                   <div className="preview-avatar" style={{
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #B8860B, #DAA520)',
+                    background: 'linear-gradient(135deg, #10B981, #34D399)',
                     color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '1rem'
+                    fontWeight: 'bold'
                   }}>
                     {userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                   </div>
@@ -1238,36 +939,33 @@ Grateful for our incredible community!
               <div className="preview-user-info">
                 <div className="preview-user-name">{userName}</div>
                 <div className="preview-user-title">{userTitle}</div>
-                <div className="preview-time">2m ago</div>
+                <div className="preview-time">Just now</div>
               </div>
             </div>
             <div className="preview-badges">
-              <span className="preview-badge">Seed</span>
-              <span className="preview-badge">$250K — $1M</span>
-              {selectedTags.slice(0, 4).map(tag => (
-                <span key={tag} className={`preview-badge hashtag ${getTagColor(tag)}`}>
-                  <span className="preview-tag-hash">#</span>
-                  {tag}
-                </span>
-              ))}
+              <span className="preview-badge">{selectedPostType}</span>
               <span className="preview-badge intent">{selectedIntent}</span>
             </div>
             <div className="preview-content">
               <h4 className="preview-title">{selectedPostType}</h4>
-              <p className="preview-text">{description || 'Describe your startup, vision, traction, or the opportunity you\'re building…'}</p>
+              <p className="preview-text">{description || 'Share an investment opportunity, market insight, portfolio update, or funding announcement...'}</p>
+              {selectedTags.length > 0 && (
+                <div className="preview-metrics">
+                  {selectedTags.map(tag => (
+                    <span key={tag} className="preview-metric">#{tag}</span>
+                  ))}
+                </div>
+              )}
               {uploadedFiles.length > 0 && (
                 <div className="preview-assets">
-                  {uploadedFiles.map((file) => (
+                  {uploadedFiles.slice(0, 3).map(file => (
                     <div key={file.id} className="preview-asset">
                       {file.file.type.startsWith('image/') ? (
                         <img src={file.preview} alt={file.name} className="preview-asset-image" />
-                      ) : file.file.type.startsWith('video/') ? (
-                        <video src={file.preview} className="preview-asset-image" controls muted />
                       ) : (
                         <div className="preview-asset-file">
-                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
                           </svg>
                           <span>{file.name}</span>
                         </div>
@@ -1276,12 +974,6 @@ Grateful for our incredible community!
                   ))}
                 </div>
               )}
-              <div className="preview-metrics">
-                <span className="preview-metric">10K+ Users</span>
-                <span className="preview-metric">$120K MRR</span>
-                <span className="preview-metric">48% MoM Growth</span>
-                <span className="preview-metric">12 Partnerships</span>
-              </div>
             </div>
           </div>
         </div>
@@ -1297,13 +989,15 @@ Grateful for our incredible community!
               <span className="publish-sub">Share with the ecosystem</span>
             </div>
           </button>
-          <button className="save-draft-bottom-btn">
+          <button className="save-draft-bottom-btn" onClick={clearDraft}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+              <polyline points="17 21 17 13 7 13 7 21" />
+              <polyline points="7 3 7 8 15 8" />
             </svg>
             <div className="save-text">
               <span className="save-main">Save Draft</span>
-              <span className="save-sub">Save and continue later</span>
+              <span className="save-sub">Finish later</span>
             </div>
           </button>
         </div>
@@ -1312,4 +1006,4 @@ Grateful for our incredible community!
   );
 };
 
-export default CreatePost;
+export default CreateInvestorPost;

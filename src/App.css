@@ -14,8 +14,9 @@ body {
 .app {
   position: relative;
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .universe-canvas {
@@ -31,7 +32,7 @@ body {
   position: relative;
   z-index: 2;
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
 /* Golden theme colors */

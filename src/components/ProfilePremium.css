@@ -2257,9 +2257,307 @@ body {
   background: rgba(100, 100, 110, 0.3);
   border: 1px solid rgba(100, 100, 110, 0.4);
   border-radius: 8px;
-  font-size: 0.75rem;
+}
+
+/* My Content Section Styles */
+.my-content-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin-bottom: 0.75rem;
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.my-content-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.my-content-tab {
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: transparent;
+  border: none;
   color: var(--text-gray);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.my-content-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-white);
+}
+
+.my-content-tab.active {
+  background: var(--role-soft);
+  color: var(--role-primary);
+}
+
+.my-content-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.my-content-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.my-content-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--role-soft);
+}
+
+.my-content-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.my-content-item-header h4 {
+  font-size: 0.9rem;
   font-weight: 600;
+  color: var(--text-white);
+}
+
+.my-content-item-menu-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.my-content-item-menu-btn:hover {
+  color: var(--text-white);
+}
+
+.my-content-item p {
+  font-size: 0.82rem;
+  color: var(--text-gray);
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
+}
+
+.my-content-item-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.my-content-item-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.my-content-action-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-gray);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.my-content-action-btn:hover {
+  background: var(--role-soft);
+  color: var(--role-primary);
+  border-color: var(--role-primary);
+}
+
+.my-content-action-btn.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.my-content-action-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.pinned-badge,
+.scheduled-badge,
+.archived-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pinned-badge {
+  background: rgba(255, 215, 0, 0.15);
+  color: var(--gold-primary);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.scheduled-badge {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--blue-primary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.archived-badge {
+  background: rgba(156, 163, 175, 0.15);
+  color: var(--text-muted);
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm {
+  padding: 1.25rem;
+  max-width: 400px;
+}
+
+.delete-confirm-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.delete-confirm-header span {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.delete-confirm-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-white);
+  margin-bottom: 0.25rem;
+}
+
+.delete-confirm-header p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.delete-confirm-actions .btn-cancel,
+.delete-confirm-actions .btn-delete {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-white);
+  border: 1px solid var(--border-subtle);
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.btn-delete:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* My Content Analytics */
+.my-content-analytics {
+  padding: 0.5rem 0;
+}
+
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.analytics-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.75rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.analytics-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.analytics-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--role-primary) 0%, var(--role-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.25rem;
+}
+
+.analytics-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.premium-empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.premium-empty-state-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 1200px) {
+  .analytics-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .my-content-tabs {
+    overflow-x: auto;
+  }
 }
 
 .premium-delete-role-btn {

@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreatePost from './CreatePost';
 import './HomeDashboard.css';
+import { useUser } from '../contexts/UserContext';
+import { useAuth } from '../contexts/AuthContext';
+import { usePosts } from '../contexts/PostContext';
+import PrestigeStarBadge from './PrestigeStarBadge';
+import AICopilot from './AICopilot';
+import PostMenu from './PostMenu';
 
 const HomeIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -113,11 +119,76 @@ const ShareIcon = () => (
   </svg>
 );
 
+const getRoleColor = (role: string): string => {
+  const roleUpperCase = role.toUpperCase();
+  if (roleUpperCase === 'ARCHITECT') return '#FFD700';
+  if (roleUpperCase === 'CATALYST') return '#00C896';
+  if (roleUpperCase === 'EXPLORER') return '#06b6d4';
+  return '#9CA3AF';
+};
+
 const HomeDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('for-you');
+  const [activeTab, setActiveTab] = useState('following');
   const [createPostOpen, setCreatePostOpen] = useState(false);
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+  const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const { userData } = useUser();
+  const { logout } = useAuth();
+  const { posts, demoUsers, likePost, addComment, savePost, unsavePost, savedPosts } = usePosts();
+  const feedPosts = posts;
+  const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const [animatingPostId, setAnimatingPostId] = useState<string | null>(null);
+
+  const handleLikePost = (postId: string) => {
+    setAnimatingPostId(postId);
+    likePost(postId, userData?.uid || 'current-user');
+    setTimeout(() => setAnimatingPostId(null), 600);
+  };
+
+  const handleSubmitComment = (postId: string) => {
+    if (commentText.trim()) {
+      addComment(postId, {
+        id: Date.now().toString(),
+        userId: userData?.uid || 'current-user',
+        userName: getUserName(),
+        userRole: getUserRole(),
+        text: commentText,
+        timestamp: new Date(),
+        likes: [],
+        replies: []
+      });
+      setCommentText('');
+      setCommentingPostId(null);
+    }
+  };
+
+  // Get initials for default avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getUserName = () => {
+    return userData?.profile?.name || 'Arjun Patel';
+  };
+
+  const getUserRole = () => {
+    return userData?.mainRole || 'ARCHITECT';
+  };
+
+  const getUserProfileImage = () => {
+    return userData?.profile?.profileImage || '';
+  };
 
   return (
     <div className="dashboard-container">
@@ -164,14 +235,13 @@ const HomeDashboard: React.FC = () => {
           </nav>
 
           {!sidebarCollapsed && (
-            <div className="sidebar-promo-card">
+            <div className="sidebar-promo-card" onClick={() => setCopilotOpen(true)}>
+              <div className="promo-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" /></svg>
+              </div>
               <div className="promo-content">
-                <h4>Build. Accelerate. Ascend.</h4>
-                <p>The ecosystem where ideas become ventures.</p>
-                <div className="promo-artifact">
-                  <div className="crystal-glow"></div>
-                </div>
-                <button className="promo-cta">Create Startup</button>
+                <h4>AI Copilot</h4>
+                <p>Your ecosystem assistant</p>
               </div>
             </div>
           )}
@@ -184,47 +254,64 @@ const HomeDashboard: React.FC = () => {
               <input type="text" placeholder="Search startups, people, ideas…" />
             </div>
 
-            <div className="profile-section">
-              <div className="notification-badge">
-                <BellIcon />
-              </div>
-              <div className="user-avatar">AP</div>
-              <div className="user-info">
-                <div className="user-name">Arjun Patel</div>
-                <div className="user-role">Architect</div>
-              </div>
-              <div className="dropdown-arrow">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="6 9 12 15 18 9"></polyline>
+            <div className="profile-section" onClick={() => setProfileDrawerOpen(!profileDrawerOpen)}>
+            <div className="notification-badge">
+              <BellIcon />
+            </div>
+            <div className="user-avatar">
+              {getUserProfileImage() ? (
+                <img 
+                  src={getUserProfileImage()} 
+                  alt={getUserName()} 
+                  style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} 
+                />
+              ) : (
+                getInitials(getUserName())
+              )}
+              <div className="star-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
               </div>
             </div>
+            <div className="user-info">
+              <div className="user-name">{getUserName()}</div>
+              <div className="user-role">
+                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                </span>
+                {userData?.prestigeSystem && (
+                  <PrestigeStarBadge
+                    starId={userData.prestigeSystem.currentStarId}
+                    size="small"
+                    color={getRoleColor(getUserRole())}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="dropdown-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </div>
           </header>
 
-          <div className="post-creation-card" onClick={() => setCreatePostOpen(true)}>
-            <div className="post-avatar">AP</div>
-            <input type="text" placeholder="Share your idea, progress or insight…" className="post-input" readOnly />
-            <div className="post-options">
-              <div className="post-option">
-                <ImageIcon />
-                <span>Media</span>
+          <div className="startup-premium-create-card">
+            <button className="startup-create-signal-button" onClick={() => setCreatePostOpen(true)}>
+              <div className="startup-button-icon">🚀</div>
+              <div className="startup-button-text">
+                <span className="startup-button-title">Create Signal</span>
+                <span className="startup-button-subtitle">Share an update with the ecosystem</span>
               </div>
-              <div className="post-option">
-                <BarChartIcon />
-                <span>Poll</span>
-              </div>
-              <div className="post-option">
-                <TagIcon />
-                <span>Tag</span>
-              </div>
-              <button className="post-button">Post</button>
-            </div>
+              <svg className="startup-button-arrow" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
           </div>
 
           <div className="feed-tabs">
-            <div className={`tab ${activeTab === 'for-you' ? 'active' : ''}`} onClick={() => setActiveTab('for-you')}>
-              For You
-            </div>
             <div className={`tab ${activeTab === 'following' ? 'active' : ''}`} onClick={() => setActiveTab('following')}>
               Following
             </div>
@@ -237,184 +324,311 @@ const HomeDashboard: React.FC = () => {
           </div>
 
           <div className="feed-posts">
-            <article className="feed-post">
-              <div className="post-header">
-                <div className="post-author">
-                  <div className="author-avatar">RS</div>
-                  <div className="author-info">
-                    <div className="author-name">
-                      Riya Sharma
-                      <span className="role-badge gold">Architect</span>
+            {feedPosts.map(post => (
+              <article className="feed-post" key={post.id}>
+                <div className="post-header">
+                  <div className="post-author">
+                    <div className="author-avatar" style={{ cursor: 'pointer' }} onClick={() => {
+                      if (demoUsers[post.userId]) {
+                        setProfileDrawerOpen(true);
+                      }
+                    }}>
+                      {post.userAvatar ? (
+                        <img src={post.userAvatar} alt={post.userName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        getInitials(post.userName)
+                      )}
                     </div>
-                    <div className="post-time">2h ago</div>
+                    <div className="author-info">
+                      <div className="author-name">
+                        {post.userName}
+                        <span className={`role-badge ${post.userRole === 'ARCHITECT' ? 'gold' : post.userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                          {post.userRole === 'ARCHITECT' ? 'Architect' : post.userRole === 'CATALYST' ? 'Catalyst' : 'Explorer'}
+                        </span>
+                        {demoUsers[post.userId]?.prestigeSystem && (
+                          <PrestigeStarBadge
+                            starId={demoUsers[post.userId].prestigeSystem.currentStarId}
+                            size="small"
+                            color={getRoleColor(post.userRole)}
+                          />
+                        )}
+                      </div>
+                      <span className="post-time">2h ago</span>
+                    </div>
+                  </div>
+                  <button 
+                    className="post-menu-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenuPostId(post.id);
+                    }}
+                  >
+                    ⋮
+                  </button>
+                </div>
+
+                <div className="post-content">
+                  <h3 className="post-title">{post.postType}</h3>
+                  <div className="post-tags">
+                    {post.tags.map(tag => <span key={tag} className="post-tag">#{tag}</span>)}
+                  </div>
+                  <p className="post-text">{post.description}</p>
+                </div>
+
+                <div className="post-actions">
+                  <div
+                    className="post-action"
+                    onClick={() => handleLikePost(post.id)}
+                    style={{
+                      color: post.likedBy.includes(userData?.uid || 'current-user')
+                        ? '#FFD700'
+                        : 'rgba(255,255,255,0.6)'
+                    }}
+                  >
+                    <HeartIcon />
+                    <span>{post.likes}</span>
+                  </div>
+                  <div className="post-action" onClick={() => setCommentingPostId(commentingPostId === post.id ? null : post.id)}>
+                    <CommentIcon />
+                    <span>{post.comments.length}</span>
+                  </div>
+                  <div className="post-action">
+                    <ShareIcon />
+                    <span>Share</span>
+                  </div>
+                  <div 
+                    className="post-action" 
+                    onClick={() => {
+                      if (savedPosts.includes(post.id)) {
+                        unsavePost(post.id);
+                      } else {
+                        savePost(post.id);
+                      }
+                    }}
+                    style={{
+                      color: savedPosts.includes(post.id)
+                        ? '#FFD700'
+                        : 'rgba(255,255,255,0.6)'
+                    }}
+                  >
+                    <BookmarkIcon />
                   </div>
                 </div>
-              </div>
-              
-              <div className="post-content">
-                <h3 className="post-title">Building Nebula AI — Your AI Co-Founder for Smarter Startups</h3>
-                <div className="post-tags">
-                  <span className="post-tag">#ArtificialIntelligence</span>
-                </div>
-                <p className="post-text">
-                  We're building an AI co-founder that helps early-stage teams validate ideas, build strategies, and ship products faster. Looking for feedback from the community!
-                </p>
-                <div className="post-image nebula-image">
-                  <div className="stars">
-                    {[...Array(50)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="star" 
-                        style={{
-                          top: `${Math.random() * 100}%`,
-                          left: `${Math.random() * 100}%`,
-                          width: `${Math.random() * 3 + 1}px`,
-                          height: `${Math.random() * 3 + 1}px`,
-                          animationDelay: `${Math.random() * 3}s`,
-                          opacity: Math.random() * 0.5 + 0.5
-                        }}
-                      />
+
+                {post.likedBy.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: '0.75rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid rgba(255,255,255,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      flexWrap: 'wrap'
+                    }}
+                  >
+                    {post.likedBy.slice(0, 3).map((userId, index) => {
+                      const user = demoUsers[userId];
+                      if (!user) return null;
+                      return (
+                        <span
+                          key={userId}
+                          style={{
+                            fontSize: '0.8rem',
+                            color: 'rgba(255,255,255,0.7)',
+                            cursor: 'pointer'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProfileDrawerOpen(true);
+                          }}
+                        >
+                          {index > 0 ? ', ' : ''}{user.userName}
+                        </span>
+                      );
+                    })}
+                    {post.likedBy.length > 3 && (
+                      <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+                        +{post.likedBy.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {commentingPostId === post.id && (
+                  <div style={{
+                    marginTop: '1rem',
+                    padding: '1rem',
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '0.75rem',
+                    display: 'flex',
+                    gap: '0.75rem',
+                    alignItems: 'flex-end'
+                  }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #B8860B, #DAA520)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.85rem',
+                      fontWeight: 'bold',
+                      color: '#fff',
+                      flexShrink: 0
+                    }}>
+                      {getInitials(getUserName())}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Write a comment..."
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSubmitComment(post.id)}
+                      style={{
+                        flex: 1,
+                        padding: '0.75rem 1rem',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '0.5rem',
+                        color: '#fff',
+                        outline: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                    <button
+                      onClick={() => handleSubmitComment(post.id)}
+                      disabled={!commentText.trim()}
+                      style={{
+                        padding: '0.75rem 1.25rem',
+                        background: commentText.trim() ? 'linear-gradient(135deg, #B8860B, #DAA520)' : 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        color: '#fff',
+                        fontWeight: 600,
+                        cursor: commentText.trim() ? 'pointer' : 'not-allowed'
+                      }}
+                    >
+                      Post
+                    </button>
+                  </div>
+                )}
+
+                {commentingPostId === post.id && post.comments.length > 0 && (
+                  <div className="post-comments" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                    {post.comments.map(comment => (
+                      <div key={comment.id} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.75rem',
+                          fontWeight: 'bold',
+                          color: '#fff',
+                          flexShrink: 0
+                        }}>
+                          {getInitials(comment.userName)}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                            <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.85rem' }}>{comment.userName}</span>
+                            <span className={`role-badge ${comment.userRole === 'ARCHITECT' ? 'gold' : comment.userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                              {comment.userRole === 'ARCHITECT' ? 'Architect' : comment.userRole === 'CATALYST' ? 'Catalyst' : 'Explorer'}
+                            </span>
+                          </div>
+                          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', margin: 0 }}>{comment.text}</p>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                  <div className="nebula-cloud nebula-cloud-1"></div>
-                  <div className="nebula-cloud nebula-cloud-2"></div>
-                  <div className="nebula-cloud nebula-cloud-3"></div>
-                  <div className="planet-atmosphere"></div>
-                  <div className="nebula-planet"></div>
-                  <div className="planet-ring"></div>
-                  <div className="nebula-text">NEBULA AI</div>
-                  <div className="image-gradient"></div>
-                </div>
-              </div>
-
-              <div className="post-actions">
-                <div className="post-action">
-                  <HeartIcon />
-                  <span>126</span>
-                </div>
-                <div className="post-action">
-                  <CommentIcon />
-                  <span>34</span>
-                </div>
-                <div className="post-action">
-                  <ShareIcon />
-                  <span>Share</span>
-                </div>
-              </div>
-            </article>
-
-            <article className="feed-post">
-              <div className="post-header">
-                <div className="post-author">
-                  <div className="author-avatar">AM</div>
-                  <div className="author-info">
-                    <div className="author-name">
-                      Arjun Malhotra
-                      <span className="role-badge green">Catalyst</span>
-                    </div>
-                    <div className="post-time">5h ago</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="post-content">
-                <h3 className="post-title">Looking for Fintech Startups in Seed Stage</h3>
-                <div className="post-tags">
-                  <span className="post-tag">#FundingRequest</span>
-                </div>
-                <p className="post-text">
-                  We are actively investing in fintech startups solving real-world problems in India and SE Asia.
-                </p>
-                <div className="investor-metrics">
-                  <div className="metric-tag">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M20 7h-3a2 2 0 0 1-2-2V2"></path>
-                      <path d="M20 17h-3a2 2 0 0 0-2 2v3"></path>
-                      <path d="M4 7h3a2 2 0 0 0 2-2V2"></path>
-                      <path d="M4 17h3a2 2 0 0 1 2 2v3"></path>
-                    </svg>
-                    <span>Stage</span>
-                    <span className="metric-value">Seed</span>
-                  </div>
-                  <div className="metric-tag">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
-                    <span>Ticket Size</span>
-                    <span className="metric-value">$250K - $1M</span>
-                  </div>
-                  <div className="metric-tag">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                    <span>Focus</span>
-                    <span className="metric-value">Fintech, SaaS, Infra</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="post-actions">
-                <div className="post-action">
-                  <HeartIcon />
-                  <span>89</span>
-                </div>
-                <div className="post-action">
-                  <CommentIcon />
-                  <span>23</span>
-                </div>
-                <div className="post-action">
-                  <ShareIcon />
-                  <span>Share</span>
-                </div>
-              </div>
-            </article>
-
-            <article className="feed-post">
-              <div className="post-header">
-                <div className="post-author">
-                  <div className="author-avatar">KM</div>
-                  <div className="author-info">
-                    <div className="author-name">
-                      Kavi Mehta
-                      <span className="role-badge blue">Explorer</span>
-                    </div>
-                    <div className="post-time">1d ago</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="post-content">
-                <h3 className="post-title">Just found the most amazing team working on decentralized AI!</h3>
-                <div className="post-tags">
-                  <span className="post-tag">#Discovery</span>
-                  <span className="post-tag">#Web3</span>
-                </div>
-                <p className="post-text">
-                  Spent the whole weekend talking to the team at DecentraMind. Their approach to decentralized training of models is game-changing. Need to connect more founders here!
-                </p>
-              </div>
-
-              <div className="post-actions">
-                <div className="post-action">
-                  <HeartIcon />
-                  <span>203</span>
-                </div>
-                <div className="post-action">
-                  <CommentIcon />
-                  <span>56</span>
-                </div>
-                <div className="post-action">
-                  <ShareIcon />
-                  <span>Share</span>
-                </div>
-              </div>
-            </article>
+                )}
+              </article>
+            ))}
           </div>
         </main>
       </div>
 
       {createPostOpen && <CreatePost onClose={() => setCreatePostOpen(false)} />}
+
+      {/* Profile Drawer */}
+      {profileDrawerOpen && (
+        <div className="profile-drawer-overlay" onClick={() => setProfileDrawerOpen(false)}>
+          <div className="profile-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="drawer-header">
+              <div className="drawer-avatar">
+                {userData?.profile?.profileImage ? (
+                  <img src={getUserProfileImage()} alt={getUserName()} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+                ) : (
+                  getInitials(getUserName())
+                )}
+              </div>
+              <div className="drawer-name">{getUserName()}</div>
+              <div className="drawer-role">
+                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                </span>
+                {userData?.prestigeSystem && (
+                  <PrestigeStarBadge
+                    starId={userData.prestigeSystem.currentStarId}
+                    size="small"
+                    color={getRoleColor(getUserRole())}
+                  />
+                )}
+              </div>
+            </div>
+            {showEcosystemOverview ? (
+              <div className="drawer-eco">
+                <button onClick={() => setShowEcosystemOverview(false)} className="back-btn">← Back</button>
+                <h3 className="eco-title">Ecosystem Overview</h3>
+                <div className="eco-metrics">
+                  <div className="eco-metric">
+                    <div className="metric-label">Total Startups</div>
+                    <div className="metric-value">1,247</div>
+                  </div>
+                  <div className="eco-metric">
+                    <div className="metric-label">Active Investors</div>
+                    <div className="metric-value">523</div>
+                  </div>
+                  <div className="eco-metric">
+                    <div className="metric-label">Community Members</div>
+                    <div className="metric-value">18,732</div>
+                  </div>
+                  <div className="eco-metric">
+                    <div className="metric-label">Capital Deployed</div>
+                    <div className="metric-value">$42.6M</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="drawer-menu">
+                <div className="drawer-item" onClick={() => {navigate('/profile'); setProfileDrawerOpen(false);}}>Profile</div>
+                <div className="drawer-item" onClick={() => setShowEcosystemOverview(true)}>Ecosystem Overview</div>
+                <div className="drawer-item" onClick={() => {navigate('/settings'); setProfileDrawerOpen(false);}}>Settings</div>
+                <div className="drawer-item">Account</div>
+                <div className="drawer-item">Upgradation</div>
+                <div className="drawer-item">Support & Feedback</div>
+                <div className="drawer-item divider" onClick={() => {logout(); setProfileDrawerOpen(false);}}>Log Out</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* AI Copilot Component */}
+      <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />
+
+      {/* Post Menu */}
+      {openMenuPostId && (
+        <PostMenu 
+          post={feedPosts.find(p => p.id === openMenuPostId)!}
+          onClose={() => setOpenMenuPostId(null)}
+        />
+      )}
     </div>
   );
 };

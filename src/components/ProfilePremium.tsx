@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { usePosts } from '../contexts/PostContext';
+import PostMenu from './PostMenu';
 import './ProfilePremium.css';
 import './PremiumFeatures.css';
+import './PostMenu.css';
 
 const HomeIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -552,6 +555,23 @@ const getInterestFontSize = (count: number) => {
 const ProfilePremium: React.FC = () => {
   const navigate = useNavigate();
   const { userData, loading, updateUserData, isDemo, uploadImage, deleteImage } = useUser();
+  const { 
+    posts, 
+    drafts, 
+    scheduledPosts, 
+    pinnedPostIds, 
+    getUserPosts, 
+    getDraftsByUser, 
+    getScheduledPosts, 
+    getPinnedPosts, 
+    getArchivedPosts,
+    deletePost,
+    editPost,
+    pinPost,
+    unpinPost,
+    archivePost,
+    unarchivePost
+  } = usePosts();
   const [mainRole, setMainRole] = useState<string>(() => {
     const selectedRole = localStorage.getItem('selectedRole');
     return selectedRole ? selectedRole.toUpperCase() : 'ARCHITECT';
@@ -876,6 +896,9 @@ const ProfilePremium: React.FC = () => {
 
   const [currentUploadedFile, setCurrentUploadedFile] = useState<File | null>(null);
   const [uploadingAsset, setUploadingAsset] = useState<boolean>(false);
+  const [activeMyContentTab, setActiveMyContentTab] = useState<string>('posts');
+  const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
+  const [deleteConfirmPostId, setDeleteConfirmPostId] = useState<string | null>(null);
 
   const handleAssetFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1012,8 +1035,8 @@ const ProfilePremium: React.FC = () => {
     setDropdownOpen(false);
   };
 
-  const openSettingsModal = () => {
-    setSettingsModalOpen(true);
+  const openSettings = () => {
+    navigate('/settings');
     setDropdownOpen(false);
   };
 
@@ -1133,17 +1156,6 @@ const ProfilePremium: React.FC = () => {
             <HomeIcon />
             <span>Home</span>
           </div>
-          {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
-            <div className="premium-nav-item">
-              <DiscoverIcon />
-              <span>Discover</span>
-            </div>
-          ) : (
-            <div className="premium-nav-item">
-              <SignalIcon />
-              <span>Signal</span>
-            </div>
-          )}
           <div className="premium-nav-item">
             <RocketIcon />
             <span>Startups</span>
@@ -1157,41 +1169,19 @@ const ProfilePremium: React.FC = () => {
               <CommunityIcon />
               <span>Community</span>
             </div>
-          ) : (
-            <div className="premium-nav-item">
-              <NetworkIcon />
-              <span>Network</span>
-            </div>
-          )}
+          ) : null}
           {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
             <div className="premium-nav-item">
               <EventsIcon />
               <span>Events</span>
             </div>
-          ) : (
-            <div className="premium-nav-item">
-              <OpportunitiesIcon />
-              <span>Opportunities</span>
-            </div>
-          )}
+          ) : null}
           {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
             <div className="premium-nav-item">
               <EcosystemIcon />
               <span>Ecosystem</span>
             </div>
-          ) : (
-            <div className="premium-nav-item">
-              <OSIcon />
-              <span>OS</span>
-              <span className="nav-badge">NEW</span>
-            </div>
-          )}
-          {safeActiveProfileMode === 'ARCHITECT' && (
-            <div className="premium-nav-item">
-              <AnalyticsIcon />
-              <span>Analytics</span>
-            </div>
-          )}
+          ) : null}
           <div className="premium-nav-item">
             <MessageIcon />
             <span>Messages</span>
@@ -1230,38 +1220,14 @@ const ProfilePremium: React.FC = () => {
         ) : null}
 
         <div className="premium-sidebar-bottom">
-          {safeActiveProfileMode === 'ARCHITECT' ? (
-            <>
-              <div className="premium-nav-item">
-                <SettingsIcon />
-                <span>Settings</span>
-              </div>
-              <div className="premium-nav-item" onClick={handleLogout}>
-                <LogoutIcon />
-                <span>Logout</span>
-              </div>
-            </>
-          ) : (
-            <div className="premium-sidebar-user">
-              <img 
-                src={safeActiveProfileMode === 'ARCHITECT' 
-                  ? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=48&h=48&fit=crop&crop=face"
-                  : safeActiveProfileMode === 'CATALYST'
-                  ? "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop&crop=face"
-                  : "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=48&h=48&fit=crop&crop=face"
-                } 
-                alt={currentData.name}
-                className="premium-sidebar-avatar"
-              />
-              <div className="premium-sidebar-user-info">
-                <div className="premium-sidebar-user-name">{currentData.name}</div>
-                <div className="premium-sidebar-user-role">{safeActiveProfileMode}</div>
-              </div>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </div>
-          )}
+          <div className="premium-nav-item" onClick={() => setSettingsModalOpen(true)}>
+            <SettingsIcon />
+            <span>Settings</span>
+          </div>
+          <div className="premium-nav-item" onClick={handleLogout}>
+            <LogoutIcon />
+            <span>Logout</span>
+          </div>
         </div>
       </aside>
 
@@ -1377,7 +1343,7 @@ const ProfilePremium: React.FC = () => {
                           <span>{safeActiveProfileMode === mainRole ? 'See Another Profile' : 'Back to Main Profile'}</span>
                         </div>
                       )}
-                      <div className="premium-dropdown-item" onClick={openSettingsModal}>
+                      <div className="premium-dropdown-item" onClick={() => { setDropdownOpen(false); setSettingsModalOpen(true); }}>
                         <SettingsIcon />
                         <span>Settings</span>
                       </div>
@@ -1410,7 +1376,7 @@ const ProfilePremium: React.FC = () => {
                           <span>{safeActiveProfileMode === mainRole ? 'See Another Profile' : 'Back to Main Profile'}</span>
                         </div>
                       )}
-                      <div className="premium-dropdown-item" onClick={openSettingsModal}>
+                      <div className="premium-dropdown-item" onClick={() => { setDropdownOpen(false); setSettingsModalOpen(true); }}>
                         <SettingsIcon />
                         <span>Settings</span>
                       </div>
@@ -2851,6 +2817,258 @@ const ProfilePremium: React.FC = () => {
             </>
           )}
 
+          {/* My Content Section */}
+          <div className="my-content-section">
+            <div className="premium-section-header">
+              <h3 className="premium-section-title">MY CONTENT</h3>
+            </div>
+
+            <div className="my-content-tabs">
+              {['posts', 'drafts', 'pinned', 'scheduled', 'archived', 'analytics'].map(tab => (
+                <button 
+                  key={tab}
+                  className={`my-content-tab ${activeMyContentTab === tab ? 'active' : ''}`}
+                  onClick={() => setActiveMyContentTab(tab)}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            <div className="my-content-content">
+              {activeMyContentTab === 'posts' && (
+                <div className="my-content-list">
+                  {(() => {
+                    const userId = userData?.uid || 'current-user';
+                    const userPosts = getUserPosts(userId);
+                    return userPosts.length > 0 ? (
+                      userPosts.map(post => (
+                        <div key={post.id} className="my-content-item">
+                          <div className="my-content-item-header">
+                            <h4>{post.postType}</h4>
+                            <button 
+                              className="my-content-item-menu-btn"
+                              onClick={() => setOpenMenuPostId(post.id)}
+                            >
+                              ⋮
+                            </button>
+                          </div>
+                          <p>{post.description}</p>
+                          <div className="my-content-item-meta">
+                            <span>Tags: {post.tags.join(', ')}</span>
+                            <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+                          </div>
+                          <div className="my-content-item-actions">
+                            <button 
+                              className="my-content-action-btn"
+                              onClick={() => setOpenMenuPostId(post.id)}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="my-content-action-btn danger"
+                              onClick={() => setDeleteConfirmPostId(post.id)}
+                            >
+                              Delete
+                            </button>
+                            {!post.isPinned && (
+                              <button 
+                                className="my-content-action-btn"
+                                onClick={() => pinPost(post.id)}
+                              >
+                                Pin
+                              </button>
+                            )}
+                            {post.isPinned && (
+                              <button 
+                                className="my-content-action-btn"
+                                onClick={() => unpinPost(post.id)}
+                              >
+                                Unpin
+                              </button>
+                            )}
+                            <button 
+                              className="my-content-action-btn"
+                              onClick={() => archivePost(post.id)}
+                            >
+                              Archive
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="premium-empty-state">
+                        <p className="premium-empty-state-text">No posts yet</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {activeMyContentTab === 'drafts' && (
+                <div className="my-content-list">
+                  {(() => {
+                    const userId = userData?.uid || 'current-user';
+                    const userDrafts = getDraftsByUser(userId);
+                    return userDrafts.length > 0 ? (
+                      userDrafts.map(draft => (
+                        <div key={draft.id} className="my-content-item">
+                          <div className="my-content-item-header">
+                            <h4>{draft.postType}</h4>
+                          </div>
+                          <p>{draft.description}</p>
+                          <div className="my-content-item-meta">
+                            <span>Tags: {draft.tags.join(', ')}</span>
+                            <span>Updated: {new Date(draft.updatedAt).toLocaleDateString()}</span>
+                          </div>
+                          <div className="my-content-item-actions">
+                            <button className="my-content-action-btn">Continue Editing</button>
+                            <button className="my-content-action-btn">Publish Draft</button>
+                            <button className="my-content-action-btn danger">Delete Draft</button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="premium-empty-state">
+                        <p className="premium-empty-state-text">No drafts yet</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {activeMyContentTab === 'pinned' && (
+                <div className="my-content-list">
+                  {(() => {
+                    const pinnedPosts = getPinnedPosts();
+                    return pinnedPosts.length > 0 ? (
+                      pinnedPosts.map(post => (
+                        <div key={post.id} className="my-content-item">
+                          <div className="my-content-item-header">
+                            <h4>{post.postType}</h4>
+                            <span className="pinned-badge">📌 Pinned</span>
+                          </div>
+                          <p>{post.description}</p>
+                          <div className="my-content-item-meta">
+                            <span>Tags: {post.tags.join(', ')}</span>
+                            <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+                          </div>
+                          <div className="my-content-item-actions">
+                            <button 
+                              className="my-content-action-btn"
+                              onClick={() => unpinPost(post.id)}
+                            >
+                              Unpin
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="premium-empty-state">
+                        <p className="premium-empty-state-text">No pinned posts yet</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {activeMyContentTab === 'scheduled' && (
+                <div className="my-content-list">
+                  {(() => {
+                    const userId = userData?.uid || 'current-user';
+                    const scheduled = getScheduledPosts(userId);
+                    return scheduled.length > 0 ? (
+                      scheduled.map(scheduledPost => (
+                        <div key={scheduledPost.id} className="my-content-item">
+                          <div className="my-content-item-header">
+                            <h4>{scheduledPost.postType}</h4>
+                            <span className="scheduled-badge">⏰ Scheduled</span>
+                          </div>
+                          <p>{scheduledPost.description}</p>
+                          <div className="my-content-item-meta">
+                            <span>Tags: {scheduledPost.tags.join(', ')}</span>
+                            <span>Scheduled for: {new Date(scheduledPost.scheduledAt).toLocaleString()}</span>
+                          </div>
+                          <div className="my-content-item-actions">
+                            <button className="my-content-action-btn">Edit Schedule</button>
+                            <button className="my-content-action-btn">Publish Now</button>
+                            <button className="my-content-action-btn danger">Cancel Schedule</button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="premium-empty-state">
+                        <p className="premium-empty-state-text">No scheduled posts yet</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {activeMyContentTab === 'archived' && (
+                <div className="my-content-list">
+                  {(() => {
+                    const userId = userData?.uid || 'current-user';
+                    const archived = getArchivedPosts(userId);
+                    return archived.length > 0 ? (
+                      archived.map(post => (
+                        <div key={post.id} className="my-content-item">
+                          <div className="my-content-item-header">
+                            <h4>{post.postType}</h4>
+                            <span className="archived-badge">📁 Archived</span>
+                          </div>
+                          <p>{post.description}</p>
+                          <div className="my-content-item-meta">
+                            <span>Tags: {post.tags.join(', ')}</span>
+                            <span>{new Date(post.timestamp).toLocaleDateString()}</span>
+                          </div>
+                          <div className="my-content-item-actions">
+                            <button 
+                              className="my-content-action-btn"
+                              onClick={() => unarchivePost(post.id)}
+                            >
+                              Unarchive
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="premium-empty-state">
+                        <p className="premium-empty-state-text">No archived posts yet</p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {activeMyContentTab === 'analytics' && (
+                <div className="my-content-analytics">
+                  <div className="analytics-cards">
+                    <div className="analytics-card">
+                      <div className="analytics-value">12</div>
+                      <div className="analytics-label">Total Posts</div>
+                    </div>
+                    <div className="analytics-card">
+                      <div className="analytics-value">1.2k</div>
+                      <div className="analytics-label">Total Views</div>
+                    </div>
+                    <div className="analytics-card">
+                      <div className="analytics-value">456</div>
+                      <div className="analytics-label">Total Engagement</div>
+                    </div>
+                    <div className="analytics-card">
+                      <div className="analytics-value">78</div>
+                      <div className="analytics-label">Total Comments</div>
+                    </div>
+                  </div>
+                  <div className="premium-empty-state">
+                    <p className="premium-empty-state-text">Detailed analytics coming soon</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* General Links & Presence for all profiles */}
           <div className="premium-two-column-row">
             <div className="premium-card" style={{gridColumn: 'span 1'}}>
@@ -2905,6 +3123,44 @@ const ProfilePremium: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {/* Post Menu */}
+      {openMenuPostId && (
+        <PostMenu 
+          post={posts.find(p => p.id === openMenuPostId)!}
+          onClose={() => setOpenMenuPostId(null)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmPostId && (
+        <div className="post-menu-overlay" onClick={() => setDeleteConfirmPostId(null)}>
+          <div className="post-menu delete-confirm" onClick={(e) => e.stopPropagation()}>
+            <div className="delete-confirm-header">
+              <span>🗑️</span>
+              <h3>Delete Post?</h3>
+              <p>This action cannot be undone. This will permanently delete the post.</p>
+            </div>
+            <div className="delete-confirm-actions">
+              <button 
+                className="btn-cancel" 
+                onClick={() => setDeleteConfirmPostId(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn-delete" 
+                onClick={() => {
+                  deletePost(deleteConfirmPostId);
+                  setDeleteConfirmPostId(null);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       {toastMessage && (

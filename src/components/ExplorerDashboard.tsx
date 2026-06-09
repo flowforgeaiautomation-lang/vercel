@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CreatePost from './CreatePost';
+import CreateExplorerPost from './CreateExplorerPost';
+import PostMenu from './PostMenu';
+import './PostMenu.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import { UserProfile, usePosts } from '../contexts/PostContext';
@@ -87,16 +89,22 @@ const ShareIcon = () => (
   </svg>
 );
 
+const BookmarkIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"></path>
+  </svg>
+);
+
 const ExplorerDashboard = () => {
   const { profile } = useAuth();
   const { userData } = useUser();
-  const { likePost, getIntelligentFeed, demoUsers, addComment } = usePosts();
+  const { likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts } = usePosts();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('for-you');
+  const [activeTab, setActiveTab] = useState('discover');
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const [userRole, setUserRole] = useState<'ARCHITECT' | 'EXPLORER' | 'CATALYST'>('EXPLORER');
-  const feedPosts = getIntelligentFeed(userRole);
+  const userRole = userData?.mainRole || 'EXPLORER';
+  const feedPosts = posts;
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
   const [showDetailedProfile, setShowDetailedProfile] = useState(false);
@@ -105,6 +113,7 @@ const ExplorerDashboard = () => {
   const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState<string>('');
   const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null);
+  const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
 
   const handleLikePost = (postId: string) => {
     likePost(postId);
@@ -317,13 +326,6 @@ const ExplorerDashboard = () => {
     );
   };
 
-  useEffect(() => {
-    const savedRole = localStorage.getItem('selectedRole');
-    if (savedRole) {
-      setUserRole(savedRole.toUpperCase() as 'ARCHITECT' | 'EXPLORER' | 'CATALYST');
-    }
-  }, []);
-
   return (
     <div className="ed-container">
       <div className="ed-left-sidebar">
@@ -432,10 +434,26 @@ const ExplorerDashboard = () => {
               ) : (
                 getInitials(getUserName())
               )}
+              <div className="star-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </div>
             </div>
             <div className="user-info">
               <div className="user-name">{getUserName()}</div>
-              <div className="user-role">{getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}</div>
+              <div className="user-role">
+                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                </span>
+                {userData?.prestigeSystem && (
+                  <PrestigeStarBadge
+                    starId={userData.prestigeSystem.currentStarId}
+                    size="small"
+                    color={getRoleColor(getUserRole())}
+                  />
+                )}
+              </div>
             </div>
             <div className="dropdown-arrow">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -445,14 +463,14 @@ const ExplorerDashboard = () => {
           </div>
         </header>
 
-        <div className="explorer-premium-create-card">
-          <button className="explorer-create-signal-button" onClick={() => setCreatePostOpen(true)}>
-            <div className="explorer-button-icon">✨</div>
-            <div className="explorer-button-text">
-              <span className="explorer-button-title">Create Signal</span>
-              <span className="explorer-button-subtitle">Share your insights or feedback</span>
+        <div className="startup-premium-create-card">
+          <button className="startup-create-signal-button" onClick={() => setCreatePostOpen(true)}>
+            <div className="startup-button-icon">🚀</div>
+            <div className="startup-button-text">
+              <span className="startup-button-title">Create Signal</span>
+              <span className="startup-button-subtitle">Share your insights or feedback</span>
             </div>
-            <svg className="explorer-button-arrow" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="startup-button-arrow" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
             </svg>
@@ -473,10 +491,6 @@ const ExplorerDashboard = () => {
             </div>
 
             <div className="ed-tabs">
-              <div className={`ed-tab ${activeTab === 'for-you' ? 'active' : ''}`} onClick={() => setActiveTab('for-you')}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78l1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
-                For You
-              </div>
               <div className={`ed-tab ${activeTab === 'following' ? 'active' : ''}`} onClick={() => setActiveTab('following')}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12,6 12,12 16,14" /></svg>
                 Following
@@ -574,6 +588,15 @@ const ExplorerDashboard = () => {
                         <span className="post-time">2h ago</span>
                       </div>
                     </div>
+                    <button 
+                      className="post-menu-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuPostId(openMenuPostId === post.id ? null : post.id);
+                      }}
+                    >
+                      ⋮
+                    </button>
                   </div>
                   
                   <div className="post-content">
@@ -604,6 +627,23 @@ const ExplorerDashboard = () => {
                     <div className="post-action">
                       <ShareIcon />
                       <span>Share</span>
+                    </div>
+                    <div 
+                      className="post-action" 
+                      onClick={() => {
+                        if (savedPosts.includes(post.id)) {
+                          unsavePost(post.id);
+                        } else {
+                          savePost(post.id);
+                        }
+                      }}
+                      style={{
+                        color: savedPosts.includes(post.id)
+                          ? '#FFD700'
+                          : 'rgba(255,255,255,0.6)'
+                      }}
+                    >
+                      <BookmarkIcon />
                     </div>
                   </div>
 
@@ -839,7 +879,7 @@ const ExplorerDashboard = () => {
               <div className="drawer-menu">
                 <div className="drawer-item" onClick={() => navigate('/profile')}>Profile</div>
                 <div className="drawer-item" onClick={() => setShowEcosystemOverview(true)}>Ecosystem Overview</div>
-                <div className="drawer-item">Settings</div>
+                <div className="drawer-item" onClick={() => navigate('/settings')}>Settings</div>
                 <div className="drawer-item">Account</div>
                 <div className="drawer-item">Upgradation</div>
                 <div className="drawer-item">Support & Feedback</div>
@@ -851,9 +891,15 @@ const ExplorerDashboard = () => {
       )}
 
       {createPostOpen && (
-        <CreatePost 
-          role={userRole} 
+        <CreateExplorerPost 
           onClose={() => setCreatePostOpen(false)} 
+        />
+      )}
+
+      {openMenuPostId && (
+        <PostMenu 
+          post={feedPosts.find(p => p.id === openMenuPostId)!}
+          onClose={() => setOpenMenuPostId(null)}
         />
       )}
       
@@ -1214,8 +1260,7 @@ const ExplorerDashboard = () => {
 
       {/* Create Post Modal */}
       {createPostOpen && (
-        <CreatePost 
-          role={userRole} 
+        <CreateExplorerPost 
           onClose={() => setCreatePostOpen(false)} 
         />
       )}
