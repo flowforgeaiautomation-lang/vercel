@@ -7,13 +7,14 @@ import RoleSelection from './components/RoleSelection';
 import HomeDashboard from './components/HomeDashboard';
 import ProfilePremium from './components/ProfilePremium';
 import StartupDashboard from './components/StartupDashboard';
+import MyStartup from './components/MyStartup';
+import StartupStudio from './components/StartupStudio';
 import InvestorDashboard from './components/InvestorDashboard';
 import ExplorerDashboard from './components/ExplorerDashboard';
 import NotificationsDashboard from './components/NotificationsDashboard';
 import BookmarksDashboard from './components/BookmarksDashboard';
 import MessagesDashboard from './components/MessagesDashboard';
 import TriveonSettings from './components/TriveonSettings';
-import StartupStudio from './components/StartupStudio';
 import AICopilot from './components/AICopilot';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
@@ -156,6 +157,7 @@ function App() {
                 <Route path="/settings" element={<TriveonSettings />} />
                 <Route path="/startups" element={<StartupDashboard />} />
                 <Route path="/startup-studio" element={<StartupStudio />} />
+                <Route path="/my-startup" element={<MyStartup />} />
                 <Route path="/investors" element={<InvestorDashboard />} />
                 <Route path="/explorers" element={<ExplorerDashboard />} />
                 <Route path="/notifications" element={<NotificationsDashboard />} />
