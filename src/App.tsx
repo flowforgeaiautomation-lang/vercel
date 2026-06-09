@@ -13,6 +13,7 @@ import NotificationsDashboard from './components/NotificationsDashboard';
 import BookmarksDashboard from './components/BookmarksDashboard';
 import MessagesDashboard from './components/MessagesDashboard';
 import TriveonSettings from './components/TriveonSettings';
+import StartupStudio from './components/StartupStudio';
 import AICopilot from './components/AICopilot';
 import { AuthProvider } from './contexts/AuthContext';
 import { UserProvider } from './contexts/UserContext';
@@ -154,6 +155,7 @@ function App() {
                 <Route path="/profile" element={<ProfilePremium />} />
                 <Route path="/settings" element={<TriveonSettings />} />
                 <Route path="/startups" element={<StartupDashboard />} />
+                <Route path="/startup-studio" element={<StartupStudio />} />
                 <Route path="/investors" element={<InvestorDashboard />} />
                 <Route path="/explorers" element={<ExplorerDashboard />} />
                 <Route path="/notifications" element={<NotificationsDashboard />} />

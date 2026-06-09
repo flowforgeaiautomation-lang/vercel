@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import CreatePost from './CreatePost';
 import './HomeDashboard.css';
 import { useUser } from '../contexts/UserContext';
@@ -202,120 +203,122 @@ const HomeDashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-content">
-        <aside className={`left-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <div className="sidebar-brand" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-            <div className="brand-logo-v">V</div>
-            {!sidebarCollapsed && <span className="brand-name">TRIVEON</span>}
-          </div>
+        <div className="dashboard-content">
+          <aside className="left-sidebar">
+            <div className="sidebar-scroll-wrapper">
+              <div className="sidebar-brand" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
+                <div className="brand-logo-v">V</div>
+                {!sidebarCollapsed && <span className="brand-name">TRIVEON</span>}
+              </div>
 
-          <nav className="sidebar-nav">
-            <div className="nav-item active" onClick={() => navigate('/home')}>
-              <HomeIcon />
-              {!sidebarCollapsed && <span>Home</span>}
-            </div>
-            <div className="nav-item" onClick={() => navigate('/startups')}>
-              <RocketIcon />
-              {!sidebarCollapsed && <span>Startups</span>}
-            </div>
-            <div className="nav-item" onClick={() => navigate('/investors')}>
-              <UsersIcon />
-              {!sidebarCollapsed && <span>Investors</span>}
-            </div>
-            <div className="nav-item" onClick={() => navigate('/explorers')}>
-              <CompassIcon />
-              {!sidebarCollapsed && <span>Explorer</span>}
-            </div>
-            {/* Discover Dropdown */}
-          <div className="nav-item" onClick={(e) => {
-                e.stopPropagation();
-                setDiscoverDropdownOpen(!discoverDropdownOpen);
-              }}>
-              <CompassIcon />
-              {!sidebarCollapsed && <span>Discover</span>}
+              <nav className="sidebar-nav">
+                <div className="nav-item active" onClick={() => navigate('/home')}>
+                  <HomeIcon />
+                  {!sidebarCollapsed && <span>Home</span>}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/startups')}>
+                  <RocketIcon />
+                  {!sidebarCollapsed && <span>Startups</span>}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/investors')}>
+                  <UsersIcon />
+                  {!sidebarCollapsed && <span>Investors</span>}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/explorers')}>
+                  <CompassIcon />
+                  {!sidebarCollapsed && <span>Explorer</span>}
+                </div>
+                {/* Discover Dropdown */}
+                <div className="nav-item discover-nav-item" onClick={(e) => {
+                      e.stopPropagation();
+                      setDiscoverDropdownOpen(!discoverDropdownOpen);
+                    }}>
+                  <CompassIcon />
+                  {!sidebarCollapsed && <span>Discover</span>}
+                  {!sidebarCollapsed && (
+                    <svg 
+                      className={`discover-chevron ${discoverDropdownOpen ? 'open' : ''}`}
+                      width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  )}
+                  {!sidebarCollapsed && discoverDropdownOpen && (
+                    <div className="discover-dropdown-content">
+                      <div 
+                        className="discover-dropdown-item"
+                        onClick={() => {
+                          setDiscoverDropdownOpen(false);
+                          navigate('/atlas');
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>Atlas</span>
+                      </div>
+                      <div 
+                        className="discover-dropdown-item"
+                        onClick={() => {
+                          setDiscoverDropdownOpen(false);
+                          navigate('/exchange');
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        <span>Exchange</span>
+                      </div>
+                      <div 
+                        className="discover-dropdown-item"
+                        onClick={() => {
+                          setDiscoverDropdownOpen(false);
+                          navigate('/circles');
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <span>Circles</span>
+                      </div>
+                      <div 
+                        className="discover-dropdown-item"
+                        onClick={() => {
+                          setDiscoverDropdownOpen(false);
+                          navigate('/insights');
+                        }}
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"></path><path d="m19 9 12 16 5 9"></path></svg>
+                        <span>Insights</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/messages')}>
+                  <MessageIcon />
+                  {!sidebarCollapsed && <span>Messages</span>}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/bookmarks')}>
+                  <BookmarkIcon />
+                  {!sidebarCollapsed && <span>Bookmarks</span>}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/notifications')}>
+                  <BellIcon />
+                  {!sidebarCollapsed && <span>Notifications</span>}
+                </div>
+                <div className="nav-item" onClick={() => navigate('/profile')}>
+                  <UserIcon />
+                  {!sidebarCollapsed && <span>Profile</span>}
+                </div>
+              </nav>
+
               {!sidebarCollapsed && (
-                <svg 
-                  className={`discover-chevron ${discoverDropdownOpen ? 'open' : ''}`}
-                  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                <div className="sidebar-promo-card" onClick={() => setCopilotOpen(true)}>
+                  <div className="promo-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" /></svg>
+                  </div>
+                  <div className="promo-content">
+                    <h4>AI Copilot</h4>
+                    <p>Your ecosystem assistant</p>
+                  </div>
+                </div>
               )}
-            {!sidebarCollapsed && discoverDropdownOpen && (
-              <div className="discover-dropdown-content">
-                <div 
-                  className="discover-dropdown-item"
-                  onClick={() => {
-                    setDiscoverDropdownOpen(false);
-                    navigate('/atlas');
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                  <span>Atlas</span>
-                </div>
-                <div 
-                  className="discover-dropdown-item"
-                  onClick={() => {
-                    setDiscoverDropdownOpen(false);
-                    navigate('/exchange');
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                  <span>Exchange</span>
-                </div>
-                <div 
-                  className="discover-dropdown-item"
-                  onClick={() => {
-                    setDiscoverDropdownOpen(false);
-                    navigate('/circles');
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                  <span>Circles</span>
-                </div>
-                <div 
-                  className="discover-dropdown-item"
-                  onClick={() => {
-                    setDiscoverDropdownOpen(false);
-                    navigate('/insights');
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"></path><path d="m19 9 12 16 5 9"></path></svg>
-                  <span>Insights</span>
-                </div>
-              </div>
-            )}
-          </div>
-            <div className="nav-item" onClick={() => navigate('/messages')}>
-              <MessageIcon />
-              {!sidebarCollapsed && <span>Messages</span>}
             </div>
-            <div className="nav-item" onClick={() => navigate('/bookmarks')}>
-              <BookmarkIcon />
-              {!sidebarCollapsed && <span>Bookmarks</span>}
-            </div>
-            <div className="nav-item" onClick={() => navigate('/notifications')}>
-              <BellIcon />
-              {!sidebarCollapsed && <span>Notifications</span>}
-            </div>
-            <div className="nav-item" onClick={() => navigate('/profile')}>
-              <UserIcon />
-              {!sidebarCollapsed && <span>Profile</span>}
-            </div>
-          </nav>
-
-          {!sidebarCollapsed && (
-            <div className="sidebar-promo-card" onClick={() => setCopilotOpen(true)}>
-              <div className="promo-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" /></svg>
-              </div>
-              <div className="promo-content">
-                <h4>AI Copilot</h4>
-                <p>Your ecosystem assistant</p>
-              </div>
-            </div>
-          )}
-        </aside>
+          </aside>
 
         <main className="center-feed">
           <header className="feed-header">
