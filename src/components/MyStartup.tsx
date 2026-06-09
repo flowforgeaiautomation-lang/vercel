@@ -35,11 +35,18 @@ const MyStartup: React.FC = () => {
               </svg>
               <span>Home</span>
             </div>
-            <div className="my-startup-nav-item active" onClick={() => navigate('/my-startup')}>
+            <div className="my-startup-nav-item" onClick={() => navigate('/startups')}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
               </svg>
               <span>Startups</span>
+            </div>
+            <div className="my-startup-nav-item active" onClick={() => navigate('/my-startup')}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"/>
+                <path d="M9 22v-4h6v4"/>
+              </svg>
+              <span>My Startup</span>
             </div>
           </nav>
 
