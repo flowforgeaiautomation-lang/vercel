@@ -192,7 +192,6 @@ body {
   font-size: 0.88rem;
   font-weight: 500;
   position: relative;
-  overflow: hidden;
 }
 
 .discover-dropdown-content {
@@ -206,8 +205,9 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  overflow: hidden;
+  z-index: 10000;
+  overflow-y: auto;
+  max-height: 400px;
 }
 
 .discover-dropdown-item {
