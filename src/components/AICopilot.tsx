@@ -39,7 +39,7 @@ const AICopilot = ({ isOpen, onClose }: AICopilotProps) => {
     let context = 'general';
     let contextName = 'TRIVEON Ecosystem';
     
-    if (path.includes('startups')) {
+    if (path.includes('startups') || path.includes('startup-studio') || path.includes('my-startup')) {
       context = 'startup';
       contextName = 'Startup Advisor';
     } else if (path.includes('investors')) {
