@@ -178,6 +178,9 @@ body {
   flex-direction: column;
   gap: 3px;
   flex: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+  padding-bottom: 10px;
 }
 
 .nav-item {
