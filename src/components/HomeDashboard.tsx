@@ -134,6 +134,7 @@ const HomeDashboard: React.FC = () => {
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [discoverDropdownOpen, setDiscoverDropdownOpen] = useState(false);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -167,6 +168,15 @@ const HomeDashboard: React.FC = () => {
       setCommentingPostId(null);
     }
   };
+
+  // Close discover dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      setDiscoverDropdownOpen(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Get initials for default avatar
   const getInitials = (name: string) => {
@@ -215,6 +225,71 @@ const HomeDashboard: React.FC = () => {
             <div className="nav-item" onClick={() => navigate('/explorers')}>
               <CompassIcon />
               {!sidebarCollapsed && <span>Explorer</span>}
+            </div>
+            {/* Discover Dropdown */}
+            <div className="nav-item relative">
+              <button 
+                className="w-full flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDiscoverDropdownOpen(!discoverDropdownOpen);
+                }}
+              >
+                <CompassIcon />
+                {!sidebarCollapsed && <span>Discover</span>}
+                {!sidebarCollapsed && (
+                  <svg 
+                    className={`w-4 h-4 ml-auto transition-transform ${discoverDropdownOpen ? 'rotate-180' : ''}`}
+                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                )}
+              </button>
+              {!sidebarCollapsed && discoverDropdownOpen && (
+                <div className="absolute left-full top-0 ml-2 w-48 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl z-50 overflow-hidden">
+                  <div 
+                    className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                    onClick={() => {
+                      setDiscoverDropdownOpen(false);
+                      navigate('/atlas');
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    <span>Atlas</span>
+                  </div>
+                  <div 
+                    className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                    onClick={() => {
+                      setDiscoverDropdownOpen(false);
+                      navigate('/exchange');
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    <span>Exchange</span>
+                  </div>
+                  <div 
+                    className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                    onClick={() => {
+                      setDiscoverDropdownOpen(false);
+                      navigate('/circles');
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Circles</span>
+                  </div>
+                  <div 
+                    className="px-4 py-3 text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-2"
+                    onClick={() => {
+                      setDiscoverDropdownOpen(false);
+                      navigate('/insights');
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"></path><path d="m19 9 12 16 5 9"></path></svg>
+                    <span>Insights</span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="nav-item" onClick={() => navigate('/messages')}>
               <MessageIcon />
