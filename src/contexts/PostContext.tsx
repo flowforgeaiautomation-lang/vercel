@@ -971,23 +971,6 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [posts, setPosts] = useState<Post[]>(initialPosts);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('triveon-posts');
-      if (saved) {
-        const parsedPosts = JSON.parse(saved);
-        setPosts(parsedPosts.map((post: any) => ({
-          ...post,
-          likedBy: post.likedBy || [],
-          timestamp: new Date(post.timestamp),
-          comments: post.comments ? parseComments(post.comments) : []
-        })));
-      }
-    } catch {
-      // use initialPosts if localStorage fails
-    }
-  }, []);
-
   const [startups, setStartups] = useState<Startup[]>(() => {
     try {
       const saved = localStorage.getItem('triveon-startups');
