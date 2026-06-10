@@ -10,7 +10,11 @@ import StartupDashboard from './components/StartupDashboard';
 import MyStartup from './components/MyStartup';
 import StartupStudio from './components/StartupStudio';
 import InvestorDashboard from './components/InvestorDashboard';
+import MyInvestments from './components/MyInvestments';
+import CatalystStudio from './components/CatalystStudio';
 import ExplorerDashboard from './components/ExplorerDashboard';
+import MyReviews from './components/MyReviews';
+import FeedbackHub from './components/FeedbackHub';
 import NotificationsDashboard from './components/NotificationsDashboard';
 import BookmarksDashboard from './components/BookmarksDashboard';
 import MessagesDashboard from './components/MessagesDashboard';
@@ -150,20 +154,24 @@ function App() {
           <Router>
             <AppWithUniverse>
               <Routes>
-                <Route path="/" element={<TriveonLogin />} />
-                <Route path="/home" element={<HomeDashboard />} />
-                <Route path="/role-selection" element={<RoleSelection />} />
-                <Route path="/profile" element={<ProfilePremium />} />
-                <Route path="/settings" element={<TriveonSettings />} />
-                <Route path="/startups" element={<StartupDashboard />} />
-                <Route path="/startup-studio" element={<StartupStudio />} />
-                <Route path="/my-startup" element={<MyStartup />} />
-                <Route path="/investors" element={<InvestorDashboard />} />
-                <Route path="/explorers" element={<ExplorerDashboard />} />
-                <Route path="/notifications" element={<NotificationsDashboard />} />
-                <Route path="/bookmarks" element={<BookmarksDashboard />} />
-                <Route path="/messages" element={<MessagesDashboard />} />
-              </Routes>
+            <Route path="/" element={<TriveonLogin />} />
+            <Route path="/home" element={<HomeDashboard />} />
+            <Route path="/role-selection" element={<RoleSelection />} />
+            <Route path="/profile" element={<ProfilePremium />} />
+            <Route path="/settings" element={<TriveonSettings />} />
+            <Route path="/startups" element={<StartupDashboard />} />
+            <Route path="/startup-studio" element={<StartupStudio />} />
+            <Route path="/my-startup" element={<MyStartup />} />
+            <Route path="/investors" element={<InvestorDashboard />} />
+            <Route path="/my-investments" element={<MyInvestments />} />
+            <Route path="/catalyst-studio" element={<CatalystStudio />} />
+            <Route path="/explorers" element={<ExplorerDashboard />} />
+            <Route path="/my-reviews" element={<MyReviews />} />
+            <Route path="/feedback-hub" element={<FeedbackHub />} />
+            <Route path="/notifications" element={<NotificationsDashboard />} />
+            <Route path="/bookmarks" element={<BookmarksDashboard />} />
+            <Route path="/messages" element={<MessagesDashboard />} />
+          </Routes>
               <GlobalAICopilot />
             </AppWithUniverse>
           </Router>

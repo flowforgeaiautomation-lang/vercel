@@ -218,22 +218,22 @@ const HomeDashboard: React.FC = () => {
                 </div>
                 <div className="nav-item" onClick={() => navigate('/startups')}>
                   <RocketIcon />
-                  {!sidebarCollapsed && <span>Startups</span>}
+                  {!sidebarCollapsed && <span>Architects</span>}
                 </div>
                 <div className="nav-item" onClick={() => navigate('/investors')}>
                   <UsersIcon />
-                  {!sidebarCollapsed && <span>Investors</span>}
+                  {!sidebarCollapsed && <span>Catalysts</span>}
                 </div>
                 <div className="nav-item" onClick={() => navigate('/explorers')}>
                   <CompassIcon />
-                  {!sidebarCollapsed && <span>Explorer</span>}
+                  {!sidebarCollapsed && <span>Explorers</span>}
                 </div>
                 {/* Discover Dropdown */}
                 <div className="nav-item discover-nav-item" onClick={(e) => {
                       e.stopPropagation();
                       setDiscoverDropdownOpen(!discoverDropdownOpen);
                     }}>
-                  <CompassIcon />
+                  <SearchIcon />
                   {!sidebarCollapsed && <span>Discover</span>}
                   {!sidebarCollapsed && (
                     <svg 
@@ -290,20 +290,20 @@ const HomeDashboard: React.FC = () => {
                 </div>
                 <div className="nav-item" onClick={() => navigate('/messages')}>
                   <MessageIcon />
-                  {!sidebarCollapsed && <span>Messages</span>}
-                </div>
-                <div className="nav-item" onClick={() => navigate('/bookmarks')}>
-                  <BookmarkIcon />
-                  {!sidebarCollapsed && <span>Bookmarks</span>}
+                  {!sidebarCollapsed && <span>Inbox</span>}
                 </div>
                 <div className="nav-item" onClick={() => navigate('/notifications')}>
-                  <BellIcon />
-                  {!sidebarCollapsed && <span>Notifications</span>}
-                </div>
-                <div className="nav-item" onClick={() => navigate('/profile')}>
-                  <UserIcon />
-                  {!sidebarCollapsed && <span>Profile</span>}
-                </div>
+            <BellIcon />
+            {!sidebarCollapsed && <span>Notifications</span>}
+          </div>
+          <div className="nav-item" onClick={() => navigate('/bookmarks')}>
+            <BookmarkIcon />
+            {!sidebarCollapsed && <span>Vault</span>}
+          </div>
+          <div className="nav-item" onClick={() => navigate('/profile')}>
+            <UserIcon />
+            {!sidebarCollapsed && <span>Profile</span>}
+          </div>
               </nav>
 
               {!sidebarCollapsed && (
@@ -370,49 +370,7 @@ const HomeDashboard: React.FC = () => {
           </div>
           </header>
 
-          <div className="ecosystem-overview-card">
-            <h1 className="eco-overview-title">Welcome to TRIVEON</h1>
-            <p className="eco-overview-subtitle">The Operating System of Ambition. Everything you need to build, invest, and discover — in one place.</p>
-            <div className="eco-pillars">
-              <div className="eco-pillar" onClick={() => navigate('/startups')}>
-                <div className="eco-pillar-icon" style={{ background: 'linear-gradient(135deg, #FFD700, #FFA500)' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-                  </svg>
-                </div>
-                <div className="eco-pillar-content">
-                  <h3>Startups</h3>
-                  <p>Build and launch your venture with tools, support, and resources.</p>
-                </div>
-              </div>
-              <div className="eco-pillar" onClick={() => navigate('/investors')}>
-                <div className="eco-pillar-icon" style={{ background: 'linear-gradient(135deg, #00C896, #00A876)' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                </div>
-                <div className="eco-pillar-content">
-                  <h3>Investors</h3>
-                  <p>Discover promising startups and deploy capital strategically.</p>
-                </div>
-              </div>
-              <div className="eco-pillar" onClick={() => navigate('/explorers')}>
-                <div className="eco-pillar-icon" style={{ background: 'linear-gradient(135deg, #06b6d4, #0891B2)' }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                  </svg>
-                </div>
-                <div className="eco-pillar-content">
-                  <h3>Explorer</h3>
-                  <p>Discover opportunities, give feedback, and contribute to the ecosystem.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+
 
           <div className="startup-premium-create-card">
             <button className="startup-create-signal-button" onClick={() => setCreatePostOpen(true)}>

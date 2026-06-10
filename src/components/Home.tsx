@@ -57,9 +57,10 @@ const Home: React.FC = () => {
   const menuItems = [
     { icon: '🏠', label: 'Home', active: true },
     { icon: '🔍', label: 'Discover', active: false },
-    { icon: '💬', label: 'Messages', active: false },
+    { icon: '💬', label: 'Inbox', active: false },
     { icon: '📊', label: 'Analytics', active: false },
     { icon: '⚙️', label: 'Settings', active: false },
+    { icon: '🔖', label: 'Vault', active: false, path: '/bookmarks' },
     { icon: '👤', label: 'Profile', active: false, path: '/profile' }
   ];
 

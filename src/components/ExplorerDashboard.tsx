@@ -37,7 +37,7 @@ const ThumbUpIcon = ({ animate }: { animate?: boolean }) => (
 );
 
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"/>
     <path d="m21 21-4.3-4.3"/>
   </svg>
@@ -115,6 +115,7 @@ const ExplorerDashboard = () => {
   const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
 
+
   const handleLikePost = (postId: string) => {
     likePost(postId);
     setAnimatingPostId(postId);
@@ -165,6 +166,8 @@ const ExplorerDashboard = () => {
     setCommentingPostId(null);
     setReplyingToCommentId(null);
   };
+
+
 
   const renderComment = (comment: any, level: number = 0) => {
     return (
@@ -352,17 +355,21 @@ const ExplorerDashboard = () => {
           </div>
           <div className="ed-nav-item" onClick={() => navigate('/startups')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
-            <span>Startups</span>
+            <span>Architects</span>
           </div>
           <div className="ed-nav-item active">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
-            <span>Explorer</span>
+            <span>Explorers</span>
           </div>
-          <div className="ed-nav-item">
+          <div className="ed-nav-item" onClick={() => navigate('/investors')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <span>Catalysts</span>
+          </div>
+          <div className="ed-nav-item" onClick={() => navigate('/feedback-hub')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
             <span>Feedback Hub</span>
           </div>
-          <div className="ed-nav-item">
+          <div className="ed-nav-item" onClick={() => navigate('/my-reviews')}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2" /><path d="M9 22v-4h6v4" /></svg>
             <span>My Reviews</span>
           </div>

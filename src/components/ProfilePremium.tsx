@@ -1158,11 +1158,11 @@ const ProfilePremium: React.FC = () => {
           </div>
           <div className="premium-nav-item">
             <RocketIcon />
-            <span>Startups</span>
+            <span>Architects</span>
           </div>
           <div className="premium-nav-item">
             <UsersIcon />
-            <span>Investors</span>
+            <span>Catalysts</span>
           </div>
           {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
             <div className="premium-nav-item">
@@ -1184,7 +1184,7 @@ const ProfilePremium: React.FC = () => {
           ) : null}
           <div className="premium-nav-item">
             <MessageIcon />
-            <span>Messages</span>
+            <span>Inbox</span>
             {safeActiveProfileMode === 'ARCHITECT' && <span className="nav-badge">9</span>}
           </div>
           {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
@@ -1193,17 +1193,10 @@ const ProfilePremium: React.FC = () => {
               <span>Notifications</span>
             </div>
           ) : null}
-          {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
-            <div className="premium-nav-item">
-              <SavedIcon />
-              <span>Saved</span>
-            </div>
-          ) : (
-            <div className="premium-nav-item">
-              <BookmarkIcon />
-              <span>Bookmarks</span>
-            </div>
-          )}
+          <div className="premium-nav-item" onClick={() => navigate('/bookmarks')}>
+            <BookmarkIcon />
+            <span>Vault</span>
+          </div>
           <div className="premium-nav-item active">
             <ProfileIcon />
             <span>Profile</span>

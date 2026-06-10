@@ -8,7 +8,7 @@ import './NotificationsDashboard.css';
 import PrestigeStarBadge from './PrestigeStarBadge';
 
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"></circle>
     <path d="m21 21-4.3-4.3"></path>
   </svg>
@@ -45,12 +45,15 @@ const NotificationsDashboard = () => {
   const [userRole, setUserRole] = useState<'ARCHITECT' | 'EXPLORER' | 'CATALYST'>('ARCHITECT');
   const [copilotOpen, setCopilotOpen] = useState(false);
 
+
   useEffect(() => {
     const savedRole = localStorage.getItem('selectedRole');
     if (savedRole) {
       setUserRole(savedRole.toUpperCase() as 'ARCHITECT' | 'EXPLORER' | 'CATALYST');
     }
   }, []);
+
+
 
   const getUserName = () => {
     return userData?.profile?.name || profile?.name || "Umat Chaudhary";
@@ -182,65 +185,22 @@ const NotificationsDashboard = () => {
           </div>
         </div>
 
-        <div className="nd-section-title">Notifications</div>
-
         <nav className="nd-nav">
+          <div className="nd-nav-item" onClick={() => navigate('/home')}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span>Home</span>
+          </div>
           <div className={`nd-nav-item ${activeCategory === 'all' ? 'active' : ''}`} onClick={() => setActiveCategory('all')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span>All Notifications</span>
-            <div className="nd-badge">6</div>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'important' ? 'active' : ''}`} onClick={() => setActiveCategory('important')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.88L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-            <span>Important</span>
+            <span>Notification</span>
           </div>
           <div className={`nd-nav-item ${activeCategory === 'connections' ? 'active' : ''}`} onClick={() => setActiveCategory('connections')}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             <span>Connections</span>
           </div>
-          <div className={`nd-nav-item ${activeCategory === 'messages' ? 'active' : ''}`} onClick={() => setActiveCategory('messages')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <span>Messages</span>
-            <div className="nd-badge">2</div>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'startups' ? 'active' : ''}`} onClick={() => setActiveCategory('startups')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-            <span>Startups</span>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'investments' ? 'active' : ''}`} onClick={() => setActiveCategory('investments')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            <span>Investments</span>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'communities' ? 'active' : ''}`} onClick={() => setActiveCategory('communities')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            <span>Communities</span>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'mentions' ? 'active' : ''}`} onClick={() => setActiveCategory('mentions')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
-            <span>Mentions</span>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'saved' ? 'active' : ''}`} onClick={() => setActiveCategory('saved')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-            <span>Saved Alerts</span>
-          </div>
-          <div className={`nd-nav-item ${activeCategory === 'archived' ? 'active' : ''}`} onClick={() => setActiveCategory('archived')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-            <span>Archived</span>
-          </div>
         </nav>
 
-        <div className="nd-copilot-card" onClick={() => setCopilotOpen(true)}>
-          <div className="nd-copilot-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76"></polygon>
-            </svg>
-          </div>
-          <div className="nd-copilot-content">
-            <strong>AI Copilot</strong>
-            <span>Your smart assistant</span>
-          </div>
-        </div>
+
       </div>
 
       <div className="nd-main">

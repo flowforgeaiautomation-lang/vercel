@@ -8,7 +8,7 @@ import PrestigeStarBadge from './PrestigeStarBadge';
 import './MessagesDashboard.css';
 
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8" />
     <path d="m21 21-4.3-4.3" />
   </svg>
@@ -33,12 +33,15 @@ const MessagesDashboard = () => {
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
   const [copilotOpen, setCopilotOpen] = useState(false);
 
+
   useEffect(() => {
     const savedRole = localStorage.getItem('selectedRole');
     if (savedRole) {
       setUserRole('EXPLORER');
     }
   }, []);
+
+
 
   const getUserName = () => {
     return userData?.profile?.name || profile?.name || 'Jimit Chaudhary';
@@ -99,7 +102,7 @@ const MessagesDashboard = () => {
           </div>
           <div className="md-nav-item active">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-            <span>Signals</span>
+            <span>Inbox</span>
           </div>
           <div className="md-nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>

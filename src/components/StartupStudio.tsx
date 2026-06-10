@@ -42,15 +42,15 @@ const StartupStudio: React.FC = () => {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
-              <span>STARTUPS</span>
+              <span>ARCHITECTS</span>
             </div>
             <div className="studio-nav-item active" onClick={() => navigate('/startup-studio')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              <span>STUDIO</span>
-            </div>
-          </nav>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span>Studio</span>
+          </div>
+        </nav>
 
           <div className="studio-copilot-card" onClick={() => setCopilotOpen(true)}>
             <div className="studio-copilot-icon">

@@ -9,7 +9,7 @@ import './BookmarksDashboard.css';
 import PrestigeStarBadge from './PrestigeStarBadge';
 
 const SearchIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="8"></circle>
     <path d="m21 21-4.3-4.3"></path>
   </svg>
@@ -46,12 +46,22 @@ const BookmarksDashboard = () => {
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [userRole, setUserRole] = useState<'ARCHITECT' | 'EXPLORER' | 'CATALYST'>('ARCHITECT');
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [discoverDropdownOpen, setDiscoverDropdownOpen] = useState(false);
 
   useEffect(() => {
     const savedRole = localStorage.getItem('selectedRole');
     if (savedRole) {
       setUserRole(savedRole.toUpperCase() as 'ARCHITECT' | 'EXPLORER' | 'CATALYST');
     }
+  }, []);
+
+  // Close discover dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      setDiscoverDropdownOpen(false);
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const getUserName = () => {
@@ -104,63 +114,81 @@ const BookmarksDashboard = () => {
           <span className="bk-logo-text">TRIVEON</span>
         </div>
 
-        <div className="bk-section-title">Bookmarks</div>
+        <div className="bk-section-title">Vault</div>
 
         <nav className="bk-nav">
-          <div className={`bk-nav-item ${activeNav === 'all' ? 'active' : ''}`} onClick={() => setActiveNav('all')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-            <span>All Saved</span>
-            <div className="bk-badge">24</div>
+          <div className="bk-nav-item" onClick={() => navigate('/home')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+            <span>Home</span>
           </div>
-          <div className={`bk-nav-item ${activeNav === 'startups' ? 'active' : ''}`} onClick={() => setActiveNav('startups')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-            <span>Startups</span>
-            <div className="bk-badge-small">10</div>
+          <div className="bk-nav-item" onClick={() => navigate('/startups')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+            <span>Architects</span>
           </div>
-          <div className={`bk-nav-item ${activeNav === 'investments' ? 'active' : ''}`} onClick={() => setActiveNav('investments')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            <span>Investments</span>
-            <div className="bk-badge-small">6</div>
+          <div className="bk-nav-item" onClick={() => navigate('/investors')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+            <span>Catalysts</span>
           </div>
-          <div className={`bk-nav-item ${activeNav === 'people' ? 'active' : ''}`} onClick={() => setActiveNav('people')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-            <span>People</span>
-            <div className="bk-badge-small">7</div>
+          <div className="bk-nav-item" onClick={() => navigate('/explorers')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>
+            <span>Explorers</span>
           </div>
-          <div className={`bk-nav-item ${activeNav === 'posts' ? 'active' : ''}`} onClick={() => setActiveNav('posts')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <span>Posts & Signals</span>
-            <div className="bk-badge-small">12</div>
-          </div>
-          <div className={`bk-nav-item ${activeNav === 'feedback' ? 'active' : ''}`} onClick={() => setActiveNav('feedback')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-            <span>Feedback & Reviews</span>
-            <div className="bk-badge-small">3</div>
-          </div>
-          <div className={`bk-nav-item ${activeNav === 'articles' ? 'active' : ''}`} onClick={() => setActiveNav('articles')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-            <span>Knowledge & Articles</span>
-            <div className="bk-badge-small">5</div>
-          </div>
-          <div className={`bk-nav-item ${activeNav === 'marketplace' ? 'active' : ''}`} onClick={() => setActiveNav('marketplace')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-            <span>Marketplace Listings</span>
-            <div className="bk-badge-small">4</div>
-          </div>
-          <div className={`bk-nav-item ${activeNav === 'opportunities' ? 'active' : ''}`} onClick={() => setActiveNav('opportunities')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span>Opportunities</span>
-            <div className="bk-badge-small">5</div>
-          </div>
-          <div className={`bk-nav-item ${activeNav === 'collections' ? 'active' : ''}`} onClick={() => setActiveNav('collections')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            <span>Collections</span>
-            <div className="bk-badge-small">6</div>
-          </div>
-          <div className={`bk-nav-item ${activeNav === 'archived' ? 'active' : ''}`} onClick={() => setActiveNav('archived')}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
-            <span>Archived</span>
-            <div className="bk-badge-small">2</div>
+          <div className="bk-nav-item" onClick={(e) => {
+                      e.stopPropagation();
+                      setDiscoverDropdownOpen(!discoverDropdownOpen);
+                    }}>
+            <SearchIcon />
+            <span>Discover</span>
+            <svg 
+                      className={`discover-chevron ${discoverDropdownOpen ? 'open' : ''}`}
+                      width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    >
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    {discoverDropdownOpen && (
+                      <div className="discover-dropdown-content">
+                        <div 
+                          className="discover-dropdown-item"
+                          onClick={() => {
+                            setDiscoverDropdownOpen(false);
+                            navigate('/atlas');
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                          <span>Atlas</span>
+                        </div>
+                        <div 
+                          className="discover-dropdown-item"
+                          onClick={() => {
+                            setDiscoverDropdownOpen(false);
+                            navigate('/exchange');
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                          <span>Exchange</span>
+                        </div>
+                        <div 
+                          className="discover-dropdown-item"
+                          onClick={() => {
+                            setDiscoverDropdownOpen(false);
+                            navigate('/circles');
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                          <span>Circles</span>
+                        </div>
+                        <div 
+                          className="discover-dropdown-item"
+                          onClick={() => {
+                            setDiscoverDropdownOpen(false);
+                            navigate('/insights');
+                          }}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3v18h18"></path><path d="m19 9 12 16 5 9"></path></svg>
+                          <span>Insights</span>
+                        </div>
+                      </div>
+                    )}
           </div>
         </nav>
 
@@ -250,7 +278,7 @@ const BookmarksDashboard = () => {
           <div className="bk-main-col">
             <div className="bk-page-header">
               <div className="bk-title">
-                <h1>All Saved</h1>
+                <h1>Vault</h1>
                 <p>Everything you've bookmarked across the ecosystem.</p>
               </div>
             </div>
