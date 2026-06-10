@@ -9,14 +9,9 @@
       }
     }
   ],
-  "buildCommand": "npm run build && rm -rf dist && npm run build",
+  "buildCommand": "npm run build",
   "installCommand": "npm install",
   "cleanUrls": true,
-  "functions": {
-    "cache": {
-      "maxAge": 0
-    }
-  },
   "headers": [
     {
       "source": "/assets/(.*)",
