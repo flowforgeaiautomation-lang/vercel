@@ -148,34 +148,52 @@ const BookmarksDashboard = () => {
                     {discoverDropdownOpen && (
                       <div className="discover-dropdown-content">
                         <div 
-                          className="discover-dropdown-item"
-                          onClick={() => {
-                            setDiscoverDropdownOpen(false);
-                            navigate('/atlas');
-                          }}
-                        >
+                        className="discover-dropdown-item"
+                        onClick={() => {
+                          setDiscoverDropdownOpen(false);
+                          navigate('/atlas');
+                        }}
+                      >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                           <span>Atlas</span>
                         </div>
                         <div 
                           className="discover-dropdown-item"
-                          onClick={() => {
-                            setDiscoverDropdownOpen(false);
-                            navigate('/exchange');
+                          style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Don't navigate, just keep dropdown open
                           }}
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
                           <span>Exchange</span>
+                          <span style={{ 
+                            fontSize: '0.65rem', 
+                            padding: '3px 8px', 
+                            background: 'rgba(255,215,0,0.15)', 
+                            color: '#FFD700', 
+                            borderRadius: '999px',
+                            fontWeight: 600
+                          }}>Soon</span>
                         </div>
                         <div 
                           className="discover-dropdown-item"
-                          onClick={() => {
-                            setDiscoverDropdownOpen(false);
-                            navigate('/circles');
+                          style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Don't navigate, just keep dropdown open
                           }}
                         >
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                           <span>Circles</span>
+                          <span style={{ 
+                            fontSize: '0.65rem', 
+                            padding: '3px 8px', 
+                            background: 'rgba(255,215,0,0.15)', 
+                            color: '#FFD700', 
+                            borderRadius: '999px',
+                            fontWeight: 600
+                          }}>Soon</span>
                         </div>
                         <div 
                           className="discover-dropdown-item"
