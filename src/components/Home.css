@@ -8,7 +8,7 @@
 
 /* Sidebar */
 .sidebar {
-  width: 280px;
+  width: 240px;
   background: var(--bg-medium);
   border-right: 1px solid rgba(212, 175, 55, 0.1);
   display: flex;
@@ -17,16 +17,16 @@
 }
 
 .sidebar-header {
-  padding: 24px 20px;
+  padding: 18px 16px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,13 +36,13 @@
 }
 
 .logo-image {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
 .logo-fallback {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--primary-gold);
   font-weight: bold;
 }
@@ -52,7 +52,7 @@
 }
 
 .logo-text {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--primary-gold);
   letter-spacing: 1px;
@@ -60,22 +60,22 @@
 
 .sidebar-nav {
   flex: 1;
-  padding: 20px 0;
+  padding: 16px 0;
 }
 
 .nav-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 12px 16px;
   background: transparent;
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .nav-item:hover {
@@ -100,20 +100,20 @@
 }
 
 .sidebar-footer {
-  padding: 20px;
+  padding: 16px;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--primary-gold);
   display: flex;
@@ -121,7 +121,7 @@
   justify-content: center;
   color: var(--bg-dark);
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .user-details {
@@ -130,14 +130,14 @@
 
 .user-name {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .user-role {
   display: block;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -145,14 +145,14 @@
 
 .logout-btn {
   width: 100%;
-  padding: 10px;
+  padding: 9px;
   background: rgba(212, 175, 55, 0.1);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 6px;
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .logout-btn:hover {
@@ -169,32 +169,32 @@
 }
 
 .content-header {
-  padding: 32px 40px 24px;
+  padding: 24px 28px 18px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
 }
 
 .content-header h1 {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .content-header p {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
 }
 
 .content-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 280px;
   overflow: hidden;
 }
 
 /* Feed Section */
 .feed-section {
-  padding: 24px 40px;
+  padding: 18px 28px;
   overflow-y: auto;
 }
 
@@ -202,18 +202,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .section-header h2 {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .filter-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: rgba(212, 175, 55, 0.1);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 6px;
@@ -232,14 +232,14 @@
 .feed-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .feed-item {
   background: var(--bg-medium);
   border: 1px solid rgba(212, 175, 55, 0.1);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 10px;
+  padding: 16px;
   transition: all 0.3s ease;
 }
 
@@ -317,35 +317,35 @@
 
 /* Right Sidebar */
 .right-sidebar {
-  padding: 24px 20px;
+  padding: 18px 16px;
   border-left: 1px solid rgba(212, 175, 55, 0.1);
   overflow-y: auto;
 }
 
 .trending-section,
 .quick-actions {
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .trending-section h3,
 .quick-actions h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .trending-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .trending-item {
   background: var(--bg-medium);
   border: 1px solid rgba(212, 175, 55, 0.1);
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
   transition: all 0.3s ease;
 }
 
@@ -354,22 +354,22 @@
 }
 
 .trending-info h4 {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .trending-info p {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   line-height: 1.4;
 }
 
 .trending-change {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .trending-change.positive {
@@ -383,17 +383,17 @@
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 10px 14px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;

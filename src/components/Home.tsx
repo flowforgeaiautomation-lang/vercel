@@ -57,9 +57,10 @@ const Home: React.FC = () => {
   const menuItems = [
     { icon: '🏠', label: 'Home', active: true },
     { icon: '🔍', label: 'Discover', active: false },
-    { icon: '💬', label: 'Messages', active: false },
+    { icon: '💬', label: 'Inbox', active: false },
     { icon: '📊', label: 'Analytics', active: false },
     { icon: '⚙️', label: 'Settings', active: false },
+    { icon: '🔖', label: 'Vault', active: false, path: '/bookmarks' },
     { icon: '👤', label: 'Profile', active: false, path: '/profile' }
   ];
 
@@ -70,8 +71,8 @@ const Home: React.FC = () => {
         <div className="sidebar-header">
           <div className="logo">
             <img 
-              src="/images/triventa-logo.png" 
-              alt="TRIVENTA" 
+              src="/images/triveon-logo.png" 
+              alt="TRIVEON" 
               className="logo-image"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -81,7 +82,7 @@ const Home: React.FC = () => {
             />
             <div className="logo-fallback hidden">◆</div>
           </div>
-          <span className="logo-text">TRIVENTA</span>
+          <span className="logo-text">TRIVEON</span>
         </div>
         
         <nav className="sidebar-nav">
@@ -117,7 +118,7 @@ const Home: React.FC = () => {
       <div className="main-content">
         <header className="content-header">
           <h1>Welcome back, {selectedRole}</h1>
-          <p>Here's what's happening in the TRIVENTA ecosystem</p>
+          <p>Here's what's happening in the TRIVEON ecosystem</p>
         </header>
 
         <div className="content-grid">

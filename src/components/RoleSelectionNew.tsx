@@ -19,8 +19,8 @@ const RoleSelectionNew: React.FC = () => {
       )
     },
     {
-      id: 'capitalist',
-      title: 'CAPITALIST',
+      id: 'catalyst',
+      title: 'CATALYST',
       description: 'Invest and scale promising ventures',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -51,7 +51,7 @@ const RoleSelectionNew: React.FC = () => {
     <div className="role-selection-container">
       <div className="role-selection-content">
         <h1 className="role-selection-title">Choose Your Path</h1>
-        <p className="role-selection-subtitle">Select your role in the TRIVENTA ecosystem</p>
+        <p className="role-selection-subtitle">Select your role in the TRIVEON ecosystem</p>
         
         <div className="roles-grid">
           {roles.map((role) => (
