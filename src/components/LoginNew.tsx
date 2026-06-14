@@ -5,6 +5,7 @@ import './LoginNew.css';
 const LoginNew: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -21,14 +22,14 @@ const LoginNew: React.FC = () => {
 
   return (
     <div className="login-container">
-      {/* Left Side - TRIVENTA Branding */}
+      {/* Left Side - TRIVEON Branding */}
       <div className="login-left">
         <div className="brand-container">
           <div className="logo-container">
-            <div className="triventa-logo">
+            <div className="triveon-logo">
               <img 
-                src="/images/triventa-logo.png" 
-                alt="TRIVENTA" 
+                src="/images/triveon-logo.png" 
+                alt="TRIVEON" 
                 className="logo-image"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -39,7 +40,7 @@ const LoginNew: React.FC = () => {
               <div className="logo-fallback hidden">◆</div>
             </div>
           </div>
-          <h1 className="brand-title">TRIVENTA</h1>
+          <h1 className="brand-title">TRIVEON</h1>
           <p className="brand-tagline">The Operating System of Ambition</p>
           <div className="brand-features">
             <div className="feature">
@@ -52,13 +53,17 @@ const LoginNew: React.FC = () => {
             </div>
             <div className="feature">
               <svg className="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M22 12H18L15 21L9 3L6 12H2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="2" y1="12" x2="22" y2="12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <span>Signal</span>
             </div>
             <div className="feature">
               <svg className="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M21 16V8A2 2 0 0 0 19 6H7L2 12L7 18H19A2 2 0 0 0 21 16Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="16 12 12 8 8 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="8" x2="12" y2="16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <span>Scale</span>
             </div>
@@ -69,7 +74,7 @@ const LoginNew: React.FC = () => {
       {/* Right Side - Login Form */}
       <div className="login-right">
         <div className="login-form-container">
-          <h2 className="login-title">Welcome to TRIVENTA</h2>
+          <h2 className="login-title">Welcome to TRIVEON</h2>
           <p className="login-subtitle">Enter your credentials to access the ecosystem</p>
           
           <form onSubmit={handleSubmit} className="login-form">
@@ -87,14 +92,33 @@ const LoginNew: React.FC = () => {
             
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+              <div className="password-input-container">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
             
             <button type="submit" className="login-button" disabled={isLoading}>

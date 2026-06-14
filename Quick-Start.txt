@@ -1,0 +1,37 @@
+==============================================
+TRIVEON - The Operating System of Ambition
+==============================================
+
+✅ YOUR EXACT APP IS SAFE IN d:\vercel\src
+✅ YOUR DIST FOLDER IS IN d:\vercel\dist
+✅ YOUR PUBLIC FOLDER IS IN d:\vercel\public
+
+==============================================
+HOW TO START PREVIEW ON YOUR DESKTOP
+==============================================
+1. Double-click "Start-TRIVEON.bat" in d:\vercel
+2. Open your browser and go to http://localhost:3003
+3. Done! 🚀
+
+==============================================
+NEVER DELETE THESE FOLDERS/FILES:
+==============================================
+- d:\vercel\src
+- d:\vercel\public
+- d:\vercel\node_modules
+- d:\vercel\package.json
+- d:\vercel\package-lock.json
+- d:\vercel\vite.config.ts
+- d:\vercel\index.html
+- d:\vercel\dist (we just made this, keep it too!)
+
+==============================================
+IF YOU NEED TO REBUILD:
+==============================================
+(we used esbuild to build this, but we have node_modules too!)
+- If you update src files, just rerun esbuild (we can help with that!)
+- Or use the Start-TRIVEON.bat which uses the current dist build!
+
+==============================================
+TRIVEON - Build • Signal • Scale
+==============================================

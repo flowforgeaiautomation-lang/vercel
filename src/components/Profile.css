@@ -11,7 +11,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 16px 28px;
   background: var(--bg-medium);
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
 }
@@ -20,11 +20,11 @@
   background: transparent;
   border: 1px solid rgba(212, 175, 55, 0.3);
   color: var(--text-secondary);
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .back-button:hover {
@@ -36,11 +36,11 @@
   background: var(--primary-gold);
   color: var(--bg-dark);
   border: none;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
@@ -52,17 +52,17 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .logo-image {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
 .logo-fallback {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--primary-gold);
   font-weight: bold;
 }
@@ -73,16 +73,16 @@
 
 /* Profile Summary */
 .profile-summary {
-  padding: 40px;
+  padding: 28px;
   background: var(--bg-medium);
   border-radius: 12px;
-  margin: 20px 40px;
+  margin: 16px 28px;
   border: 1px solid rgba(212, 175, 55, 0.1);
 }
 
 .profile-info {
   display: flex;
-  gap: 24px;
+  gap: 18px;
   align-items: flex-start;
 }
 
@@ -92,8 +92,8 @@
 }
 
 .profile-image {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 12px;
   object-fit: cover;
   border: 3px solid var(--primary-gold);
@@ -101,10 +101,10 @@
 
 .verification-badge {
   position: absolute;
-  bottom: -5px;
-  right: -5px;
-  width: 24px;
-  height: 24px;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
   background: var(--primary-gold);
   border-radius: 50%;
   display: flex;
@@ -117,48 +117,48 @@
 }
 
 .founder-name {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .founder-badge {
   background: var(--primary-gold);
   color: var(--bg-dark);
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .founder-headline {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--primary-gold);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
 }
 
 .founder-description {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .founder-meta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .location, .website {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
 }
 
@@ -166,10 +166,10 @@
 .credibility-strip {
   display: flex;
   justify-content: space-between;
-  padding: 24px 0;
+  padding: 18px 0;
   border-top: 1px solid rgba(212, 175, 55, 0.1);
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-  margin: 24px 0;
+  margin: 18px 0;
 }
 
 .credibility-item {
@@ -201,9 +201,9 @@
 /* Content Grid */
 .profile-content-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 40px;
-  padding: 0 40px 40px;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  padding: 0 28px 28px;
 }
 
 /* Profile Feed */
@@ -212,23 +212,23 @@
 }
 
 .section-title {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .feed-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 .feed-item {
   background: var(--bg-medium);
   border: 1px solid rgba(212, 175, 55, 0.1);
   border-radius: 8px;
-  padding: 20px;
+  padding: 16px;
   transition: all 0.3s ease;
 }
 
@@ -241,47 +241,47 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .feed-item-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .feed-type {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--primary-gold);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  padding: 4px 8px;
+  padding: 3px 7px;
   background: rgba(212, 175, 55, 0.1);
   border-radius: 4px;
 }
 
 .feed-time {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
 .feed-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .feed-description {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .feed-author {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
@@ -289,28 +289,28 @@
 .profile-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 24px;
 }
 
 .trending-section h3,
 .quick-actions h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .trending-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .trending-item {
   background: var(--bg-medium);
   border: 1px solid rgba(212, 175, 55, 0.1);
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
   transition: all 0.3s ease;
 }
 
@@ -319,21 +319,21 @@
 }
 
 .trending-item h4 {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .trending-item p {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .trending-change {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -346,23 +346,23 @@
 }
 
 .quick-actions {
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 10px 14px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;

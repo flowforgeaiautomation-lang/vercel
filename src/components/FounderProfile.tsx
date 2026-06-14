@@ -10,18 +10,18 @@ const FounderProfile: React.FC = () => {
           <div className="profile-image-container">
             <img 
               src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face" 
-              alt="Arjun Mehta" 
+              alt="Unnati Chaudhary" 
               className="profile-image"
             />
             <div className="verification-badge">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#D4AF37"/>
+                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10C20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#FFD700"/>
               </svg>
             </div>
           </div>
           <div className="profile-info">
             <div className="name-row">
-              <h1 className="founder-name">Arjun Mehta</h1>
+              <h1 className="founder-name">Unnati Chaudhary</h1>
               <span className="founder-badge">Founder</span>
             </div>
             <p className="founder-headline">Founder & CEO @ Synthara</p>
@@ -197,9 +197,9 @@ const FounderProfile: React.FC = () => {
             </div>
           </div>
           <p className="testimonial">
-            "Arjun is a sharp builder with strong execution skills and a clear vision."
+            "Unnati is a sharp builder with strong execution skills and a clear vision."
           </p>
-          <div className="testimonial-author">- Neeraj K., Investor</div>
+          <div className="testimonial-author">- Rahul K., Investor</div>
         </div>
 
         {/* Bottom Action Bar */}

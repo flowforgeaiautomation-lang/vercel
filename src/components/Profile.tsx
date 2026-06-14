@@ -31,9 +31,9 @@ const Profile: React.FC = () => {
               const firebase = (window as any).firebase;
               const app = firebase.initializeApp({
                 apiKey: "AIzaSyBkZ8P7Y3Q2rLmX9t1W5vK6nG7hJ4fQ",
-                authDomain: "triventa.firebaseapp.com",
-                projectId: "triventa",
-                storageBucket: "triventa.appspot.com",
+                authDomain: "triveon.firebaseapp.com",
+                projectId: "triveon",
+                storageBucket: "triveon.appspot.com",
                 messagingSenderId: "123456789",
                 appId: "1:123456789:web:abcdef123456"
               });
@@ -136,7 +136,7 @@ const Profile: React.FC = () => {
           alignItems: 'center', 
           height: '100vh',
           flexDirection: 'column',
-          color: '#D4AF37',
+          color: '#FFD700',
           fontSize: '18px'
         }}>
           <div style={{ fontSize: '24px', marginBottom: '16px' }}>◆</div>
@@ -165,7 +165,7 @@ const Profile: React.FC = () => {
             style={{
               marginTop: '16px',
               padding: '12px 24px',
-              backgroundColor: '#D4AF37',
+              backgroundColor: '#FFD700',
               color: '#0A0A0F',
               border: 'none',
               borderRadius: '8px',
@@ -191,9 +191,9 @@ const Profile: React.FC = () => {
         </button>
         <div className="logo">
           <img 
-            src="/images/triventa-logo.png" 
-            alt="TRIVENTA" 
-            className="logo-image"
+              src="/images/triveon-logo.png" 
+              alt="TRIVEON" 
+              className="logo-image"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
@@ -215,7 +215,7 @@ const Profile: React.FC = () => {
             />
             <div className="verification-badge">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10C20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L8 12.17L15 6L8 15Z" fill="#D4AF37"/>
+                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10C20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L8 12.17L15 6L8 15Z" fill="#FFD700"/>
               </svg>
             </div>
           </div>

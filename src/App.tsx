@@ -1,10 +1,46 @@
-import React, { useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import LoginNew from './components/LoginNew';
+import TriveonLogin from './components/TriveonLogin';
 import RoleSelectionNew from './components/RoleSelectionNew';
-import Home from './components/Home';
-import ProfileNew from './components/ProfileNew';
+import RoleSelection from './components/RoleSelection';
+import HomeDashboard from './components/HomeDashboard';
+import ProfilePremium from './components/ProfilePremium';
+import StartupDashboard from './components/StartupDashboard';
+import MyStartup from './components/MyStartup';
+import StartupStudio from './components/StartupStudio';
+import InvestorDashboard from './components/InvestorDashboard';
+import MyInvestments from './components/MyInvestments';
+import CatalystStudio from './components/CatalystStudio';
+import ExplorerDashboard from './components/ExplorerDashboard';
+import MyReviews from './components/MyReviews';
+import FeedbackHub from './components/FeedbackHub';
+import NotificationsDashboard from './components/NotificationsDashboard';
+import BookmarksDashboard from './components/BookmarksDashboard';
+import MessagesDashboard from './components/MessagesDashboard';
+import TriveonSettings from './components/TriveonSettings';
+import AtlasDashboard from './components/AtlasDashboard';
+import InsightsDashboard from './components/InsightsDashboard';
+import AICopilot from './components/AICopilot';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { UserProvider } from './contexts/UserContext';
+import { PostProvider } from './contexts/PostContext';
 import './App.css';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#000' }}>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
 
 function AppWithUniverse({ children }: { children: React.ReactNode }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -74,30 +110,95 @@ function AppWithUniverse({ children }: { children: React.ReactNode }) {
   );
 }
 
-function App() {
+// Global AI button component
+function GlobalAICopilot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  
+  // Don't show on login pages
+  const isAuthPage = location.pathname === '/' || location.pathname.includes('login') || location.pathname.includes('role-selection');
+  
+  if (isAuthPage) return null;
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={
-          <AppWithUniverse>
-            <LoginNew />
-          </AppWithUniverse>
-        } />
-        <Route path="/role-selection" element={
-          <AppWithUniverse>
-            <RoleSelectionNew />
-          </AppWithUniverse>
-        } />
-        <Route path="/profile" element={
-          <AppWithUniverse>
-            <ProfileNew />
-          </AppWithUniverse>
-        } />
-      </Routes>
-    </Router>
+    <>
+      {/* Floating AI Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+          border: 'none',
+          boxShadow: '0 6px 20px rgba(255, 165, 0, 0.4)',
+          cursor: 'pointer',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.3s, box-shadow 0.3s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 165, 0, 0.5)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 165, 0, 0.4)';
+        }}
+      >
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" />
+        </svg>
+      </button>
+      
+      {/* AI Copilot Panel */}
+      {isOpen && <AICopilot isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+    </>
   );
 }
 
-// TRIVENTA - The Operating System of Ambition
+function App() {
+  return (
+    <AuthProvider>
+      <UserProvider>
+        <PostProvider>
+          <Router>
+            <AppWithUniverse>
+              <Routes>
+                <Route path="/" element={<TriveonLogin />} />
+                <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
+                <Route path="/home" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePremium /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><TriveonSettings /></ProtectedRoute>} />
+                <Route path="/startups" element={<ProtectedRoute><StartupDashboard /></ProtectedRoute>} />
+                <Route path="/atlas" element={<ProtectedRoute><AtlasDashboard /></ProtectedRoute>} />
+                <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
+                <Route path="/startup-studio" element={<ProtectedRoute><StartupStudio /></ProtectedRoute>} />
+                <Route path="/my-startup" element={<ProtectedRoute><MyStartup /></ProtectedRoute>} />
+                <Route path="/investors" element={<ProtectedRoute><InvestorDashboard /></ProtectedRoute>} />
+                <Route path="/my-investments" element={<ProtectedRoute><MyInvestments /></ProtectedRoute>} />
+                <Route path="/catalyst-studio" element={<ProtectedRoute><CatalystStudio /></ProtectedRoute>} />
+                <Route path="/explorers" element={<ProtectedRoute><ExplorerDashboard /></ProtectedRoute>} />
+                <Route path="/my-reviews" element={<ProtectedRoute><MyReviews /></ProtectedRoute>} />
+                <Route path="/feedback-hub" element={<ProtectedRoute><FeedbackHub /></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute><NotificationsDashboard /></ProtectedRoute>} />
+                <Route path="/bookmarks" element={<ProtectedRoute><BookmarksDashboard /></ProtectedRoute>} />
+                <Route path="/messages" element={<ProtectedRoute><MessagesDashboard /></ProtectedRoute>} />
+              </Routes>
+              <GlobalAICopilot />
+            </AppWithUniverse>
+          </Router>
+        </PostProvider>
+      </UserProvider>
+    </AuthProvider>
+  );
+}
+
+// TRIVEON - The Operating System of Ambition
 export default App;

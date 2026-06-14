@@ -1,4 +1,4 @@
-/* TRIVENTA Premium Dark Founder Profile */
+/* TRIVEON Premium Dark Founder Profile */
 
 /* Base Styles */
 .founder-profile {
@@ -26,7 +26,7 @@
 }
 
 .profile-container {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   position: relative;
   z-index: 2;
@@ -37,7 +37,7 @@
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.4),
     0 0 80px rgba(212, 175, 55, 0.05);
-  padding: 30px;
+  padding: 24px;
   animation: fadeInUp 0.8s ease-out;
 }
 
@@ -56,9 +56,9 @@
 .profile-header {
   display: flex;
   align-items: flex-start;
-  gap: 25px;
-  margin-bottom: 25px;
-  padding-bottom: 25px;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.1);
 }
 
@@ -68,8 +68,8 @@
 }
 
 .profile-image {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(212, 175, 55, 0.2);
@@ -78,10 +78,10 @@
 
 .verification-badge {
   position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 28px;
-  height: 28px;
+  bottom: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
   background: rgba(212, 175, 55, 0.9);
   border-radius: 50%;
   display: flex;
@@ -97,12 +97,12 @@
 .name-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
 .founder-name {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
   margin: 0;
   background: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
@@ -114,9 +114,9 @@
 .founder-badge {
   background: rgba(212, 175, 55, 0.15);
   color: #d4af37;
-  padding: 4px 12px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -124,23 +124,23 @@
 }
 
 .founder-headline {
-  font-size: 18px;
+  font-size: 16px;
   color: #b0b0b0;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   font-weight: 500;
 }
 
 .founder-description {
-  font-size: 14px;
+  font-size: 13px;
   color: #888888;
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   line-height: 1.5;
 }
 
 .founder-meta {
   display: flex;
-  gap: 20px;
-  font-size: 13px;
+  gap: 16px;
+  font-size: 12px;
   color: #666666;
 }
 
@@ -155,8 +155,8 @@
   background: rgba(212, 175, 55, 0.05);
   border: 1px solid rgba(212, 175, 55, 0.1);
   border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 25px;
+  padding: 16px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -170,43 +170,43 @@
 
 .credibility-label {
   display: block;
-  font-size: 11px;
+  font-size: 10px;
   color: #888888;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   font-weight: 600;
 }
 
 .credibility-value {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   color: #d4af37;
   font-weight: 700;
 }
 
 .credibility-separator {
   width: 1px;
-  height: 40px;
+  height: 32px;
   background: rgba(212, 175, 55, 0.1);
 }
 
 /* Metrics Grid */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .metric-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(212, 175, 55, 0.1);
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   transition: all 0.3s ease;
   cursor: pointer;
 }

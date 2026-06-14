@@ -12,43 +12,43 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
+  padding: 40px 28px;
   position: relative;
 }
 
 .brand-container {
   text-align: center;
-  max-width: 500px;
+  max-width: 420px;
   z-index: 10;
 }
 
 .logo-container {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
-.triventa-logo {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 24px;
+.triveon-logo {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 18px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 3px solid var(--primary-gold);
-  border-radius: 20px;
+  border-radius: 16px;
   background: rgba(0, 29, 61, 0.8);
   box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
   animation: float 4s ease-in-out infinite;
 }
 
 .logo-image {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
 }
 
 .logo-fallback {
-  font-size: 48px;
+  font-size: 36px;
   color: var(--primary-gold);
   font-weight: bold;
 }
@@ -58,18 +58,18 @@
 }
 
 .brand-title {
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: 800;
   color: var(--primary-gold);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
   letter-spacing: 2px;
 }
 
 .brand-tagline {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  margin-bottom: 48px;
+  margin-bottom: 32px;
   font-weight: 300;
   letter-spacing: 1px;
 }
@@ -77,8 +77,8 @@
 .brand-features {
   display: flex;
   justify-content: center;
-  gap: 48px;
-  margin-top: 60px;
+  gap: 32px;
+  margin-top: 40px;
 }
 
 .feature {
@@ -115,7 +115,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
+  padding: 40px 28px;
   background: rgba(0, 29, 61, 0.6);
   backdrop-filter: blur(10px);
   border-left: 1px solid rgba(212, 175, 55, 0.2);
@@ -123,29 +123,29 @@
 
 .login-form-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
   z-index: 10;
 }
 
 .login-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   text-align: center;
 }
 
 .login-subtitle {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text-secondary);
-  margin-bottom: 40px;
+  margin-bottom: 28px;
   text-align: center;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 .form-group {
@@ -162,12 +162,12 @@
 
 .form-group input {
   width: 100%;
-  padding: 16px;
+  padding: 12px 14px;
   background: rgba(0, 53, 102, 0.4);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: 15px;
   transition: all 0.3s ease;
 }
 
@@ -181,18 +181,47 @@
   color: var(--text-muted);
 }
 
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  padding-right: 48px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--primary-gold);
+}
+
 .login-button {
   width: 100%;
-  padding: 16px;
+  padding: 13px;
   background: var(--primary-gold);
   color: var(--bg-dark);
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .login-button:hover:not(:disabled) {
@@ -208,7 +237,7 @@
 
 .login-footer {
   text-align: center;
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 .login-footer p {

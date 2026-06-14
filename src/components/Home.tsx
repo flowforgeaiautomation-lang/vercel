@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 import './Home.css';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { userData } = useUser();
   const [selectedRole, setSelectedRole] = useState<string>('');
 
   useEffect(() => {
@@ -57,9 +59,10 @@ const Home: React.FC = () => {
   const menuItems = [
     { icon: '🏠', label: 'Home', active: true },
     { icon: '🔍', label: 'Discover', active: false },
-    { icon: '💬', label: 'Messages', active: false },
+    { icon: '💬', label: 'Inbox', active: false },
     { icon: '📊', label: 'Analytics', active: false },
     { icon: '⚙️', label: 'Settings', active: false },
+    { icon: '🔖', label: 'Vault', active: false, path: '/bookmarks' },
     { icon: '👤', label: 'Profile', active: false, path: '/profile' }
   ];
 
@@ -70,8 +73,8 @@ const Home: React.FC = () => {
         <div className="sidebar-header">
           <div className="logo">
             <img 
-              src="/images/triventa-logo.png" 
-              alt="TRIVENTA" 
+              src="/images/triveon-logo.png" 
+              alt="TRIVEON" 
               className="logo-image"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -81,7 +84,7 @@ const Home: React.FC = () => {
             />
             <div className="logo-fallback hidden">◆</div>
           </div>
-          <span className="logo-text">TRIVENTA</span>
+          <span className="logo-text">TRIVEON</span>
         </div>
         
         <nav className="sidebar-nav">
@@ -100,10 +103,10 @@ const Home: React.FC = () => {
         <div className="sidebar-footer">
           <div className="user-info">
             <div className="user-avatar">
-              <span>{selectedRole.charAt(0).toUpperCase()}</span>
+              <span>{(userData?.profile?.name || selectedRole).charAt(0).toUpperCase()}</span>
             </div>
             <div className="user-details">
-              <span className="user-name">User</span>
+              <span className="user-name">{userData?.profile?.name || 'User'}</span>
               <span className="user-role">{selectedRole.toUpperCase()}</span>
             </div>
           </div>
@@ -116,8 +119,8 @@ const Home: React.FC = () => {
       {/* Main Content */}
       <div className="main-content">
         <header className="content-header">
-          <h1>Welcome back, {selectedRole}</h1>
-          <p>Here's what's happening in the TRIVENTA ecosystem</p>
+          <h1>Welcome back, {userData?.profile?.name || selectedRole}!</h1>
+          <p>Here's what's happening in the TRIVEON ecosystem</p>
         </header>
 
         <div className="content-grid">
