@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import LoginNew from './components/LoginNew';
 import TriarcoraLogin from './components/TriarcoraLogin';
 import RoleSelectionNew from './components/RoleSelectionNew';
@@ -23,7 +23,7 @@ import AtlasDashboard from './components/AtlasDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import AICopilot from './components/AICopilot';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { UserProvider } from './contexts/UserContext';
+import { UserProvider, useUser } from './contexts/UserContext';
 import { PostProvider } from './contexts/PostContext';
 import './App.css';
 
@@ -114,6 +114,109 @@ function AppWithUniverse({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Welcome Modal
+function WelcomeModal() {
+  const { userData, updateUserData } = useUser();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (userData && !userData.hasSeenWelcomeModal) {
+      setIsOpen(true);
+    }
+  }, [userData]);
+
+  const handleCompleteProfile = () => {
+    updateUserData({ hasSeenWelcomeModal: true });
+    setIsOpen(false);
+    navigate('/profile');
+  };
+
+  const handleGoToHome = () => {
+    updateUserData({ hasSeenWelcomeModal: true });
+    setIsOpen(false);
+    navigate('/home');
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="premium-modal-overlay"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000
+      }}
+    >
+      <div
+        className="premium-modal"
+        style={{
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+          borderRadius: '16px',
+          padding: '32px',
+          maxWidth: '480px',
+          width: '90%',
+          textAlign: 'center',
+          border: '1px solid rgba(255,215,0,0.3)',
+          boxShadow: '0 8px 32px rgba(255,215,0,0.15)'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ color: '#FFD700', marginBottom: '16px', fontSize: '28px' }}>
+          Welcome to TRIARCORA
+        </h2>
+        <p style={{ color: '#ccc', marginBottom: '32px', fontSize: '16px', lineHeight: '1.5' }}>
+          Hello {userData?.profile?.name || 'User'} 👋<br />
+          <br />
+          Your account has been created successfully.<br />
+          <br />
+          You can now discover startups, investors, explorers, opportunities, insights, and connections across the ecosystem.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <button
+            style={{
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              color: '#000',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+            onClick={handleCompleteProfile}
+          >
+            Complete Profile
+          </button>
+          <button
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.2)',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+            onClick={handleGoToHome}
+          >
+            Go To Home
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Global AI button component
 function GlobalAICopilot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -195,6 +298,7 @@ function App() {
                 <Route path="/bookmarks" element={<ProtectedRoute><BookmarksDashboard /></ProtectedRoute>} />
                 <Route path="/messages" element={<ProtectedRoute><MessagesDashboard /></ProtectedRoute>} />
               </Routes>
+              <WelcomeModal />
               <GlobalAICopilot />
             </AppWithUniverse>
           </Router>

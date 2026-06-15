@@ -336,6 +336,7 @@ interface UserData {
   activities?: any[];
   assets?: any[];
   settings: SettingsData;
+  hasSeenWelcomeModal: boolean;
 }
 
 interface UserContextType {
@@ -654,6 +655,7 @@ const getDemoUserData = (): UserData => {
     extraRole: null,
     activeProfileView: role,
     isDemo: true,
+    hasSeenWelcomeModal: false,
     prestigeSystem: {
       currentStarId: 5,
       currentStarName: 'CASTOR',
@@ -830,6 +832,7 @@ const getEmptyRealUserData = (userId: string, role: string, name: string = '', e
     isDemo: false,
     displayName: name,
     email: email,
+    hasSeenWelcomeModal: false,
     prestigeSystem: {
       currentStarId: 1,
       currentStarName: 'ASTRA',
