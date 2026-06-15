@@ -57,7 +57,7 @@ const CatalystStudio = () => {
             </svg>
           </div>
           <div className="brand-text">
-            <span className="brand-name">TRIVEON</span>
+            <span className="brand-name">TRIARCORA</span>
             <span className="brand-tagline">INVEST. GROW. IMPACT.</span>
           </div>
         </div>

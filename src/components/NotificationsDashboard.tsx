@@ -92,7 +92,7 @@ const NotificationsDashboard = () => {
   }, []);
 
   const getUserName = () => {
-    return localStorage.getItem('triveon-name') || userData?.profile?.name || profile?.name || 'Umat Chaudhary';
+    return localStorage.getItem('triarcora-name') || userData?.profile?.name || profile?.name || 'Umat Chaudhary';
   };
 
   const getUserRole = () => {
@@ -206,7 +206,7 @@ const NotificationsDashboard = () => {
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
           </div>
-          <span className="nd-logo-text">TRIVEON</span>
+          <span className="nd-logo-text">TRIARCORA</span>
         </div>
 
         <div className="nd-messaging-header">

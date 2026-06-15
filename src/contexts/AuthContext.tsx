@@ -43,6 +43,7 @@ interface AuthContextType {
   user: User | null;
   profile: ProfileData | null;
   loading: boolean;
+  isDemoMode: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -50,6 +51,7 @@ interface AuthContextType {
   quickResetPassword: (email: string, newPassword: string, confirmPassword: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateProfileRole: (role: string) => Promise<void>;
+  setDemoMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -90,6 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -141,9 +144,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setProfile(newProfile);
     
     // Save email, password, and name in localStorage
-    localStorage.setItem('triveon-email', email);
-    localStorage.setItem('triveon-password', password);
-    localStorage.setItem('triveon-name', name);
+    localStorage.setItem('triarcora-email', email);
+    localStorage.setItem('triarcora-password', password);
+    localStorage.setItem('triarcora-name', name);
   };
 
   const login = async (email: string, password: string) => {
@@ -152,8 +155,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setProfile(userProfile);
     
     // Save email and password in localStorage
-    localStorage.setItem('triveon-email', email);
-    localStorage.setItem('triveon-password', password);
+    localStorage.setItem('triarcora-email', email);
+    localStorage.setItem('triarcora-password', password);
   };
 
   const logout = async () => {
@@ -181,8 +184,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const quickResetPassword = async (email: string, newPassword: string) => {
-    localStorage.setItem('triveon-email', email);
-    localStorage.setItem('triveon-password', newPassword);
+    localStorage.setItem('triarcora-email', email);
+    localStorage.setItem('triarcora-password', newPassword);
     console.log('[AuthContext] Password saved locally:', email);
   };
 
@@ -210,18 +213,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const setDemoMode = () => {
+    setIsDemoMode(true);
+    setProfile({
+      uid: 'demo-user',
+      name: 'Demo User',
+      email: 'demo@triarcora.com',
+      photoURL: '',
+      role: null,
+      accountType: 'personal',
+      createdAt: new Date(),
+      isVerified: true,
+      prestigeLevel: 1,
+      trustIndex: 50
+    });
+    setUser(null);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
       profile, 
       loading, 
+      isDemoMode,
       login, 
       signup, 
       logout, 
       googleLogin, 
       quickResetPassword, 
       changePassword,
-      updateProfileRole 
+      updateProfileRole,
+      setDemoMode
     }}>
       {children}
     </AuthContext.Provider>

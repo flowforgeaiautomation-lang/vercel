@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import LoginNew from './components/LoginNew';
-import TriveonLogin from './components/TriveonLogin';
+import TriarcoraLogin from './components/TriarcoraLogin';
 import RoleSelectionNew from './components/RoleSelectionNew';
 import RoleSelection from './components/RoleSelection';
 import HomeDashboard from './components/HomeDashboard';
@@ -18,7 +18,7 @@ import FeedbackHub from './components/FeedbackHub';
 import NotificationsDashboard from './components/NotificationsDashboard';
 import BookmarksDashboard from './components/BookmarksDashboard';
 import MessagesDashboard from './components/MessagesDashboard';
-import TriveonSettings from './components/TriveonSettings';
+import TriarcoraSettings from './components/TriarcoraSettings';
 import AtlasDashboard from './components/AtlasDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import AICopilot from './components/AICopilot';
@@ -28,14 +28,18 @@ import { PostProvider } from './contexts/PostContext';
 import './App.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isDemoMode, profile } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#000' }}>Loading...</div>;
   }
 
-  if (!user) {
+  if (!user && !isDemoMode) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  if (isDemoMode && !profile) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
@@ -171,11 +175,11 @@ function App() {
           <Router>
             <AppWithUniverse>
               <Routes>
-                <Route path="/" element={<TriveonLogin />} />
-                <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
-                <Route path="/home" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><ProfilePremium /></ProtectedRoute>} />
-                <Route path="/settings" element={<ProtectedRoute><TriveonSettings /></ProtectedRoute>} />
+              <Route path="/" element={<TriarcoraLogin />} />
+              <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
+              <Route path="/home" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePremium /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><TriarcoraSettings /></ProtectedRoute>} />
                 <Route path="/startups" element={<ProtectedRoute><StartupDashboard /></ProtectedRoute>} />
                 <Route path="/atlas" element={<ProtectedRoute><AtlasDashboard /></ProtectedRoute>} />
                 <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
@@ -200,5 +204,5 @@ function App() {
   );
 }
 
-// TRIVEON - The Operating System of Ambition
+// TRIARCORA - The Operating System of Ambition
 export default App;

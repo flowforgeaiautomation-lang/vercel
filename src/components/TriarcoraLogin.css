@@ -40,7 +40,7 @@ body {
   background: linear-gradient(180deg, var(--gold-light), var(--gold-primary));
 }
 
-.triveon-login-container {
+.triarcora-login-container {
   position: relative;
   width: 100%;
   min-height: 100vh;
@@ -479,7 +479,7 @@ body {
     min-height: auto;
   }
 
-  .triveon-login-container {
+  .triarcora-login-container {
     min-height: auto;
   }
 

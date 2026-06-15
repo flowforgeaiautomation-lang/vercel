@@ -5,7 +5,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '../firebase';
 
-// TRIVEON PRESTIGE STAR SYSTEM
+// TRIARCORA PRESTIGE STAR SYSTEM
 interface PrestigeStar {
   id: number;
   name: string;
@@ -411,7 +411,7 @@ const ROLE_DATA: Record<string, RoleData> = {
   EXPLORER: {
     name: "Alex Explorer",
     title: "Curious. Connected. Growing Together.",
-    bio: "Exploring ideas, supporting founders, and learning every day in the Triveon ecosystem.",
+    bio: "Exploring ideas, supporting founders, and learning every day in the Triarcora ecosystem.",
     location: "Global Citizen",
     badges: ["EXPLORER"],
     verificationColor: "#3B82F6",
@@ -643,7 +643,7 @@ const getDemoUserData = (): UserData => {
   const selectedRole = localStorage.getItem('selectedRole') || 'ARCHITECT';
   const role = selectedRole.toUpperCase();
   const roleData = ROLE_DATA[role] || ROLE_DATA['ARCHITECT'];
-  const savedName = localStorage.getItem('triveon-name');
+  const savedName = localStorage.getItem('triarcora-name');
   
   return {
     uid: 'demo-user',
@@ -769,7 +769,7 @@ const getDemoUserData = (): UserData => {
       },
       {
         id: '4',
-        title: 'Spoke at TRIVEON Summit \'24',
+        title: 'Spoke at TRIARCORA Summit \'24',
         description: '',
         year: '2024'
       },
@@ -781,7 +781,7 @@ const getDemoUserData = (): UserData => {
       },
       {
         id: '6',
-        title: 'Joined TRIVEON',
+        title: 'Joined TRIARCORA',
         description: '',
         year: '2022'
       }
@@ -986,7 +986,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             }
           }
           // Apply saved name from localStorage (highest priority)
-          const savedName = localStorage.getItem('triveon-name');
+          const savedName = localStorage.getItem('triarcora-name');
           if (savedName) {
             firestoreData.profile.name = savedName;
           }
@@ -1026,7 +1026,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             demoData = getDemoUserData();
           }
           // Apply saved name from localStorage (highest priority)
-          const savedName = localStorage.getItem('triveon-name');
+          const savedName = localStorage.getItem('triarcora-name');
           if (savedName) {
             demoData.profile.name = savedName;
           }
@@ -1040,7 +1040,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Fallback to demo mode on error
         const demoData = getDemoUserData();
         // Apply saved name from localStorage (highest priority)
-        const savedName = localStorage.getItem('triveon-name');
+        const savedName = localStorage.getItem('triarcora-name');
         if (savedName) {
           demoData.profile.name = savedName;
         }
@@ -1065,7 +1065,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Save name to localStorage if it's present in newData or updated
       if (updated.profile?.name) {
-        localStorage.setItem('triveon-name', updated.profile.name);
+        localStorage.setItem('triarcora-name', updated.profile.name);
       }
       
       if (user) {

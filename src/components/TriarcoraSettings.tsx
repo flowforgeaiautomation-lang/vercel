@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useAuth } from '../contexts/AuthContext';
-import './TriveonSettings.css';
+import './TriarcoraSettings.css';
 
 type SettingsSection = 
   | 'account-preferences' 
@@ -147,7 +147,7 @@ const searchIndex: Record<string, SettingsSection[]> = {
   'delete account': ['account-actions']
 };
 
-const TriveonSettings: React.FC = () => {
+const TriarcoraSettings: React.FC = () => {
   const navigate = useNavigate();
   const { userData, updateSettings, updateUserData, uploadImage, addExtraRole, deleteExtraRole, switchProfile } = useUser();
   const { logout, changePassword } = useAuth();
@@ -348,7 +348,7 @@ const TriveonSettings: React.FC = () => {
       setChangePasswordModalOpen(false);
       setPasswordFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
-      console.error('[TriveonSettings] Change password error:', error);
+      console.error('[TriarcoraSettings] Change password error:', error);
       let errorMessage = 'An error occurred. Please try again.';
       if (error.code === 'auth/wrong-password') {
         errorMessage = 'Current password is incorrect.';
@@ -397,7 +397,7 @@ const TriveonSettings: React.FC = () => {
     const dataToExport = {
       user: userData,
       exportedAt: new Date().toISOString(),
-      app: 'TRIVEON'
+      app: 'TRIARCORA'
     };
     
     let blob: Blob;
@@ -405,7 +405,7 @@ const TriveonSettings: React.FC = () => {
     
     if (format === 'json') {
       blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
-      filename = `triveon-data-export-${Date.now()}.json`;
+      filename = `triarcora-data-export-${Date.now()}.json`;
     } else {
       // Simple CSV export for demonstration
       const csvContent = [
@@ -416,7 +416,7 @@ const TriveonSettings: React.FC = () => {
         ['Exported At', new Date().toISOString()]
       ].map(row => row.join(',')).join('\n');
       blob = new Blob([csvContent], { type: 'text/csv' });
-      filename = `triveon-data-export-${Date.now()}.csv`;
+      filename = `triarcora-data-export-${Date.now()}.csv`;
     }
     
     const url = URL.createObjectURL(blob);
@@ -484,13 +484,13 @@ const TriveonSettings: React.FC = () => {
       const aiMemory = {
         settings: userData?.settings?.aiSettings,
         exportedAt: new Date().toISOString(),
-        app: 'TRIVEON'
+        app: 'TRIARCORA'
       };
       const blob = new Blob([JSON.stringify(aiMemory, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `triveon-ai-memory-export-${Date.now()}.json`;
+      a.download = `triarcora-ai-memory-export-${Date.now()}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -562,7 +562,7 @@ const TriveonSettings: React.FC = () => {
   );
 
   return (
-    <div className="triveon-settings-page">
+    <div className="triarcora-settings-page">
       <div className="settings-sidebar">
         <div className="settings-sidebar-header">
           <button className="settings-back-button" onClick={() => navigate('/profile')}>
@@ -571,7 +571,7 @@ const TriveonSettings: React.FC = () => {
             </svg>
             <span>Back</span>
           </button>
-          <h2>TRIVEON Settings</h2>
+          <h2>TRIARCORA Settings</h2>
         </div>
         
         <div className="settings-search">
@@ -774,7 +774,7 @@ const TriveonSettings: React.FC = () => {
                 <div className="settings-item">
                   <div className="settings-item-content">
                     <h4>Email Address</h4>
-                    <p>{userData?.email || 'arjun@triveon.com'}</p>
+                    <p>{userData?.email || 'arjun@triarcora.com'}</p>
                   </div>
                   <button className="settings-btn" onClick={() => handleEditProfile('Email Address')}>Change</button>
                 </div>
@@ -2368,7 +2368,7 @@ const TriveonSettings: React.FC = () => {
             <div className="settings-section">
               <div className="settings-section-header">
                 <h1>Appearance</h1>
-                <p>Customize how TRIVEON looks for you</p>
+                <p>Customize how TRIARCORA looks for you</p>
               </div>
               
               <div className="settings-card">
@@ -2619,7 +2619,7 @@ const TriveonSettings: React.FC = () => {
                 <div className="settings-item">
                   <div className="settings-item-content">
                     <h4>Safety Center</h4>
-                    <p>Learn about safety on TRIVEON</p>
+                    <p>Learn about safety on TRIARCORA</p>
                   </div>
                   <button className="settings-btn">Learn</button>
                 </div>
@@ -2631,7 +2631,7 @@ const TriveonSettings: React.FC = () => {
                 <div className="settings-item">
                   <div className="settings-item-content">
                     <h4>Trust Center</h4>
-                    <p>Learn about trust and security on TRIVEON</p>
+                    <p>Learn about trust and security on TRIARCORA</p>
                   </div>
                   <button className="settings-btn">Learn</button>
                 </div>
@@ -3445,4 +3445,4 @@ const TriveonSettings: React.FC = () => {
   );
 }
 
-export default TriveonSettings;
+export default TriarcoraSettings;

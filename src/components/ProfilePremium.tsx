@@ -425,7 +425,7 @@ const ROLE_DATA: Record<string, RoleData> = {
   EXPLORER: {
     name: "Alex Explorer",
     title: "Curious. Connected. Growing Together.",
-    bio: "Exploring ideas, supporting founders, and learning every day in the Triveon ecosystem.",
+    bio: "Exploring ideas, supporting founders, and learning every day in the Triarcora ecosystem.",
     location: "Global Citizen",
     badges: ["EXPLORER"],
     verificationColor: "#3B82F6",
@@ -823,7 +823,7 @@ const ProfilePremium: React.FC = () => {
         }
       });
       // Save name to localStorage
-      localStorage.setItem('triveon-name', editFormData.name);
+      localStorage.setItem('triarcora-name', editFormData.name);
       setEditProfileModalOpen(false);
       showToast('Profile updated successfully!', 'success');
     }
@@ -1071,7 +1071,7 @@ const ProfilePremium: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#000814', color: 'white', fontSize: '24px' }}>
         <div>LOADING...</div>
         <div className="auth-loader-spinner"></div>
-        <h1 className="auth-loader-title">TRIVEON</h1>
+        <h1 className="auth-loader-title">TRIARCORA</h1>
         <p className="auth-loader-text">Loading your profile...</p>
       </div>
     );
@@ -1122,7 +1122,7 @@ const ProfilePremium: React.FC = () => {
     <div className={`profile-premium-container role-${safeActiveProfileMode.toLowerCase()}`}>
       <aside className="premium-sidebar">
         <div className="sidebar-brand">
-          <div className="brand-logo">TRIVEON</div>
+          <div className="brand-logo">TRIARCORA</div>
         </div>
 
         <nav className="premium-sidebar-nav">
@@ -1180,7 +1180,7 @@ const ProfilePremium: React.FC = () => {
         {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
           <div className="premium-sidebar-upgrade-card">
             <CrownIcon className="upgrade-icon" />
-            <h3>Triveon Premium</h3>
+            <h3>Triarcora Premium</h3>
             <p>Unlock exclusive ecosystem benefits and premium access.</p>
             <button className="premium-upgrade-btn">Upgrade Now</button>
           </div>
@@ -1322,9 +1322,9 @@ const ProfilePremium: React.FC = () => {
             )}
 
             {safeActiveProfileMode === 'ARCHITECT' && (
-              <div className="premium-triveon-score">
+              <div className="premium-triarcora-score">
                 <div className="premium-score-header">
-                  <span className="premium-score-label">TRIVEON Score</span>
+                  <span className="premium-score-label">TRIARCORA Score</span>
                   <InfoIcon />
                 </div>
                 <div className="premium-score-value">

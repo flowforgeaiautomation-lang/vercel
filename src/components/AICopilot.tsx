@@ -27,7 +27,7 @@ const AICopilot = ({ isOpen, onClose }: AICopilotProps) => {
       setMessages([{
         id: 1,
         role: 'assistant',
-        content: 'Hi! I\'m your TRIVEON AI Copilot!\n\nType "1" = Home\nType "2" = Startup Studio\nType "3" = My Startup\nType "4" = Investor Hub\nType "5" = Profile\n\nOr ask me anything!'
+        content: 'Hi! I\'m your TRIARCORA AI Copilot!\n\nType "1" = Home\nType "2" = Startup Studio\nType "3" = My Startup\nType "4" = Investor Hub\nType "5" = Profile\n\nOr ask me anything!'
       }])
     }
   }, [isOpen])
@@ -102,12 +102,12 @@ const AICopilot = ({ isOpen, onClose }: AICopilotProps) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiKey}`,
             'HTTP-Referer': 'http://localhost:3000',
-            'X-Title': 'TRIVEON AI Copilot'
+            'X-Title': 'TRIARCORA AI Copilot'
           },
           body: JSON.stringify({
             model: 'qwen/qwen2.5-7b-instruct',
             messages: [
-              { role: 'system', content: 'You are a helpful, friendly, concise assistant for TRIVEON startup platform.' },
+              { role: 'system', content: 'You are a helpful, friendly, concise assistant for TRIARCORA startup platform.' },
               ...messages.map(m => ({ role: m.role, content: m.content })),
               userMsg
             ],
@@ -177,7 +177,7 @@ const AICopilot = ({ isOpen, onClose }: AICopilotProps) => {
           }}>
             🧠
           </div>
-          <div style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>TRIVEON AI</div>
+          <div style={{ color: 'white', fontWeight: 800, fontSize: '1rem' }}>TRIARCORA AI</div>
         </div>
         <button onClick={onClose} style={{
           background: 'transparent',

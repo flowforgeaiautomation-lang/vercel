@@ -51,7 +51,7 @@ const RoleSelectionNew: React.FC = () => {
     <div className="role-selection-container">
       <div className="role-selection-content">
         <h1 className="role-selection-title">Choose Your Path</h1>
-        <p className="role-selection-subtitle">Select your role in the TRIVEON ecosystem</p>
+        <p className="role-selection-subtitle">Select your role in the TRIARCORA ecosystem</p>
         
         <div className="roles-grid">
           {roles.map((role) => (

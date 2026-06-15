@@ -31,9 +31,9 @@ const Profile: React.FC = () => {
               const firebase = (window as any).firebase;
               const app = firebase.initializeApp({
                 apiKey: "AIzaSyBkZ8P7Y3Q2rLmX9t1W5vK6nG7hJ4fQ",
-                authDomain: "triveon.firebaseapp.com",
-                projectId: "triveon",
-                storageBucket: "triveon.appspot.com",
+                authDomain: "triarcora.firebaseapp.com",
+                projectId: "triarcora",
+                storageBucket: "triarcora.appspot.com",
                 messagingSenderId: "123456789",
                 appId: "1:123456789:web:abcdef123456"
               });
@@ -191,8 +191,8 @@ const Profile: React.FC = () => {
         </button>
         <div className="logo">
           <img 
-              src="/images/triveon-logo.png" 
-              alt="TRIVEON" 
+              src="/images/triarcora-png.png" 
+              alt="TRIARCORA" 
               className="logo-image"
             onError={(e) => {
               const target = e.target as HTMLImageElement;

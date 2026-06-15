@@ -52,7 +52,7 @@ const FeedbackHub = () => {
             </svg>
           </div>
           <div className="brand-text">
-            <span className="brand-name">TRIVEON</span>
+            <span className="brand-name">TRIARCORA</span>
             <span className="brand-tagline">DISCOVER. REVIEW. IMPACT.</span>
           </div>
         </div>

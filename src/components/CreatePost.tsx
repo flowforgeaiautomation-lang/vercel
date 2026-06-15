@@ -338,7 +338,7 @@ ${selectedTags.map(t => `#${t}`).join(' ')} #Innovation #Community`;
       const improvedPost = description + `
 
 ---
-✨ Enhanced by TRIVEON AI:${improvements || '\n• Optimized readability and flow'}
+✨ Enhanced by TRIARCORA AI:${improvements || '\n• Optimized readability and flow'}
 • Added clear call-to-action
 • Improved engagement potential
 
@@ -400,7 +400,7 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
       // Capitalize first letter of sentences
       fixedPost = fixedPost.replace(/(^|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
       
-      fixedPost += '\n\n✨ Checked and improved by TRIVEON AI';
+      fixedPost += '\n\n✨ Checked and improved by TRIARCORA AI';
       
       setDescription(fixedPost);
       setIsAiTyping(false);
@@ -578,7 +578,7 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
                 </svg>
               </div>
               <div className="ai-copilot-panel-title">
-                <strong>TRIVEON AI Copilot</strong>
+                <strong>TRIARCORA AI Copilot</strong>
                 <span>Your intelligent writing assistant</span>
               </div>
             </div>

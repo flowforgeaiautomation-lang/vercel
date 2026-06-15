@@ -38,7 +38,7 @@ export interface UserProfile {
   };
   stats: { followers: number; following: number; endorsements: number; };
   tags: string[];
-  // TRIVEON PRESTIGE STAR SYSTEM
+  // TRIARCORA PRESTIGE STAR SYSTEM
   prestigeSystem: {
     currentStarId: number;
     currentStarName: string;
@@ -973,7 +973,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [startups, setStartups] = useState<Startup[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-startups');
+      const saved = localStorage.getItem('triarcora-startups');
       if (!saved) return initialStartups;
       return JSON.parse(saved);
     } catch {
@@ -983,7 +983,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [marketplaceListings, setMarketplaceListings] = useState<MarketplaceListing[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-marketplace');
+      const saved = localStorage.getItem('triarcora-marketplace');
       if (!saved) return initialMarketplaceListings;
       
       const parsed = JSON.parse(saved);
@@ -998,7 +998,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [aiRecommendations, setAiRecommendations] = useState<AIRecommendation[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-ai-recommendations');
+      const saved = localStorage.getItem('triarcora-ai-recommendations');
       if (!saved) return initialAIRecommendations;
       return JSON.parse(saved);
     } catch {
@@ -1008,7 +1008,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [productLaunches, setProductLaunches] = useState<ProductLaunch[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-product-launches');
+      const saved = localStorage.getItem('triarcora-product-launches');
       if (!saved) return initialProductLaunches;
       
       const parsed = JSON.parse(saved);
@@ -1023,7 +1023,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [trendingHashtags, setTrendingHashtags] = useState<HashtagData[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-trending-hashtags');
+      const saved = localStorage.getItem('triarcora-trending-hashtags');
       if (!saved) return initialTrendingHashtags;
       
       const parsed = JSON.parse(saved);
@@ -1038,7 +1038,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [savedPosts, setSavedPosts] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-saved-posts');
+      const saved = localStorage.getItem('triarcora-saved-posts');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -1047,7 +1047,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [savedCollections, setSavedCollections] = useState<SavedCollection[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-saved-collections');
+      const saved = localStorage.getItem('triarcora-saved-collections');
       if (!saved) return [];
       
       const parsed = JSON.parse(saved);
@@ -1062,7 +1062,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [drafts, setDrafts] = useState<Draft[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-drafts');
+      const saved = localStorage.getItem('triarcora-drafts');
       if (!saved) return [];
       const parsed = JSON.parse(saved);
       return parsed.map((item: any) => ({
@@ -1077,7 +1077,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-scheduled');
+      const saved = localStorage.getItem('triarcora-scheduled');
       if (!saved) return [];
       const parsed = JSON.parse(saved);
       return parsed.map((item: any) => ({
@@ -1092,7 +1092,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [reposts, setReposts] = useState<Repost[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-reposts');
+      const saved = localStorage.getItem('triarcora-reposts');
       if (!saved) return [];
       const parsed = JSON.parse(saved);
       return parsed.map((item: any) => ({
@@ -1106,7 +1106,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [reports, setReports] = useState<Report[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-reports');
+      const saved = localStorage.getItem('triarcora-reports');
       if (!saved) return [];
       const parsed = JSON.parse(saved);
       return parsed.map((item: any) => ({
@@ -1120,7 +1120,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [mutedUsers, setMutedUsers] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-muted-users');
+      const saved = localStorage.getItem('triarcora-muted-users');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -1129,7 +1129,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [hiddenPosts, setHiddenPosts] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-hidden-posts');
+      const saved = localStorage.getItem('triarcora-hidden-posts');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -1138,7 +1138,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [notInterestedTopics, setNotInterestedTopics] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-not-interested');
+      const saved = localStorage.getItem('triarcora-not-interested');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -1147,7 +1147,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [pinnedPostIds, setPinnedPostIds] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('triveon-pinned-posts');
+      const saved = localStorage.getItem('triarcora-pinned-posts');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -1288,67 +1288,67 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   useEffect(() => {
-    localStorage.setItem('triveon-ai-recommendations', JSON.stringify(aiRecommendations));
+    localStorage.setItem('triarcora-ai-recommendations', JSON.stringify(aiRecommendations));
   }, [aiRecommendations]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-product-launches', JSON.stringify(productLaunches));
+    localStorage.setItem('triarcora-product-launches', JSON.stringify(productLaunches));
   }, [productLaunches]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-startups', JSON.stringify(startups));
+    localStorage.setItem('triarcora-startups', JSON.stringify(startups));
   }, [startups]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-marketplace', JSON.stringify(marketplaceListings));
+    localStorage.setItem('triarcora-marketplace', JSON.stringify(marketplaceListings));
   }, [marketplaceListings]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-posts', JSON.stringify(posts));
+    localStorage.setItem('triarcora-posts', JSON.stringify(posts));
   }, [posts]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-trending-hashtags', JSON.stringify(trendingHashtags));
+    localStorage.setItem('triarcora-trending-hashtags', JSON.stringify(trendingHashtags));
   }, [trendingHashtags]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-saved-posts', JSON.stringify(savedPosts));
+    localStorage.setItem('triarcora-saved-posts', JSON.stringify(savedPosts));
   }, [savedPosts]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-saved-collections', JSON.stringify(savedCollections));
+    localStorage.setItem('triarcora-saved-collections', JSON.stringify(savedCollections));
   }, [savedCollections]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-drafts', JSON.stringify(drafts));
+    localStorage.setItem('triarcora-drafts', JSON.stringify(drafts));
   }, [drafts]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-scheduled', JSON.stringify(scheduledPosts));
+    localStorage.setItem('triarcora-scheduled', JSON.stringify(scheduledPosts));
   }, [scheduledPosts]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-reposts', JSON.stringify(reposts));
+    localStorage.setItem('triarcora-reposts', JSON.stringify(reposts));
   }, [reposts]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-reports', JSON.stringify(reports));
+    localStorage.setItem('triarcora-reports', JSON.stringify(reports));
   }, [reports]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-muted-users', JSON.stringify(mutedUsers));
+    localStorage.setItem('triarcora-muted-users', JSON.stringify(mutedUsers));
   }, [mutedUsers]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-hidden-posts', JSON.stringify(hiddenPosts));
+    localStorage.setItem('triarcora-hidden-posts', JSON.stringify(hiddenPosts));
   }, [hiddenPosts]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-not-interested', JSON.stringify(notInterestedTopics));
+    localStorage.setItem('triarcora-not-interested', JSON.stringify(notInterestedTopics));
   }, [notInterestedTopics]);
 
   useEffect(() => {
-    localStorage.setItem('triveon-pinned-posts', JSON.stringify(pinnedPostIds));
+    localStorage.setItem('triarcora-pinned-posts', JSON.stringify(pinnedPostIds));
   }, [pinnedPostIds]);
 
   const addPost = (postData: Omit<Post, 'id' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'timestamp' | 'engagementScore' | 'isSaved'>) => {

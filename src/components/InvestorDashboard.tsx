@@ -342,7 +342,7 @@ const InvestorDashboard = () => {
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
           </div>
-          <span className="id-logo-text">TRIVEON</span>
+          <span className="id-logo-text">TRIARCORA</span>
         </div>
 
         <nav className="id-nav">

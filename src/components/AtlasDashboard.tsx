@@ -46,7 +46,7 @@ const AtlasDashboard = () => {
   ];
 
   const getUserName = () => {
-    return localStorage.getItem('triveon-name') || userData?.profile?.name || profile?.name || "Unnati Chaudhary";
+    return localStorage.getItem('triarcora-name') || userData?.profile?.name || profile?.name || "Unnati Chaudhary";
   };
 
   const getUserRole = () => {
@@ -80,7 +80,7 @@ const AtlasDashboard = () => {
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
           </div>
-          <span className="sd-logo-text">TRIVEON</span>
+          <span className="sd-logo-text">TRIARCORA</span>
         </div>
 
         {/* Navigation */}
@@ -131,7 +131,7 @@ const AtlasDashboard = () => {
               fontSize: '1.2rem',
               fontWeight: 800,
               letterSpacing: '1px'
-            }}>TRIVEON</span>
+            }}>TRIARCORA</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -183,7 +183,7 @@ const AtlasDashboard = () => {
             fontSize: '1.15rem',
             margin: '12px 0 0',
             fontWeight: 500
-          }}>Find anything across TRIVEON.</p>
+          }}>Find anything across TRIARCORA.</p>
         </div>
 
         {/* Search Bar */}
@@ -329,7 +329,7 @@ const AtlasDashboard = () => {
             fontSize: '0.85rem',
             fontWeight: 400,
             margin: 0
-          }}>One search. Everything in TRIVEON.</p>
+          }}>One search. Everything in TRIARCORA.</p>
         </div>
       </div>
     </div>

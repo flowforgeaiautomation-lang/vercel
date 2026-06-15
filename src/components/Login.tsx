@@ -22,14 +22,14 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-container">
-      {/* Left Side - TRIVEON Branding */}
+      {/* Left Side - TRIARCORA Branding */}
       <div className="login-left">
         <div className="brand-container">
           <div className="logo-container">
-            <div className="triveon-logo">
+            <div className="triarcora-logo">
               <img 
-                src="/images/triveon-logo.png" 
-                alt="TRIVEON" 
+                src="/images/triarcora-png.png" 
+                alt="TRIARCORA" 
                 className="logo-image"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
@@ -40,7 +40,7 @@ const Login: React.FC = () => {
               <div className="logo-fallback hidden">◆</div>
             </div>
           </div>
-          <h1 className="brand-title">TRIVEON</h1>
+          <h1 className="brand-title">TRIARCORA</h1>
           <p className="brand-tagline">The Operating System of Ambition</p>
           <div className="brand-features">
             <div className="feature">
@@ -74,7 +74,7 @@ const Login: React.FC = () => {
       {/* Right Side - Login Form */}
       <div className="login-right">
         <div className="login-form-container">
-          <h2 className="login-title">Welcome to TRIVEON</h2>
+          <h2 className="login-title">Welcome to TRIARCORA</h2>
           <p className="login-subtitle">Enter your credentials to access the ecosystem</p>
           
           <form onSubmit={handleSubmit} className="login-form">

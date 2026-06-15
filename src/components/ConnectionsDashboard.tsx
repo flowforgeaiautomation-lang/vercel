@@ -116,7 +116,7 @@ const ConnectionsDashboard = () => {
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
           </div>
-          <span className="cd-logo-text">TRIVEON</span>
+          <span className="cd-logo-text">TRIARCORA</span>
         </div>
 
         <div className="cd-messaging-header">

@@ -24,7 +24,7 @@ const StartupStudio: React.FC = () => {
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
             <div className="studio-brand-text">
-              <span className="studio-brand-name">TRIVEON</span>
+              <span className="studio-brand-name">TRIARCORA</span>
               <span className="studio-brand-tag">BUILD. LAUNCH. SCALE.</span>
             </div>
           </div>

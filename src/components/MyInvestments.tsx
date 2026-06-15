@@ -65,7 +65,7 @@ const MyInvestments = () => {
             </svg>
           </div>
           <div className="brand-text">
-            <span className="brand-name">TRIVEON</span>
+            <span className="brand-name">TRIARCORA</span>
             <span className="brand-tagline">INVEST. GROW. IMPACT.</span>
           </div>
         </div>
@@ -192,7 +192,7 @@ const MyInvestments = () => {
             <div className="stat-content">
               <div className="stat-label">Investor Score</div>
               <div className="stat-value">92/100</div>
-              <div className="stat-sub positive">Top 8% on Triveon</div>
+              <div className="stat-sub positive">Top 8% on Triarcora</div>
             </div>
           </div>
         </div>

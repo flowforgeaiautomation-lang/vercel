@@ -190,7 +190,7 @@ const HomeDashboard: React.FC = () => {
   };
 
   const getUserName = () => {
-    return localStorage.getItem('triveon-name') || userData?.profile?.name || 'Arjun Patel';
+    return localStorage.getItem('triarcora-name') || userData?.profile?.name || 'Arjun Patel';
   };
 
   const getUserRole = () => {
@@ -206,9 +206,18 @@ const HomeDashboard: React.FC = () => {
         <div className="dashboard-content">
           <aside className="left-sidebar">
             <div className="sidebar-scroll-wrapper">
-              <div className="sidebar-brand" onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-                <div className="brand-logo-v">V</div>
-                {!sidebarCollapsed && <span className="brand-name">TRIVEON</span>}
+              <div className="sidebar-brand" onClick={() => navigate('/home')}>
+                <svg width="44" height="44" viewBox="0 0 100 100" fill="none">
+                  <defs>
+                    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{stopColor:'#FFD700'}} />
+                      <stop offset="100%" style={{stopColor:'#FFA500'}} />
+                    </linearGradient>
+                  </defs>
+                  <polygon points="20,80 50,20 80,80" fill="url(#brandGrad)" />
+                  <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
+                </svg>
+                {!sidebarCollapsed && <span className="brand-name">TRIARCORA</span>}
               </div>
 
               <nav className="sidebar-nav">
@@ -356,11 +365,6 @@ const HomeDashboard: React.FC = () => {
               ) : (
                 getInitials(getUserName())
               )}
-              <div className="star-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              </div>
             </div>
             <div className="user-info">
               <div className="user-name">{getUserName()}</div>

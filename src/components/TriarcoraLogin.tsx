@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './TriveonLogin.css';
+import './TriarcoraLogin.css';
 
-const TriveonLogin: React.FC = () => {
+const TriarcoraLogin: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
-  const [email, setEmail] = useState(localStorage.getItem('triveon-email') || '');
-  const [password, setPassword] = useState(localStorage.getItem('triveon-password') || '');
+  const [email, setEmail] = useState(localStorage.getItem('triarcora-email') || '');
+  const [password, setPassword] = useState(localStorage.getItem('triarcora-password') || '');
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -22,7 +22,7 @@ const TriveonLogin: React.FC = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
-  const { login, signup, googleLogin, quickResetPassword, profile, loading } = useAuth();
+  const { login, signup, googleLogin, quickResetPassword, profile, loading, setDemoMode } = useAuth();
 
   useEffect(() => {
     if (!loading && profile) {
@@ -33,6 +33,7 @@ const TriveonLogin: React.FC = () => {
   const handleDemoClick = () => {
     localStorage.removeItem('selectedRole');
     localStorage.setItem('currentUserId', 'demo-user');
+    setDemoMode();
     navigate('/role-selection');
   };
 
@@ -200,12 +201,12 @@ const TriveonLogin: React.FC = () => {
 
     setIsLoading(true);
     try {
-      console.log('[TriveonLogin] Starting signup...');
+      console.log('[TriarcoraLogin] Starting signup...');
       await signup(name, email, password);
-      console.log('[TriveonLogin] Signup successful!');
+      console.log('[TriarcoraLogin] Signup successful!');
       navigate('/role-selection');
     } catch (error: any) {
-      console.error('[TriveonLogin] Signup error details:', error);
+      console.error('[TriarcoraLogin] Signup error details:', error);
       let errorMessage = 'An error occurred. Please try again.';
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = 'This email is already connected to an account.';
@@ -226,12 +227,12 @@ const TriveonLogin: React.FC = () => {
 
     setIsLoading(true);
     try {
-      console.log('[TriveonLogin] Starting signin...');
+      console.log('[TriarcoraLogin] Starting signin...');
       await login(email, password);
-      console.log('[TriveonLogin] Signin successful!');
+      console.log('[TriarcoraLogin] Signin successful!');
       navigate('/role-selection');
     } catch (error: any) {
-      console.error('[TriveonLogin] Signin error details:', error);
+      console.error('[TriarcoraLogin] Signin error details:', error);
       let errorMessage = 'Invalid email or password.';
       if (error.code === 'auth/invalid-email') {
         errorMessage = 'Please enter a valid email address.';
@@ -247,14 +248,14 @@ const TriveonLogin: React.FC = () => {
   };
 
   const handleGoogleLogin = async () => {
-    console.log('[TriveonLogin] Starting Google login...');
+    console.log('[TriarcoraLogin] Starting Google login...');
     setIsLoading(true);
     try {
       await googleLogin();
-      console.log('[TriveonLogin] Google login successful!');
+      console.log('[TriarcoraLogin] Google login successful!');
       navigate('/role-selection');
     } catch (error: any) {
-      console.error('[TriveonLogin] Google login error details:', error);
+      console.error('[TriarcoraLogin] Google login error details:', error);
       let errorMessage = 'Unable to sign in with Google.';
       if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
         errorMessage = 'Google sign-in cancelled.';
@@ -302,7 +303,7 @@ const TriveonLogin: React.FC = () => {
   };
 
   return (
-    <div className="triveon-login-container">
+    <div className="triarcora-login-container">
       <canvas ref={canvasRef} className="stars-canvas" />
       
       <div className="login-content">
@@ -313,8 +314,8 @@ const TriveonLogin: React.FC = () => {
                 <div className="logo-glow"></div>
                 <div className="logo-content">
                   <img 
-                    src="/images/triveon-logo.png" 
-                    alt="TRIVEON" 
+                    src="/images/triarcora-png.png" 
+                    alt="Triarcora" 
                     className="logo-image"
                   />
                 </div>
@@ -364,7 +365,7 @@ const TriveonLogin: React.FC = () => {
               <>
                 <div className="auth-header">
                   <p className="auth-welcome">Welcome to</p>
-                  <h2 className="auth-title">TRIVEON</h2>
+                  <h2 className="auth-title">TRIARCORA</h2>
                   <p className="auth-subtitle">Enter your credentials to continue</p>
                 </div>
               </>
@@ -659,4 +660,4 @@ const TriveonLogin: React.FC = () => {
   );
 };
 
-export default TriveonLogin;
+export default TriarcoraLogin;

@@ -257,7 +257,7 @@ const CreateExplorerPost: React.FC<CreateExplorerPostProps> = ({ onClose }) => {
         improvements += '\n• Improved sentence structure';
       }
 
-      const improvedPost = description + `\n\n---\n✨ Enhanced by TRIVEON AI:${improvements || '\n• Optimized readability and flow'}\n• Added clear call-to-action\n• Improved engagement potential\n\n${selectedTags.map(t => `#${t}`).join(' ')}`;
+      const improvedPost = description + `\n\n---\n✨ Enhanced by TRIARCORA AI:${improvements || '\n• Optimized readability and flow'}\n• Added clear call-to-action\n• Improved engagement potential\n\n${selectedTags.map(t => `#${t}`).join(' ')}`;
 
       setDescription(improvedPost);
       setIsAiTyping(false);
@@ -311,7 +311,7 @@ const CreateExplorerPost: React.FC<CreateExplorerPostProps> = ({ onClose }) => {
 
       fixedPost = fixedPost.replace(/(^|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
 
-      fixedPost += '\n\n✨ Checked and improved by TRIVEON AI';
+      fixedPost += '\n\n✨ Checked and improved by TRIARCORA AI';
 
       setDescription(fixedPost);
       setIsAiTyping(false);
@@ -465,7 +465,7 @@ const CreateExplorerPost: React.FC<CreateExplorerPostProps> = ({ onClose }) => {
                 </svg>
               </div>
               <div className="ai-copilot-panel-title">
-                <strong>TRIVEON AI Copilot</strong>
+                <strong>TRIARCORA AI Copilot</strong>
                 <span>Your intelligent writing assistant</span>
               </div>
             </div>

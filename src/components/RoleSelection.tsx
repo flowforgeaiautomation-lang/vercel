@@ -189,7 +189,7 @@ const RoleSelection: React.FC = () => {
       <div className="role-selection-content">
         <div className="header-section">
           <div className="brand-header">
-            <h1 className="brand-name">TRIVEON</h1>
+            <h1 className="brand-name">TRIARCORA</h1>
             <p className="brand-tagline">Ideas. Validated. Funded.</p>
           </div>
           

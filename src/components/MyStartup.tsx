@@ -24,7 +24,7 @@ const MyStartup: React.FC = () => {
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
             <div className="my-startup-brand-text">
-              <span className="my-startup-brand-name">TRIVEON</span>
+              <span className="my-startup-brand-name">TRIARCORA</span>
             </div>
           </div>
 
