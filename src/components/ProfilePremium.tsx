@@ -1211,7 +1211,7 @@ const ProfilePremium: React.FC = () => {
                     />
                   ) : (
                     <div className="premium-default-avatar">
-                      <span className="premium-avatar-initials">{getInitials(displayProfile.name || 'User')}</span>
+                      <span className="premium-avatar-initials">{getInitials(displayProfile.name)}</span>
                     </div>
                   )}
                   <div className="premium-verification-badge">

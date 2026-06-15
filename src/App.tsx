@@ -174,7 +174,7 @@ function WelcomeModal() {
           Welcome to TRIARCORA
         </h2>
         <p style={{ color: '#ccc', marginBottom: '32px', fontSize: '16px', lineHeight: '1.5' }}>
-          Hello {userData?.profile?.name || 'User'} 👋<br />
+          Hello {userData?.profile?.name}👋<br />
           <br />
           Your account has been created successfully.<br />
           <br />

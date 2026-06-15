@@ -377,7 +377,9 @@ const HomeDashboard: React.FC = () => {
           </div>
           </header>
 
-
+          <div className="welcome-section">
+            <h1 className="welcome-title">Welcome back, {userName}👋</h1>
+          </div>
 
           <div className="startup-premium-create-card">
             <button className="startup-create-signal-button" onClick={() => setCreatePostOpen(true)}>

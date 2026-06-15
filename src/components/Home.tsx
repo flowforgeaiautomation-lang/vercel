@@ -102,24 +102,24 @@ const Home: React.FC = () => {
 
         <div className="sidebar-footer">
           <div className="user-info">
-            <div className="user-avatar">
-              <span>{(userData?.profile?.name || selectedRole).charAt(0).toUpperCase()}</span>
+              <div className="user-avatar">
+                <span>{(userData?.profile?.name).charAt(0).toUpperCase()}</span>
+              </div>
+              <div className="user-details">
+                <span className="user-name">{userData?.profile?.name}</span>
+                <span className="user-role">{selectedRole.toUpperCase()}</span>
+              </div>
             </div>
-            <div className="user-details">
-              <span className="user-name">{userData?.profile?.name || 'User'}</span>
-              <span className="user-role">{selectedRole.toUpperCase()}</span>
-            </div>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
           </div>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
-        </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
       <div className="main-content">
         <header className="content-header">
-          <h1>Welcome back, {userData?.profile?.name || selectedRole}!</h1>
+          <h1>Welcome back, {userData?.profile?.name}👋</h1>
           <p>Here's what's happening in the Triarcora ecosystem</p>
         </header>
 

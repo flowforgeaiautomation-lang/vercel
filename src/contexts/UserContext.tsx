@@ -1125,7 +1125,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       userData, 
       loading,
       isDemo: userData?.isDemo || false,
-      userName: userData?.profile?.name || 'User',
+      userName: userData?.profile?.name,
       userEmail: userData?.email || '',
       userRole: userData?.mainRole || 'ARCHITECT',
       userProfileImage: userData?.profile?.profileImage || '',
