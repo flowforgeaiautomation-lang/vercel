@@ -24,8 +24,7 @@ const SearchIcon = () => (
 );
 
 const StartupDashboard = () => {
-  const { profile } = useAuth();
-  const { userData } = useUser();
+  const { userName, userRole, userProfileImage, userData } = useUser();
   const { startups, marketplaceListings, aiRecommendations, productLaunches, upvoteProductLaunch, likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts } = usePosts();
   const [productLaunchCategory, setProductLaunchCategory] = useState('All');
   
@@ -35,7 +34,6 @@ const StartupDashboard = () => {
   const [activeTab, setActiveTab] = useState('discover');
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const userRole = userData?.mainRole || 'ARCHITECT';
   const feedPosts = posts;
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
@@ -52,26 +50,6 @@ const StartupDashboard = () => {
     setAnimatingPostId(postId);
     setTimeout(() => setAnimatingPostId(null), 1200);
   };
-  
-  const getUserName = () => {
-    return userData?.profile?.name || profile?.name || "Unnati Chaudhary";
-  };
-
-  const getUserRole = () => {
-    return userData?.mainRole || profile?.role || "Architect";
-  };
-
-  const getUserProfileImage = () => {
-    if (userData?.profile?.profileImage) {
-      return userData.profile.profileImage;
-    }
-    const defaultImages: Record<string, string> = {
-      ARCHITECT: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=180&h=180&fit=crop&crop=face',
-      CATALYST: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=180&h=180&fit=crop&crop=face',
-      EXPLORER: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=180&h=180&fit=crop&crop=face'
-    };
-    return defaultImages[userRole] || defaultImages['ARCHITECT'];
-  };
 
   const getInitials = (name: string) => {
     return name
@@ -87,9 +65,9 @@ const StartupDashboard = () => {
     
     addComment(postId, {
       userId: userData?.uid || 'demo-user',
-      userName: getUserName(),
-      userAvatar: userData?.profile?.profileImage,
-      userRole: userData?.mainRole || userRole,
+      userName: userName,
+      userAvatar: userProfileImage,
+      userRole: userRole,
       content: commentText.trim()
     }, parentId);
     

@@ -36,24 +36,15 @@ interface Bookmark {
 }
 
 const BookmarksDashboard = () => {
-  const { profile } = useAuth();
-  const { userData } = useUser();
+  const { userName, userRole, userProfileImage, userData } = useUser();
   const { getSavedPosts, unsavePost, savedCollections, createCollection, addToCollection, demoUsers } = usePosts();
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('All');
   const [activeNav, setActiveNav] = useState('all');
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const [userRole, setUserRole] = useState<'ARCHITECT' | 'EXPLORER' | 'CATALYST'>('ARCHITECT');
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [discoverDropdownOpen, setDiscoverDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    const savedRole = localStorage.getItem('selectedRole');
-    if (savedRole) {
-      setUserRole(savedRole.toUpperCase() as 'ARCHITECT' | 'EXPLORER' | 'CATALYST');
-    }
-  }, []);
 
   // Close discover dropdown when clicking outside
   useEffect(() => {
@@ -63,14 +54,6 @@ const BookmarksDashboard = () => {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
-
-  const getUserName = () => {
-    return userData?.profile?.name || profile?.name || "Unnati Chaudhary";
-  };
-
-  const getUserRole = () => {
-    return userData?.mainRole || profile?.role || "Explorer";
-  };
 
   const getInitials = (name: string) => {
     return name
@@ -352,22 +335,22 @@ const BookmarksDashboard = () => {
           <div className="profile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
               <div className="drawer-avatar">
-                {userData?.profile?.profileImage ? (
-                  <img src={userData.profile.profileImage} alt={getUserName()} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+                {userProfileImage ? (
+                  <img src={userProfileImage} alt={userName} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
                 ) : (
-                  getInitials(getUserName())
+                  getInitials(userName)
                 )}
               </div>
-              <div className="drawer-name">{getUserName()}</div>
+              <div className="drawer-name">{userName}</div>
               <div className="drawer-role">
-                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
-                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                <span className={`role-badge ${userRole === 'ARCHITECT' ? 'gold' : userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase()}
                 </span>
                 {userData?.prestigeSystem && (
                   <PrestigeStarBadge
                     starId={userData.prestigeSystem.currentStarId}
                     size="small"
-                    color={getRoleColor(getUserRole())}
+                    color={getRoleColor(userRole)}
                   />
                 )}
               </div>

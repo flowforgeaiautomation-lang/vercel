@@ -78,26 +78,10 @@ const getInitials = (name: string) => {
 };
 
 const NotificationsDashboard = () => {
-  const { profile } = useAuth();
-  const { userData } = useUser();
+  const { userName, userRole, userData } = useUser();
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState<'notifications' | 'connections'>('notifications');
   const [activeTab, setActiveTab] = useState('All');
-
-  useEffect(() => {
-    const savedRole = localStorage.getItem('selectedRole');
-    if (savedRole) {
-      // setUserRole(savedRole.toUpperCase() as 'ARCHITECT' | 'EXPLORER' | 'CATALYST');
-    }
-  }, []);
-
-  const getUserName = () => {
-    return localStorage.getItem('triarcora-name') || userData?.profile?.name || profile?.name || 'Umat Chaudhary';
-  };
-
-  const getUserRole = () => {
-    return userData?.mainRole || profile?.role || 'Investor';
-  };
 
   const notifications: Notification[] = [
     {

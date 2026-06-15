@@ -342,6 +342,10 @@ interface UserContextType {
   userData: UserData | null;
   loading: boolean;
   isDemo: boolean;
+  userName: string;
+  userEmail: string;
+  userRole: string;
+  userProfileImage: string;
   setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
   updateUserData: (newData: Partial<UserData>) => void;
   updateSettings: (newSettings: Partial<SettingsData>) => void;
@@ -970,7 +974,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLoading(true);
       try {
         if (user) {
-          // Logged-in user: load from Firestore
+          // Logged-in user: load exact data from Firestore, no overwrites
           console.log('[UserContext] Loading logged-in user from Firestore');
           const userRef = doc(db, 'userProfiles', user.uid);
           const docSnap = await getDoc(userRef);
@@ -980,15 +984,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             await setDoc(userRef, firestoreData);
           } else {
             firestoreData = docSnap.data() as UserData;
-            // Ensure settings exist
+            // Ensure settings exist without overwriting existing data
             if (!firestoreData.settings) {
               firestoreData.settings = getDefaultSettings();
             }
           }
-          // Apply saved name from localStorage (highest priority)
-          const savedName = localStorage.getItem('triarcora-name');
-          if (savedName) {
-            firestoreData.profile.name = savedName;
+          // Display exact stored name from Firestore (don't overwrite with localStorage)
+          if (authProfile?.name && !firestoreData.profile.name) {
+            firestoreData.profile.name = authProfile.name;
           }
           setUserData(firestoreData);
           setCurrentUserId(user.uid);
@@ -1025,11 +1028,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           } else {
             demoData = getDemoUserData();
           }
-          // Apply saved name from localStorage (highest priority)
-          const savedName = localStorage.getItem('triarcora-name');
-          if (savedName) {
-            demoData.profile.name = savedName;
-          }
           setUserData(demoData);
           setCurrentUserId('demo-user');
           localStorage.setItem('currentUserId', 'demo-user');
@@ -1039,11 +1037,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.error('[UserContext] Error loading user data:', error);
         // Fallback to demo mode on error
         const demoData = getDemoUserData();
-        // Apply saved name from localStorage (highest priority)
-        const savedName = localStorage.getItem('triarcora-name');
-        if (savedName) {
-          demoData.profile.name = savedName;
-        }
         setUserData(demoData);
         setCurrentUserId('demo-user');
         localStorage.setItem('currentUserId', 'demo-user');
@@ -1135,6 +1128,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       userData, 
       loading,
       isDemo: userData?.isDemo || false,
+      userName: userData?.profile?.name || 'User',
+      userEmail: userData?.email || '',
+      userRole: userData?.mainRole || 'ARCHITECT',
+      userProfileImage: userData?.profile?.profileImage || '',
       setUserData, 
       updateUserData, 
       updateSettings,

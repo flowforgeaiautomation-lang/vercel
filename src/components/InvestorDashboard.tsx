@@ -94,14 +94,12 @@ const BookmarkIcon = () => (
 );
 
 const InvestorDashboard = () => {
-  const { profile } = useAuth();
-  const { userData } = useUser();
+  const { userName, userRole, userProfileImage, userData } = useUser();
   const { likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts } = usePosts();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('discover');
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const userRole = userData?.mainRole || 'CATALYST';
   const feedPosts = posts;
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
@@ -119,14 +117,6 @@ const InvestorDashboard = () => {
     setTimeout(() => setAnimatingPostId(null), 1200);
   };
 
-  const getUserName = () => {
-    return userData?.profile?.name || profile?.name || 'Sarah Chen';
-  };
-
-  const getUserRole = () => {
-    return userData?.mainRole || profile?.role || 'Catalyst';
-  };
-
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -136,26 +126,14 @@ const InvestorDashboard = () => {
       .slice(0, 2);
   };
 
-  const getUserProfileImage = () => {
-    if (userData?.profile?.profileImage) {
-      return userData.profile.profileImage;
-    }
-    const defaultImages: Record<string, string> = {
-      ARCHITECT: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=180&h=180&fit=crop&crop=face',
-      CATALYST: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=180&h=180&fit=crop&crop=face',
-      EXPLORER: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=180&h=180&fit=crop&crop=face'
-    };
-    return defaultImages[userRole] || defaultImages['CATALYST'];
-  };
-
   const handleSubmitComment = (postId: string, parentId?: string) => {
     if (!commentText.trim()) return;
     
     addComment(postId, {
       userId: userData?.uid || 'demo-user',
-      userName: getUserName(),
-      userAvatar: userData?.profile?.profileImage,
-      userRole: userData?.mainRole || userRole,
+      userName: userName,
+      userAvatar: userProfileImage,
+      userRole: userRole,
       content: commentText.trim()
     }, parentId);
     
@@ -666,14 +644,14 @@ const InvestorDashboard = () => {
           <div className="profile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
               <div className="drawer-avatar">
-                {userData?.profile?.profileImage ? (
-                  <img src={getUserProfileImage()} alt={getUserName()} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+                {userProfileImage ? (
+                  <img src={userProfileImage} alt={userName} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
                 ) : (
-                  getInitials(getUserName())
+                  getInitials(userName)
                 )}
               </div>
-              <div className="drawer-name">{getUserName()}</div>
-              <div className="drawer-role">{getUserRole()}</div>
+              <div className="drawer-name">{userName}</div>
+              <div className="drawer-role">{userRole}</div>
             </div>
             {showEcosystemOverview ? (
               <div>

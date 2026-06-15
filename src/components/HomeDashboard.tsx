@@ -139,7 +139,7 @@ const HomeDashboard: React.FC = () => {
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { userData } = useUser();
+  const { userName, userRole, userProfileImage, userData } = useUser();
   const { logout } = useAuth();
   const { posts, demoUsers, likePost, addComment, savePost, unsavePost, savedPosts } = usePosts();
   const feedPosts = posts;
@@ -158,8 +158,8 @@ const HomeDashboard: React.FC = () => {
       addComment(postId, {
         id: Date.now().toString(),
         userId: userData?.uid || 'current-user',
-        userName: getUserName(),
-        userRole: getUserRole(),
+        userName: userName,
+        userRole: userRole,
         text: commentText,
         timestamp: new Date(),
         likes: [],
@@ -187,18 +187,6 @@ const HomeDashboard: React.FC = () => {
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const getUserName = () => {
-    return localStorage.getItem('triarcora-name') || userData?.profile?.name || 'Arjun Patel';
-  };
-
-  const getUserRole = () => {
-    return userData?.mainRole || 'ARCHITECT';
-  };
-
-  const getUserProfileImage = () => {
-    return userData?.profile?.profileImage || '';
   };
 
   return (
@@ -356,27 +344,27 @@ const HomeDashboard: React.FC = () => {
 
             <div className="profile-section" onClick={() => setProfileDrawerOpen(!profileDrawerOpen)}>
             <div className="user-avatar">
-              {getUserProfileImage() ? (
+              {userProfileImage ? (
                 <img 
-                  src={getUserProfileImage()} 
-                  alt={getUserName()} 
+                  src={userProfileImage} 
+                  alt={userName} 
                   style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} 
                 />
               ) : (
-                getInitials(getUserName())
+                getInitials(userName)
               )}
             </div>
             <div className="user-info">
-              <div className="user-name">{getUserName()}</div>
+              <div className="user-name">{userName}</div>
               <div className="user-role">
-                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
-                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                <span className={`role-badge ${userRole === 'ARCHITECT' ? 'gold' : userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase()}
                 </span>
                 {userData?.prestigeSystem && (
                   <PrestigeStarBadge
                     starId={userData.prestigeSystem.currentStarId}
                     size="small"
-                    color={getRoleColor(getUserRole())}
+                    color={getRoleColor(userRole)}
                   />
                 )}
               </div>
@@ -655,22 +643,22 @@ const HomeDashboard: React.FC = () => {
           <div className="profile-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
               <div className="drawer-avatar">
-                {userData?.profile?.profileImage ? (
-                  <img src={getUserProfileImage()} alt={getUserName()} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
+                {userProfileImage ? (
+                  <img src={userProfileImage} alt={userName} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
                 ) : (
-                  getInitials(getUserName())
+                  getInitials(userName)
                 )}
               </div>
-              <div className="drawer-name">{getUserName()}</div>
+              <div className="drawer-name">{userName}</div>
               <div className="drawer-role">
-                <span className={`role-badge ${getUserRole() === 'ARCHITECT' ? 'gold' : getUserRole() === 'CATALYST' ? 'green' : 'cyan'}`}>
-                  {getUserRole().charAt(0).toUpperCase() + getUserRole().slice(1).toLowerCase()}
+                <span className={`role-badge ${userRole === 'ARCHITECT' ? 'gold' : userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                  {userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase()}
                 </span>
                 {userData?.prestigeSystem && (
                   <PrestigeStarBadge
                     starId={userData.prestigeSystem.currentStarId}
                     size="small"
-                    color={getRoleColor(getUserRole())}
+                    color={getRoleColor(userRole)}
                   />
                 )}
               </div>

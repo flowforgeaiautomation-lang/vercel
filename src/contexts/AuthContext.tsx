@@ -34,6 +34,7 @@ interface ProfileData {
   role: string | null;
   accountType: string;
   createdAt: any;
+  lastLoginAt?: any;
   isVerified: boolean;
   prestigeLevel: number;
   trustIndex: number;
@@ -79,6 +80,7 @@ const createUserProfile = async (user: User, name: string = ''): Promise<Profile
     role: null,
     accountType: 'personal',
     createdAt: serverTimestamp(),
+    lastLoginAt: serverTimestamp(),
     isVerified: user.emailVerified,
     prestigeLevel: 1,
     trustIndex: 50
@@ -86,6 +88,22 @@ const createUserProfile = async (user: User, name: string = ''): Promise<Profile
 
   await setDoc(userRef, profileData);
   return profileData;
+};
+
+const loadAndUpdateUserProfile = async (user: User): Promise<ProfileData> => {
+  const userRef = doc(db, 'users', user.uid);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    throw new Error('User profile not found');
+  }
+
+  // Update lastLoginAt without overwriting other data
+  await setDoc(userRef, { lastLoginAt: serverTimestamp() }, { merge: true });
+
+  // Fetch the updated profile
+  const updatedDoc = await getDoc(userRef);
+  return updatedDoc.data() as ProfileData;
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -109,7 +127,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       if (firebaseUser) {
         try {
-          const userProfile = await createUserProfile(firebaseUser);
+          // Check if profile exists first
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userDoc = await getDoc(userRef);
+          
+          let userProfile;
+          if (userDoc.exists()) {
+            // Existing user: load and update lastLoginAt
+            userProfile = await loadAndUpdateUserProfile(firebaseUser);
+          } else {
+            // New user: create profile (only happens once on first login/signup)
+            userProfile = await createUserProfile(firebaseUser);
+          }
+          
           setProfile(userProfile);
         } catch (error) {
           console.error('[AuthContext] Error loading profile:', error);
@@ -123,16 +153,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
 
     const handleRedirectResult = async () => {
-    try {
-      const result = await getRedirectResult(auth);
-      if (result && result.user) {
-        const userProfile = await createUserProfile(result.user);
-        setProfile(userProfile);
+      try {
+        const result = await getRedirectResult(auth);
+        if (result && result.user) {
+          const userRef = doc(db, 'users', result.user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          let userProfile;
+          if (userDoc.exists()) {
+            userProfile = await loadAndUpdateUserProfile(result.user);
+          } else {
+            userProfile = await createUserProfile(result.user);
+          }
+          
+          setProfile(userProfile);
+        }
+      } catch {
+        // Silently ignore all errors from getRedirectResult - it's safe
       }
-    } catch {
-      // Silently ignore all errors from getRedirectResult - it's safe
-    }
-  };
+    };
     handleRedirectResult();
 
     return unsubscribe;
@@ -140,6 +179,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signup = async (name: string, email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Explicitly create new profile only on signup
     const newProfile = await createUserProfile(userCredential.user, name);
     setProfile(newProfile);
     
@@ -151,7 +191,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const userProfile = await createUserProfile(userCredential.user);
+    // Load existing profile and update lastLoginAt (do NOT create new profile)
+    const userProfile = await loadAndUpdateUserProfile(userCredential.user);
     setProfile(userProfile);
     
     // Save email and password in localStorage
@@ -168,7 +209,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const googleLogin = async () => {
     try {
       const userCredential = await signInWithPopup(auth, provider);
-      await createUserProfile(userCredential.user);
+      const userRef = doc(db, 'users', userCredential.user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      let userProfile;
+      if (userDoc.exists()) {
+        // Existing user: load and update lastLoginAt
+        userProfile = await loadAndUpdateUserProfile(userCredential.user);
+      } else {
+        // New user: create profile
+        userProfile = await createUserProfile(userCredential.user);
+      }
+      
+      setProfile(userProfile);
     } catch (error: any) {
       console.error('[AuthContext] Google login error:', error);
       if (
