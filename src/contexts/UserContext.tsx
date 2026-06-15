@@ -647,7 +647,6 @@ const getDemoUserData = (): UserData => {
   const selectedRole = localStorage.getItem('selectedRole') || 'ARCHITECT';
   const role = selectedRole.toUpperCase();
   const roleData = ROLE_DATA[role] || ROLE_DATA['ARCHITECT'];
-  const savedName = localStorage.getItem('triarcora-name');
   
   return {
     uid: 'demo-user',
@@ -661,7 +660,7 @@ const getDemoUserData = (): UserData => {
       progressPercent: 45
     },
     profile: {
-      name: savedName || roleData.name,
+      name: roleData.name,
       title: roleData.title,
       bio: roleData.bio,
       location: roleData.location,
@@ -1055,11 +1054,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (!prev) return null;
       const updated = { ...prev, ...newData };
       console.log('[UserContext] Saving updated user profile:', updated);
-      
-      // Save name to localStorage if it's present in newData or updated
-      if (updated.profile?.name) {
-        localStorage.setItem('triarcora-name', updated.profile.name);
-      }
       
       if (user) {
         // Logged-in user: save to Firestore and localStorage

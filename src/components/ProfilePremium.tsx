@@ -822,8 +822,6 @@ const ProfilePremium: React.FC = () => {
           ...editFormData
         }
       });
-      // Save name to localStorage
-      localStorage.setItem('triarcora-name', editFormData.name);
       setEditProfileModalOpen(false);
       showToast('Profile updated successfully!', 'success');
     }
