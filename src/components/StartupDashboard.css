@@ -1152,3 +1152,15 @@
   padding-top: 12px;
   color: #ef4444;
 }
+
+/* Style select dropdowns with scroll */
+.sd-filters select {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Make dropdown options text visible */
+.sd-filters select option {
+  color: #000 !important;
+  background: #fff !important;
+}

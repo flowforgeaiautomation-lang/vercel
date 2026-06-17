@@ -5,6 +5,12 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
 html, body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -17,6 +23,44 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
+}
+
+/* Ensure touch targets are minimum 48px for accessibility */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="radio"],
+input[type="checkbox"],
+label {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Improve text readability on mobile */
+p, h1, h2, h3, h4, h5, h6, li, span {
+  line-height: 1.5;
+}
+
+/* Prevent text selection on interactive elements for mobile */
+button, a, input[type="button"], input[type="submit"] {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Default input styles to prevent zoom on mobile */
+input, select, textarea {
+  font-size: 16px !important; /* Prevents iOS auto-zoom */
+}
+
+/* Image optimizations */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 #root {
@@ -58,6 +102,11 @@ html, body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* GLOBAL GOLDEN TRIARCORA STYLES - APPLIES EVERYWHERE */

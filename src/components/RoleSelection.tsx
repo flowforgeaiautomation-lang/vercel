@@ -38,10 +38,24 @@ const RoleSelection: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>('architect');
   const [isLoading, setIsLoading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lastClickTimeRef = useRef<number>(0);
   const navigate = useNavigate();
   const { profile, updateProfileRole, user } = useAuth();
 
-
+  const goHome = async (role: string) => {
+    const uppercaseRole = role.toUpperCase();
+    localStorage.setItem('selectedRole', uppercaseRole);
+    // Navigate FIRST for instant response
+    navigate('/home');
+    // Update roles in background
+    try {
+      if (user) {
+        await updateProfileRole([uppercaseRole]);
+      }
+    } catch (error) {
+      console.error('Error updating role:', error);
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -150,36 +164,21 @@ const RoleSelection: React.FC = () => {
   }, []);
 
   const handleRoleClick = (role: string) => {
-    setSelectedRole(role);
-  };
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    lastClickTimeRef.current = now;
 
-  const handleRoleDoubleClick = async (role: string) => {
+    // Select the role (only one role allowed)
     setSelectedRole(role);
-    localStorage.setItem('selectedRole', role);
-    // Navigate FIRST for instant response
-    navigate('/home');
-    // Update role in background
-    try {
-      if (user) {
-        await updateProfileRole(role);
-      }
-    } catch (error) {
-      console.error('Error updating role:', error);
+
+    // If double-click, go home immediately
+    if (timeSinceLastClick < 300) {
+      goHome(role);
     }
   };
 
   const handleContinue = async () => {
-    localStorage.setItem('selectedRole', selectedRole);
-    // Navigate FIRST for instant response
-    navigate('/home');
-    // Update role in background
-    try {
-      if (user) {
-        await updateProfileRole(selectedRole);
-      }
-    } catch (error) {
-      console.error('Error updating role:', error);
-    }
+    goHome(selectedRole);
   };
 
   return (
@@ -215,7 +214,6 @@ const RoleSelection: React.FC = () => {
           <div 
             className={`role-card ${selectedRole === 'architect' ? 'selected' : ''}`}
             onClick={() => handleRoleClick('architect')}
-            onDoubleClick={() => handleRoleDoubleClick('architect')}
           >
             {selectedRole === 'architect' && (
               <div className="selected-indicator">
@@ -252,7 +250,6 @@ const RoleSelection: React.FC = () => {
           <div 
             className={`role-card ${selectedRole === 'explorer' ? 'selected' : ''}`}
             onClick={() => handleRoleClick('explorer')}
-            onDoubleClick={() => handleRoleDoubleClick('explorer')}
           >
             {selectedRole === 'explorer' && (
               <div className="selected-indicator">
@@ -289,7 +286,6 @@ const RoleSelection: React.FC = () => {
           <div 
             className={`role-card ${selectedRole === 'catalyst' ? 'selected' : ''}`}
             onClick={() => handleRoleClick('catalyst')}
-            onDoubleClick={() => handleRoleDoubleClick('catalyst')}
           >
             {selectedRole === 'catalyst' && (
               <div className="selected-indicator">

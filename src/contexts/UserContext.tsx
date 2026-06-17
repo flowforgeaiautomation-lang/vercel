@@ -307,10 +307,11 @@ interface UserData {
   uid: string;
   mainRole: string;
   extraRole: string | null;
+  roles: string[];
   activeProfileView: string;
   isDemo: boolean;
   displayName?: string;
-  username?: string;
+  username: string;
   email?: string;
   coverImage?: string;
   skills?: string[];
@@ -319,6 +320,8 @@ interface UserData {
     currentStarId: number;
     currentStarName: string;
     progressPercent: number;
+    memberSince: string; // ISO date string when user joined
+    lastActive: string; // ISO date string of last activity
   };
   profile: {
     name: string;
@@ -337,6 +340,7 @@ interface UserData {
   assets?: any[];
   settings: SettingsData;
   hasSeenWelcomeModal: boolean;
+  hasSeenProfileModal: boolean;
 }
 
 interface UserContextType {
@@ -344,6 +348,7 @@ interface UserContextType {
   loading: boolean;
   isDemo: boolean;
   userName: string;
+  userUsername: string;
   userEmail: string;
   userRole: string;
   userProfileImage: string;
@@ -379,6 +384,55 @@ interface RoleData {
     twitter: string;
   };
 }
+
+const generateUsername = (name: string): string => {
+  return name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') || 'user';
+};
+
+// Calculate how many full active months the user has
+const calculateActiveMonths = (memberSince: string, lastActive: string): number => {
+  const startDate = new Date(memberSince);
+  const endDate = new Date(lastActive);
+  
+  let months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+  months += endDate.getMonth() - startDate.getMonth();
+  
+  // At least 1 month active to count
+  return Math.max(0, months);
+};
+
+// Calculate current prestige star based on active months
+const calculatePrestigeStar = (memberSince: string, lastActive: string) => {
+  const activeMonths = calculateActiveMonths(memberSince, lastActive);
+  
+  // 1 month per star, max 10 (SIRIUS)
+  let starId = Math.min(10, activeMonths + 1); // +1 because month 0 is ASTRA (id 1)
+  
+  // Ensure starId is between 1 and 10
+  starId = Math.max(1, Math.min(10, starId));
+  const star = PRESTIGE_STARS.find(s => s.id === starId);
+  
+  // Calculate progress percent (0-100) through current month
+  const startDate = new Date(memberSince);
+  const currentMonthStart = new Date(startDate.getFullYear(), startDate.getMonth() + (starId - 1), 1);
+  const nextMonthStart = new Date(startDate.getFullYear(), startDate.getMonth() + starId, 1);
+  const now = new Date(lastActive);
+  
+  let progressPercent = 0;
+  if (now >= currentMonthStart && now < nextMonthStart) {
+    const totalDaysInMonth = nextMonthStart.getTime() - currentMonthStart.getTime();
+    const daysPassed = now.getTime() - currentMonthStart.getTime();
+    progressPercent = Math.min(100, Math.round((daysPassed / totalDaysInMonth) * 100));
+  } else if (now >= nextMonthStart) {
+    progressPercent = 100;
+  }
+  
+  return {
+    starId,
+    starName: star?.displayName || 'ASTRA',
+    progressPercent
+  };
+};
 
 const ROLE_DATA: Record<string, RoleData> = {
   ARCHITECT: {
@@ -649,13 +703,18 @@ const getDemoUserData = (): UserData => {
   const role = selectedRole.toUpperCase();
   const roleData = ROLE_DATA[role] || ROLE_DATA['ARCHITECT'];
   
+  const username = generateUsername(roleData.name);
+  
   return {
     uid: 'demo-user',
     mainRole: role,
     extraRole: null,
+    roles: [role],
     activeProfileView: role,
     isDemo: true,
     hasSeenWelcomeModal: false,
+    hasSeenProfileModal: false,
+    username,
     prestigeSystem: {
       currentStarId: 5,
       currentStarName: 'CASTOR',
@@ -822,21 +881,30 @@ const getDemoUserData = (): UserData => {
 };
 
 // Empty real user profile data
-const getEmptyRealUserData = (userId: string, role: string, name: string = '', email: string = ''): UserData => {
-  const selectedRole = role || localStorage.getItem('selectedRole') || 'ARCHITECT';
+const getEmptyRealUserData = (userId: string, roleOrRoles: string | string[], name: string = '', email: string = ''): UserData => {
+  const rolesArray = Array.isArray(roleOrRoles) 
+    ? roleOrRoles.map(r => r.toUpperCase()) 
+    : [roleOrRoles.toUpperCase()];
+  const selectedRole = rolesArray[0];
+  const username = generateUsername(name || 'user');
   return {
     uid: userId,
-    mainRole: selectedRole.toUpperCase(),
-    extraRole: null,
-    activeProfileView: selectedRole.toUpperCase(),
+    mainRole: selectedRole,
+    extraRole: rolesArray.length > 1 ? rolesArray[1] : null,
+    roles: rolesArray,
+    activeProfileView: selectedRole,
     isDemo: false,
     displayName: name,
+    username,
     email: email,
     hasSeenWelcomeModal: false,
+    hasSeenProfileModal: false,
     prestigeSystem: {
       currentStarId: 1,
       currentStarName: 'ASTRA',
-      progressPercent: 0
+      progressPercent: 0,
+      memberSince: new Date().toISOString(),
+      lastActive: new Date().toISOString()
     },
     profile: {
       name: name || '',
@@ -932,11 +1000,29 @@ const saveUserProfileToFirestore = async (userId: string, userData: UserData) =>
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, profile: authProfile } = useAuth();
-  // Initialize user data immediately with demo data
-  const initialUserData = getDemoUserData();
-  const [userData, setUserData] = useState<UserData | null>(initialUserData);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [currentUserId, setCurrentUserId] = useState<string>('demo-user');
+  // Initialize user data instantly from localStorage, NO LOADING!
+  const [userData, setUserData] = useState<UserData | null>(() => {
+    // Check for stored user data first!
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('triarcora-lastUserId');
+      if (storedUserId) {
+        const storedData = localStorage.getItem(`user-${storedUserId}`);
+        if (storedData) {
+          return JSON.parse(storedData) as UserData;
+        }
+      }
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentUserId, setCurrentUserId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('triarcora-lastUserId') || '';
+    }
+    return '';
+  });
+  const loadingInProgress = React.useRef<boolean>(false);
+  const initialized = React.useRef<boolean>(false);
 
   // Upload image to Firebase Storage
   const uploadImage = async (file: File, path: string): Promise<string> => {
@@ -970,105 +1056,112 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Load user data from Firestore or localStorage
+  // Load user data from AuthContext's profile (single source of truth)
   useEffect(() => {
-    const loadUserData = async () => {
-      setLoading(true);
-      try {
-        if (user) {
-          // Logged-in user: load exact data from Firestore, no overwrites
-          console.log('[UserContext] Loading logged-in user from Firestore');
-          const userRef = doc(db, 'userProfiles', user.uid);
-          const docSnap = await getDoc(userRef);
-          let firestoreData: UserData;
-          if (!docSnap.exists()) {
-            firestoreData = getEmptyRealUserData(user.uid, authProfile?.role || '', authProfile?.name || '', authProfile?.email || '');
-            await setDoc(userRef, firestoreData);
-          } else {
-            firestoreData = docSnap.data() as UserData;
-            // Ensure settings exist without overwriting existing data
-            if (!firestoreData.settings) {
-              firestoreData.settings = getDefaultSettings();
-            }
-          }
-          // Display exact stored name from Firestore (don't overwrite with localStorage)
-          if (authProfile?.name && !firestoreData.profile.name) {
-            firestoreData.profile.name = authProfile.name;
-          }
-          setUserData(firestoreData);
-          setCurrentUserId(user.uid);
-        } else {
-          // Demo user: check localStorage first, else use demo data
-          console.log('[UserContext] Initializing demo mode');
-          let demoData: UserData;
-          const savedDemoProfile = localStorage.getItem('user-demo-user');
-          if (savedDemoProfile) {
-            try {
-              demoData = JSON.parse(savedDemoProfile);
-              // Ensure settings exist
-              if (!demoData.settings) {
-                demoData.settings = getDefaultSettings();
-              }
-              // Parse dates
-              if (demoData.activities) {
-                demoData.activities = demoData.activities.map((a: any) => ({
-                  ...a,
-                  uploadTime: a.uploadTime ? new Date(a.uploadTime) : undefined
-                }));
-              }
-              if (demoData.assets) {
-                demoData.assets = demoData.assets.map((a: any) => ({
-                  ...a,
-                  uploadTime: a.uploadTime ? new Date(a.uploadTime) : new Date()
-                }));
-              }
-              console.log('[UserContext] Loaded saved demo profile from localStorage');
-            } catch (e) {
-              console.log('[UserContext] Failed to parse saved demo profile, using default');
-              demoData = getDemoUserData();
-            }
-          } else {
-            demoData = getDemoUserData();
-          }
-          setUserData(demoData);
-          setCurrentUserId('demo-user');
-          localStorage.setItem('currentUserId', 'demo-user');
-          saveUserProfile('demo-user', demoData);
-        }
-      } catch (error) {
-        console.error('[UserContext] Error loading user data:', error);
-        // Fallback to demo mode on error
-        const demoData = getDemoUserData();
-        setUserData(demoData);
-        setCurrentUserId('demo-user');
-        localStorage.setItem('currentUserId', 'demo-user');
-        saveUserProfile('demo-user', demoData);
-      } finally {
-        setLoading(false);
+    if (user && authProfile) {
+      // Check if we already loaded this user to prevent infinite loops
+      if (currentUserId === user.uid && userData) {
+        return;
       }
-    };
 
-    loadUserData();
-  }, [user, authProfile]);
+      // First, try to load from localStorage for INSTANT display
+      const storedData = localStorage.getItem(`user-${user.uid}`);
+      
+      // Create UserData from authProfile
+      const rolesArray = authProfile.roles || [authProfile.role || 'ARCHITECT'];
+      
+      let initialData: UserData = storedData 
+        ? JSON.parse(storedData) as UserData
+        : getEmptyRealUserData(user.uid, rolesArray, authProfile.name || '', authProfile.email || '');
+
+      // Update userData with authProfile's data
+      initialData.uid = authProfile.uid;
+      if (authProfile.name && !initialData.profile.name) {
+        initialData.profile.name = authProfile.name;
+      }
+      if (authProfile.username) {
+        initialData.username = authProfile.username;
+      }
+      if (authProfile.email) {
+        initialData.email = authProfile.email;
+      }
+      if (authProfile.photoURL) {
+        initialData.profile.profileImage = authProfile.photoURL;
+      }
+      if (authProfile.role) {
+        const role = authProfile.role.toUpperCase();
+        initialData.mainRole = role;
+        initialData.activeProfileView = role;
+        if (!initialData.roles.includes(role)) {
+          initialData.roles.push(role);
+        }
+      }
+
+      // Update state first for instant UI
+      setUserData(initialData);
+      setCurrentUserId(user.uid);
+      saveUserProfile(user.uid, initialData);
+      localStorage.setItem('triarcora-lastUserId', user.uid);
+
+      // Check Firestore for existing data in background
+      const userRef = doc(db, 'userProfiles', user.uid);
+      getDoc(userRef).then((docSnap) => {
+        let finalData: UserData = initialData;
+        
+        if (docSnap.exists()) {
+          const firestoreData = docSnap.data() as UserData;
+          finalData = { ...initialData, ...firestoreData };
+        }
+        
+        // Ensure userData has all required fields
+        if (!finalData.settings) {
+          finalData.settings = getDefaultSettings();
+        }
+        if (!finalData.prestigeSystem) {
+          finalData.prestigeSystem = {
+            currentStarId: 1,
+            currentStarName: 'ASTRA',
+            progressPercent: 0,
+            memberSince: new Date().toISOString(),
+            lastActive: new Date().toISOString()
+          };
+        }
+        if (!finalData.prestigeSystem.memberSince) {
+          finalData.prestigeSystem.memberSince = new Date().toISOString();
+        }
+
+        // Update state, localStorage, and Firestore
+        setUserData(finalData);
+        saveUserProfile(user.uid, finalData);
+        saveUserProfileToFirestore(user.uid, finalData);
+      }).catch((error) => {
+        console.error('[UserContext] Error fetching user data from Firestore:', error);
+      });
+    } else if (!initialized.current) {
+      // Only clear data if this is the first run
+      setUserData(null);
+      setCurrentUserId('');
+      localStorage.removeItem('triarcora-lastUserId');
+    }
+    initialized.current = true;
+  }, [user?.uid, authProfile?.uid]);
 
   const updateUserData = (newData: Partial<UserData>) => {
-    console.log('[UserContext] updateUserData called with:', newData);
     setUserData(prev => {
       if (!prev) return null;
       const updated = { ...prev, ...newData };
-      console.log('[UserContext] Saving updated user profile:', updated);
       
       if (user) {
         // Logged-in user: save to Firestore and localStorage
         saveUserProfileToFirestore(user.uid, updated);
+        saveUserProfile(user.uid, updated);
+        localStorage.setItem('triarcora-lastUserId', user.uid);
       }
-      saveUserProfile(currentUserId, updated);
       return updated;
     });
   };
 
   const updateSettings = (newSettings: Partial<SettingsData>) => {
-    console.log('[UserContext] updateSettings called with:', newSettings);
     setUserData(prev => {
       if (!prev) return null;
       const updated = {
@@ -1078,7 +1171,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           ...newSettings
         }
       };
-      console.log('[UserContext] Saving updated settings:', updated);
       
       if (user) {
         // Logged-in user: save to Firestore and localStorage
@@ -1087,25 +1179,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       saveUserProfile(currentUserId, updated);
       return updated;
     });
-  };
-
-  const createNewUserProfile = () => {
-    const newUserId = `user-${Date.now()}`;
-    setCurrentUserId(newUserId);
-  };
-
-  const switchToDemo = () => {
-    const demoProfile = getDemoUserData();
-    setUserData(demoProfile);
-    localStorage.setItem('currentUserId', 'demo-user');
-    saveUserProfile('demo-user', demoProfile);
-  };
-
-  const switchToReal = () => {
-    const realUserId = localStorage.getItem('realUserId') || `user-${Date.now()}`;
-    localStorage.setItem('realUserId', realUserId);
-    localStorage.setItem('currentUserId', realUserId);
-    setCurrentUserId(realUserId);
   };
 
   const addExtraRole = (role: string) => {
@@ -1124,8 +1197,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <UserContext.Provider value={{ 
       userData, 
       loading,
-      isDemo: userData?.isDemo || false,
+      isDemo: false,
       userName: userData?.profile?.name,
+      userUsername: userData?.username || '',
       userEmail: userData?.email || '',
       userRole: userData?.mainRole || 'ARCHITECT',
       userProfileImage: userData?.profile?.profileImage || '',
@@ -1133,9 +1207,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateUserData, 
       updateSettings,
       setCurrentUserId, 
-      createNewUserProfile,
-      switchToDemo,
-      switchToReal,
       uploadImage,
       deleteImage,
       addExtraRole,

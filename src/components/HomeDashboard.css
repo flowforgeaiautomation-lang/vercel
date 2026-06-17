@@ -1739,10 +1739,48 @@ body {
     top: 0;
     height: 100%;
     z-index: 100;
+    width: 72px;
   }
   
   .dashboard-content {
     grid-template-columns: 1fr;
     padding-left: 88px;
+  }
+
+  .brand-name,
+  .promo-content,
+  .nav-item span:not(.nav-icon) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-content {
+    padding: 12px;
+    padding-left: 88px;
+  }
+
+  .feed-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+
+  .post-options {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .post-action {
+    padding: 8px 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .dashboard-content {
+    padding-left: 76px;
   }
 }

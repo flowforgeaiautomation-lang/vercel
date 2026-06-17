@@ -25,7 +25,6 @@ interface UploadedFile {
 }
 
 const CreateInvestorPost: React.FC<CreateInvestorPostProps> = ({ onClose }) => {
-  console.log('CreateInvestorPost RENDERED!');
   const { userData } = useUser();
   const { addPost } = usePosts();
 
@@ -428,7 +427,7 @@ const CreateInvestorPost: React.FC<CreateInvestorPostProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => console.log('Overlay clicked!')}>
+    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => {}}>
       <div className="create-post-modal role-catalyst">
         <div className="create-post-header">
           <div className="create-post-header-left">

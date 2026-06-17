@@ -150,7 +150,7 @@ const searchIndex: Record<string, SettingsSection[]> = {
 const TriarcoraSettings: React.FC = () => {
   const navigate = useNavigate();
   const { userData, updateSettings, updateUserData, uploadImage, addExtraRole, deleteExtraRole, switchProfile } = useUser();
-  const { logout, changePassword } = useAuth();
+  const { logout, changePassword, deleteAccount } = useAuth();
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [activeSection, setActiveSection] = useState<SettingsSection>('account-preferences');
   const [searchQuery, setSearchQuery] = useState('');
@@ -184,6 +184,10 @@ const TriarcoraSettings: React.FC = () => {
   const [resetRecommendationsModalOpen, setResetRecommendationsModalOpen] = useState(false);
   const [contentInterests, setContentInterests] = useState<string[]>(['AI', 'SaaS', 'FinTech']);
   const [aiMemoryModalOpen, setAiMemoryModalOpen] = useState(false);
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = useState(false);
+  const [deleteAccountPassword, setDeleteAccountPassword] = useState('');
+  const [deleteAccountStep, setDeleteAccountStep] = useState(1);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Initialize edit form data
@@ -500,10 +504,43 @@ const TriarcoraSettings: React.FC = () => {
   };
 
   const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account? This action is irreversible!')) {
-      console.log('Deleting account...');
-      showToast('Account deletion request submitted!', 'success');
+    setDeleteAccountModalOpen(true);
+    setDeleteAccountStep(1);
+    setDeleteAccountPassword('');
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (deleteAccountStep === 1) {
+      if (!deleteAccountPassword) {
+        showToast('Please enter your password!', 'error');
+        return;
+      }
+      setDeleteAccountStep(2);
+    } else if (deleteAccountStep === 2) {
+      setIsDeletingAccount(true);
+      try {
+        await deleteAccount(deleteAccountPassword);
+        navigate('/');
+        showToast('Account deleted successfully!', 'success');
+      } catch (error: any) {
+        console.error('Error deleting account:', error);
+        let errorMessage = 'An error occurred. Please try again.';
+        if (error.code === 'auth/wrong-password') {
+          errorMessage = 'Incorrect password.';
+          setDeleteAccountStep(1);
+        }
+        showToast(errorMessage, 'error');
+      } finally {
+        setIsDeletingAccount(false);
+        setDeleteAccountModalOpen(false);
+      }
     }
+  };
+
+  const cancelDeleteAccount = () => {
+    setDeleteAccountModalOpen(false);
+    setDeleteAccountStep(1);
+    setDeleteAccountPassword('');
   };
 
   const handleDeactivateAccount = () => {
@@ -2798,7 +2835,14 @@ const TriarcoraSettings: React.FC = () => {
                     <h4>Log Out</h4>
                     <p>Sign out of your account on this device</p>
                   </div>
-                  <button className="settings-btn" onClick={logout}>Log Out</button>
+                  <button className="settings-btn" onClick={async () => {
+                      try {
+                        await logout();
+                        navigate('/');
+                      } catch (error) {
+                        console.error('Logout failed:', error);
+                      }
+                    }}>Log Out</button>
                 </div>
                 
                 <div className="settings-item">
@@ -3435,6 +3479,76 @@ const TriarcoraSettings: React.FC = () => {
                 }}
               >
                 Clear Memory
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Modal */}
+      {deleteAccountModalOpen && (
+        <div className="profile-modal-overlay" onClick={cancelDeleteAccount}>
+          <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="profile-modal-header">
+              <h3>Delete Account</h3>
+              <button className="profile-modal-close" onClick={cancelDeleteAccount}>
+                ×
+              </button>
+            </div>
+            <div className="profile-modal-body">
+              {deleteAccountStep === 1 ? (
+                <div>
+                  <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
+                    To continue, please enter your password:
+                  </p>
+                  <div className="profile-edit-section">
+                    <label className="profile-edit-label">Password</label>
+                    <input
+                      type="password"
+                      className="profile-edit-input"
+                      value={deleteAccountPassword}
+                      onChange={(e) => setDeleteAccountPassword(e.target.value)}
+                      placeholder="Enter your password"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
+                    Are you absolutely sure you want to delete your account?
+                  </p>
+                  <p style={{ color: '#9CA3AF', marginBottom: '20px' }}>
+                    This will permanently delete:
+                  </p>
+                  <ul style={{ color: '#9CA3AF', paddingLeft: '20px', marginBottom: '24px' }}>
+                    <li>Your profile and personal information</li>
+                    <li>All your posts, drafts, and saved items</li>
+                    <li>Connections and messages</li>
+                    <li>Notifications</li>
+                    <li>Role data and settings</li>
+                    <li>User account and authentication</li>
+                  </ul>
+                  <p style={{ color: '#EF4444', fontSize: '14px' }}>
+                    This action is irreversible!
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="profile-modal-footer">
+              <button className="profile-modal-btn cancel" onClick={cancelDeleteAccount}>
+                Cancel
+              </button>
+              <button 
+                className="profile-modal-btn" 
+                style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)' }}
+                onClick={confirmDeleteAccount}
+                disabled={isDeletingAccount}
+              >
+                {isDeletingAccount 
+                  ? 'Deleting...' 
+                  : deleteAccountStep === 1 
+                    ? 'Continue' 
+                    : 'Delete Account'}
               </button>
             </div>
           </div>

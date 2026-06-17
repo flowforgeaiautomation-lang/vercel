@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import AICopilot from './AICopilot';
+import FeedbackForm from './FeedbackForm';
 import './FeedbackHub.css';
 
 const HomeIcon = () => (
@@ -30,6 +31,9 @@ const FeedbackHub = () => {
   const { userData } = useUser();
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState('This Month');
+  const [feedbackFormOpen, setFeedbackFormOpen] = useState(false);
+  const [currentStartup, setCurrentStartup] = useState('Nebula AI');
+  const [currentCategory, setCurrentCategory] = useState('Product Feedback');
 
   const getUserProfileImage = () => {
     if (userData?.profile?.profileImage) {
@@ -116,7 +120,11 @@ const FeedbackHub = () => {
             <p className="page-subtitle">Help startups grow by sharing your insights and feedback.</p>
           </div>
           <div className="header-right">
-            <button className="give-feedback-btn" onClick={() => setCopilotOpen(true)}>
+            <button className="give-feedback-btn" onClick={() => {
+              setCurrentStartup('Startup');
+              setCurrentCategory('Product');
+              setFeedbackFormOpen(true);
+            }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 5v14M5 12h14" />
               </svg>
@@ -212,7 +220,11 @@ const FeedbackHub = () => {
                   </svg>
                   2 Days Left
                 </div>
-                <button className="give-feedback-btn-small">Give Feedback</button>
+                <button className="give-feedback-btn-small" onClick={() => {
+                  setCurrentStartup('Nebula AI');
+                  setCurrentCategory('Product Feedback');
+                  setFeedbackFormOpen(true);
+                }}>Give Feedback</button>
                 <div className="request-bookmark">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
@@ -242,7 +254,11 @@ const FeedbackHub = () => {
                   </svg>
                   4 Days Left
                 </div>
-                <button className="give-feedback-btn-small">Give Feedback</button>
+                <button className="give-feedback-btn-small" onClick={() => {
+                  setCurrentStartup('Nebula AI');
+                  setCurrentCategory('Product Feedback');
+                  setFeedbackFormOpen(true);
+                }}>Give Feedback</button>
                 <div className="request-bookmark">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
@@ -273,7 +289,11 @@ const FeedbackHub = () => {
                   </svg>
                   5 Days Left
                 </div>
-                <button className="give-feedback-btn-small">Give Feedback</button>
+                <button className="give-feedback-btn-small" onClick={() => {
+                  setCurrentStartup('Nebula AI');
+                  setCurrentCategory('Product Feedback');
+                  setFeedbackFormOpen(true);
+                }}>Give Feedback</button>
                 <div className="request-bookmark">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
@@ -311,7 +331,11 @@ const FeedbackHub = () => {
                   </div>
                   <span className="progress-text">In Progress</span>
                 </div>
-                <button className="continue-btn">Continue</button>
+                <button className="continue-btn" onClick={() => {
+                  setCurrentStartup('BuildBetter');
+                  setCurrentCategory('Product Usability');
+                  setFeedbackFormOpen(true);
+                }}>Continue</button>
                 <div className="request-bookmark">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
@@ -407,6 +431,14 @@ const FeedbackHub = () => {
       </div>
 
       {copilotOpen && <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />}
+      {feedbackFormOpen && (
+        <FeedbackForm 
+          startupName={currentStartup}
+          feedbackCategory={currentCategory}
+          onClose={() => setFeedbackFormOpen(false)}
+          onSubmit={(data) => console.log('Feedback submitted:', data)}
+        />
+      )}
     </div>
   );
 };

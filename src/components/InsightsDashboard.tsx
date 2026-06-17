@@ -55,8 +55,9 @@ const InsightsDashboard = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [discoverDropdownOpen, setDiscoverDropdownOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
-  const tabs = ['All', 'Startup', 'Investment', 'Research', 'AI', 'Growth', 'Leadership', 'Product', 'Technology', 'More'];
+  const tabs = ['All', 'Articles', 'Research Reports', 'Funding Guides', 'Legal Guides', 'Valuation Guides', 'Market Reports', 'Tax Resources', 'Investment Frameworks', 'Due Diligence Checklists'];
 
   const featuredInsight = {
     title: 'How We Reached ₹1 Crore ARR in 12 Months',
@@ -190,8 +191,23 @@ const InsightsDashboard = () => {
       <div className="insights-main">
         <div className="insights-content">
           <div className="insights-page-header">
-            <h1>Insights</h1>
-            <p>Ideas worth sharing. Knowledge worth saving.</p>
+            <div>
+              <h1>Insights</h1>
+              <p>Ideas worth sharing. Knowledge worth saving.</p>
+            </div>
+            <button
+              onClick={() => {
+                if (profile?.isVerified) {
+                  setShowCreateModal(true);
+                } else {
+                  alert('Only verified users can publish insights. Please verify your email first!');
+                }
+              }}
+              className="create-insight-btn"
+            >
+              <PlusIcon />
+              Create Insight
+            </button>
           </div>
 
           {/* Tabs */}

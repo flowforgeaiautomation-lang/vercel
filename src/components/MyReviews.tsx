@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import AICopilot from './AICopilot';
+import ReviewForm from './ReviewForm';
 import './MyReviews.css';
 
 const HomeIcon = () => (
@@ -37,6 +38,8 @@ const MyReviews = () => {
   const { userData } = useUser();
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [currentReviewStartup, setCurrentReviewStartup] = useState('Startup');
 
   const getUserProfileImage = () => {
     if (userData?.profile?.profileImage) {
@@ -123,7 +126,10 @@ const MyReviews = () => {
             <p className="page-subtitle">Your feedback, insights, and contributions across the ecosystem.</p>
           </div>
           <div className="header-right">
-            <button className="write-review-btn">
+            <button className="write-review-btn" onClick={() => {
+              setCurrentReviewStartup('Startup');
+              setReviewFormOpen(true);
+            }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M12 5v14M5 12h14" />
               </svg>
@@ -494,7 +500,10 @@ const MyReviews = () => {
                     </div>
                     <div className="feedback-date">May 28, 2025</div>
                   </div>
-                  <button className="review-now-btn">Review Now</button>
+                  <button className="review-now-btn" onClick={() => {
+                    setCurrentReviewStartup('QuantumPay');
+                    setReviewFormOpen(true);
+                  }}>Review Now</button>
                 </div>
 
                 <div className="feedback-card">
@@ -513,7 +522,10 @@ const MyReviews = () => {
                     </div>
                     <div className="feedback-date">May 30, 2025</div>
                   </div>
-                  <button className="review-now-btn">Review Now</button>
+                  <button className="review-now-btn" onClick={() => {
+                    setCurrentReviewStartup('GreenMesh');
+                    setReviewFormOpen(true);
+                  }}>Review Now</button>
                 </div>
               </div>
             </div>
@@ -536,7 +548,10 @@ const MyReviews = () => {
                     <div className="draft-tag">Product Review</div>
                     <div className="draft-date">Last saved 2 hours ago</div>
                   </div>
-                  <button className="continue-btn">Continue</button>
+                  <button className="continue-btn" onClick={() => {
+                    setCurrentReviewStartup('SmartNote');
+                    setReviewFormOpen(true);
+                  }}>Continue</button>
                 </div>
 
                 <div className="draft-card">
@@ -551,7 +566,10 @@ const MyReviews = () => {
                     <div className="draft-tag">Startup Review</div>
                     <div className="draft-date">Last saved yesterday</div>
                   </div>
-                  <button className="continue-btn">Continue</button>
+                  <button className="continue-btn" onClick={() => {
+                    setCurrentReviewStartup('BuildBuddy');
+                    setReviewFormOpen(true);
+                  }}>Continue</button>
                 </div>
               </div>
             </div>
@@ -630,6 +648,13 @@ const MyReviews = () => {
       </div>
 
       {copilotOpen && <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />}
+      {reviewFormOpen && (
+        <ReviewForm
+          startupName={currentReviewStartup}
+          onClose={() => setReviewFormOpen(false)}
+          onSubmit={(data) => console.log('Review submitted:', data)}
+        />
+      )}
     </div>
   );
 };

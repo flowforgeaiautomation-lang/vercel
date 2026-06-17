@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import { usePosts } from '../contexts/PostContext';
 import AICopilot from './AICopilot';
+import PostMenu from './PostMenu';
 import './BookmarksDashboard.css';
 import PrestigeStarBadge from './PrestigeStarBadge';
 
@@ -45,6 +46,7 @@ const BookmarksDashboard = () => {
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [discoverDropdownOpen, setDiscoverDropdownOpen] = useState(false);
+  const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
 
   // Close discover dropdown when clicking outside
   useEffect(() => {
@@ -283,7 +285,13 @@ const BookmarksDashboard = () => {
                           >
                             Unsave
                           </button>
-                          <button className="bk-more-btn">
+                          <button 
+                            className="bk-more-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenuPostId(post.id);
+                            }}
+                          >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
                           </button>
                         </div>
@@ -368,6 +376,14 @@ const BookmarksDashboard = () => {
       )}
 
       {copilotOpen && <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />}
+      
+      {/* Post Menu */}
+      {openMenuPostId && (
+        <PostMenu 
+          post={savedPosts.find(p => p.id === openMenuPostId)!}
+          onClose={() => setOpenMenuPostId(null)}
+        />
+      )}
     </div>
   );
 };

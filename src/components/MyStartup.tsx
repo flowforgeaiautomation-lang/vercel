@@ -188,6 +188,48 @@ const MyStartup: React.FC = () => {
               </div>
             </div>
 
+            {/* AI Insights */}
+            <div className="my-startup-growth-card" style={{
+              background: 'rgba(255,215,0,0.05)',
+              border: '1px solid rgba(255,215,0,0.2)',
+            }}>
+              <div className="my-startup-card-header">
+                <h3 className="my-startup-card-title">🧠 AI Insights</h3>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '0.5rem 0' }}>
+                <div style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  borderRadius: '0.75rem', 
+                  padding: '1rem', 
+                  borderLeft: '4px solid #FFD700'
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0, fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    💡 <strong>Investor interest increased 27% this week.</strong> This is a great sign — continue sharing updates to maintain momentum!
+                  </p>
+                </div>
+                <div style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  borderRadius: '0.75rem', 
+                  padding: '1rem', 
+                  borderLeft: '4px solid #10B981'
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0, fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    📝 Your profile completeness is at 85%. Adding more metrics and a clear pitch deck could significantly improve visibility!
+                  </p>
+                </div>
+                <div style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  borderRadius: '0.75rem', 
+                  padding: '1rem', 
+                  borderLeft: '4px solid #8B5CF6'
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.85)', margin: 0, fontSize: '0.9rem', lineHeight: '1.6' }}>
+                    🚀 Your growth rate of +32% MoM is well above average for your stage! Consider highlighting this in your next investor update.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Fundraising Overview */}
             <div className="my-startup-fundraising-card">
               <div className="my-startup-card-header">

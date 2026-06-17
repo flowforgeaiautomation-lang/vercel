@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import { UserProfile, usePosts } from '../contexts/PostContext';
 import AICopilot from './AICopilot';
+import ReviewForm from './ReviewForm';
 import PrestigeStarBadge from './PrestigeStarBadge';
 import './ExplorerDashboard.css';
 
@@ -97,16 +98,18 @@ const BookmarkIcon = () => (
 
 const ExplorerDashboard = () => {
   const { userName, userRole, userProfileImage, userData } = useUser();
-  const { likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts } = usePosts();
+  const { likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts, hiddenPosts, mutedUsers } = usePosts();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('discover');
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const feedPosts = posts;
+  const feedPosts = posts.filter(post => !hiddenPosts.includes(post.id) && !mutedUsers.includes(post.userId));
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
   const [showDetailedProfile, setShowDetailedProfile] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [currentReviewStartup, setCurrentReviewStartup] = useState('Startup');
   const [animatingPostId, setAnimatingPostId] = useState<string | null>(null);
   const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState<string>('');
@@ -118,6 +121,10 @@ const ExplorerDashboard = () => {
     likePost(postId);
     setAnimatingPostId(postId);
     setTimeout(() => setAnimatingPostId(null), 1200);
+  };
+
+  const getUserName = () => {
+    return userData?.profile?.name || profile?.name || 'Explorer';
   };
 
   const getInitials = (name: string) => {
@@ -369,10 +376,7 @@ const ExplorerDashboard = () => {
                 <h1>Explorer Home</h1>
                 <p>Discover, explore, contribute. Make an impact.</p>
               </div>
-              <button className="ed-customize">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
-                Customize Feed
-              </button>
+              
             </div>
 
             <div className="ed-tabs">
@@ -417,7 +421,10 @@ const ExplorerDashboard = () => {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,18 15,12 9,6" /></svg>
               </div>
 
-              <div className="ed-quick-card">
+              <div className="ed-quick-card" onClick={() => {
+                setCurrentReviewStartup('Startup');
+                setReviewFormOpen(true);
+              }} style={{ cursor: 'pointer' }}>
                 <div className="ed-card-icon">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2" /></svg>
                 </div>
@@ -1147,6 +1154,23 @@ const ExplorerDashboard = () => {
       {createPostOpen && (
         <CreateExplorerPost 
           onClose={() => setCreatePostOpen(false)} 
+        />
+      )}
+
+      {/* AI Copilot */}
+      {copilotOpen && (
+        <AICopilot 
+          isOpen={copilotOpen} 
+          onClose={() => setCopilotOpen(false)} 
+        />
+      )}
+
+      {/* Review Form */}
+      {reviewFormOpen && (
+        <ReviewForm
+          startupName={currentReviewStartup}
+          onClose={() => setReviewFormOpen(false)}
+          onSubmit={(data) => console.log('Review submitted:', data)}
         />
       )}
     </div>

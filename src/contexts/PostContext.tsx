@@ -21,6 +21,7 @@ export interface Comment {
 export interface UserProfile {
   userId: string;
   userName: string;
+  username: string;
   userRole: string;
   userTitle: string;
   userBio: string;
@@ -125,12 +126,12 @@ export interface Post {
   id: string;
   userId: string;
   userName: string;
+  userUsername: string;
   userAvatar?: string;
   userRole: string;
   userTitle?: string;
   postType: string;
   intent: string;
-  description: string;
   tags: string[];
   likes: number;
   likedBy: string[]; // Array of user IDs who liked the post
@@ -214,6 +215,20 @@ export interface SavedCollection {
   name: string;
   postIds: string[];
   createdAt: Date;
+};
+
+export interface Notification {
+  id: string;
+  userId: string;
+  avatar?: string;
+  name: string;
+  role: string;
+  roleType: 'gold' | 'green' | 'cyan' | 'purple';
+  text: string;
+  time: string;
+  action?: string;
+  isUnread: boolean;
+  timestamp: Date;
 }
 
 interface PostContextType {
@@ -234,6 +249,7 @@ interface PostContextType {
   hiddenPosts: string[];
   notInterestedTopics: string[];
   pinnedPostIds: string[];
+  notifications: Notification[];
   addPost: (post: Omit<Post, 'id' | 'likes' | 'comments' | 'shares' | 'timestamp' | 'engagementScore' | 'isSaved'>) => void;
   likePost: (postId: string) => void;
   addComment: (postId: string, comment: Omit<Comment, 'id' | 'timestamp'>, parentId?: string) => void;
@@ -281,6 +297,9 @@ interface PostContextType {
   // Copy functions
   copyPostLink: (postId: string) => string;
   copyPostText: (postId: string) => string;
+  addNotification: (notification: Omit<Notification, 'id' | 'time' | 'timestamp'>) => void;
+  markAllAsRead: () => void;
+  getNotifications: () => Notification[];
 }
 
 const PostContext = createContext<PostContextType | undefined>(undefined);
@@ -293,6 +312,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     'demo-1': {
       userId: 'demo-1',
       userName: 'Riya Sharma',
+      username: 'riyasharma',
       userRole: 'ARCHITECT',
       userTitle: 'Founder & CEO @ Nebula AI',
       userBio: 'Passionate entrepreneur building the future of AI-powered startup tools. Previously at Google and Stripe.',
@@ -319,6 +339,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     'demo-2': {
       userId: 'demo-2',
       userName: 'Unnati Chaudhary',
+      username: 'queenunnati',
       userRole: 'CATALYST',
       userTitle: 'Partner @ Peak Capital',
       userBio: 'Early-stage investor focused on fintech and SaaS startups. Love working with passionate founders.',
@@ -346,6 +367,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     'demo-3': {
       userId: 'demo-3',
       userName: 'Kabir Mehta',
+      username: 'kabirmehta',
       userRole: 'EXPLORER',
       userTitle: 'Product @ Web3 Labs',
       userBio: 'Building decentralized social platforms and exploring the future of web3. Previously at Coinbase.',
@@ -372,6 +394,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     'demo-4': {
       userId: 'demo-4',
       userName: 'Rohit Sharma',
+      username: 'rohitsharma',
       userRole: 'ARCHITECT',
       userTitle: 'Founder @ FinFlow',
       userBio: 'Building modern accounting for startups, helping teams manage finances in real-time. Previously at Stripe.',
@@ -398,6 +421,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     'demo-5': {
       userId: 'demo-5',
       userName: 'Lisa Schmidt',
+      username: 'lisaschmidt',
       userRole: 'CATALYST',
       userTitle: 'Angel Investor',
       userBio: 'Investing in climate tech startups that make sustainability accessible for businesses.',
@@ -425,6 +449,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     'demo-6': {
       userId: 'demo-6',
       userName: 'Dr. Sarah Chen',
+      username: 'drsarahchen',
       userRole: 'EXPLORER',
       userTitle: 'Product Lead @ HealthHub',
       userBio: 'Building patient-first telehealth solutions. Expert in healthcare product design and regulation.',
@@ -788,6 +813,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '1',
       userId: 'demo-1',
       userName: 'Riya Sharma',
+      userUsername: 'riyasharma',
       userRole: 'ARCHITECT',
       userTitle: 'Founder & CEO @ Nebula AI',
       postType: 'Startup Launch',
@@ -843,6 +869,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '2',
       userId: 'demo-2',
       userName: 'Unnati Chaudhary',
+      userUsername: 'queenunnati',
       userRole: 'CATALYST',
       userTitle: 'Partner @ Peak Capital',
       postType: 'Investment Opportunity',
@@ -860,6 +887,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '3',
       userId: 'demo-3',
       userName: 'Kabir Mehta',
+      userUsername: 'kabirmehta',
       userRole: 'EXPLORER',
       userTitle: 'Product @ Web3 Labs',
       postType: 'Insight / Research',
@@ -877,6 +905,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '4',
       userId: 'demo-4',
       userName: 'Rohit Sharma',
+      userUsername: 'rohitsharma',
       userRole: 'ARCHITECT',
       userTitle: 'Founder @ FinFlow',
       postType: 'Growth Update',
@@ -894,6 +923,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '5',
       userId: 'demo-5',
       userName: 'Lisa Schmidt',
+      userUsername: 'lisaschmidt',
       userRole: 'CATALYST',
       userTitle: 'Angel Investor',
       postType: 'Traction Update',
@@ -911,6 +941,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '6',
       userId: 'demo-6',
       userName: 'Dr. Sarah Chen',
+      userUsername: 'drsarahchen',
       userRole: 'EXPLORER',
       userTitle: 'Product Lead @ HealthHub',
       postType: 'Learning Post',
@@ -928,6 +959,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '7',
       userId: 'demo-2',
       userName: 'Unnati Chaudhary',
+      userUsername: 'queenunnati',
       userRole: 'CATALYST',
       userTitle: 'Partner @ Peak Capital',
       postType: 'Investment Announcement',
@@ -945,6 +977,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: '8',
       userId: 'demo-3',
       userName: 'Kabir Mehta',
+      userUsername: 'kabirmehta',
       userRole: 'EXPLORER',
       userTitle: 'Product @ Web3 Labs',
       postType: 'Community Post',
@@ -1119,21 +1152,15 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   const [mutedUsers, setMutedUsers] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('triarcora-muted-users');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    // Clear muted users for now to restore all posts
+    localStorage.removeItem('triarcora-muted-users');
+    return [];
   });
 
   const [hiddenPosts, setHiddenPosts] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('triarcora-hidden-posts');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    // Clear hidden posts for now to restore all posts
+    localStorage.removeItem('triarcora-hidden-posts');
+    return [];
   });
 
   const [notInterestedTopics, setNotInterestedTopics] = useState<string[]>(() => {
@@ -1149,6 +1176,63 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const saved = localStorage.getItem('triarcora-pinned-posts');
       return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [notifications, setNotifications] = useState<Notification[]>(() => {
+    try {
+      const saved = localStorage.getItem('triarcora-notifications');
+      if (!saved) {
+        // Initial demo notifications with real names
+        return [
+          {
+            id: '1',
+            userId: 'demo-1',
+            avatar: undefined,
+            name: 'Riya Sharma',
+            role: 'Architect',
+            roleType: 'gold',
+            text: 'liked your post.',
+            time: '2m ago',
+            action: 'View Post',
+            isUnread: true,
+            timestamp: new Date(Date.now() - 120000)
+          },
+          {
+            id: '2',
+            userId: 'demo-2',
+            avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=180&h=180&fit=crop&crop=face',
+            name: 'Unnati Chaudhary',
+            role: 'Investor',
+            roleType: 'green',
+            text: 'sent you a connection request.',
+            time: '5m ago',
+            action: 'Accept',
+            isUnread: true,
+            timestamp: new Date(Date.now() - 300000)
+          },
+          {
+            id: '3',
+            userId: 'demo-4',
+            avatar: undefined,
+            name: 'Rohit Sharma',
+            role: 'Architect',
+            roleType: 'gold',
+            text: 'started following you.',
+            time: '1h ago',
+            action: 'View Profile',
+            isUnread: false,
+            timestamp: new Date(Date.now() - 3600000)
+          }
+        ];
+      }
+      const parsed = JSON.parse(saved);
+      return parsed.map((item: any) => ({
+        ...item,
+        timestamp: new Date(item.timestamp)
+      }));
     } catch {
       return [];
     }
@@ -1175,6 +1259,21 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
   };
 
+  // Format time ago string
+  const formatTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
   // Get trending hashtags
   const getTrendingHashtags = (): HashtagData[] => {
     return [...trendingHashtags].sort((a, b) => {
@@ -1195,7 +1294,11 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // Get saved posts
   const getSavedPosts = (): Post[] => {
-    return posts.filter(post => savedPosts.includes(post.id));
+    return posts.filter(post => 
+      savedPosts.includes(post.id) && 
+      !hiddenPosts.includes(post.id) && 
+      !mutedUsers.includes(post.userId)
+    );
   };
 
   // Collections management
@@ -1351,6 +1454,19 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('triarcora-pinned-posts', JSON.stringify(pinnedPostIds));
   }, [pinnedPostIds]);
 
+  useEffect(() => {
+    localStorage.setItem('triarcora-notifications', JSON.stringify(notifications));
+  }, [notifications]);
+
+  // Helper function for role type
+  const getRoleType = (role: string): 'gold' | 'green' | 'cyan' | 'purple' => {
+    const roleUpper = role.toUpperCase();
+    if (roleUpper.includes('ARCHITECT') || roleUpper.includes('FOUNDER')) return 'gold';
+    if (roleUpper.includes('CATALYST') || roleUpper.includes('INVESTOR')) return 'green';
+    if (roleUpper.includes('EXPLORER') || roleUpper.includes('PRODUCT')) return 'cyan';
+    return 'purple';
+  };
+
   const addPost = (postData: Omit<Post, 'id' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'timestamp' | 'engagementScore' | 'isSaved'>) => {
     const newPost: Post = {
       ...postData,
@@ -1366,10 +1482,28 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const likePost = (postId: string) => {
-    const userId = userData?.uid || 'current-user'; // Use current user ID
+    const userId = userData?.uid || 'current-user';
+    const currentUserName = userData?.profile?.name || 'User';
+    const currentUserRole = userData?.mainRole || 'User';
+    const currentUserAvatar = userData?.profile?.avatar;
     setPosts(prev => prev.map(post => {
       if (post.id !== postId) return post;
       const isLiked = post.likedBy.includes(userId);
+      if (!isLiked) {
+        // Add notification to post author
+        if (post.userId !== userId) {
+          addNotification({
+            userId: userId,
+            avatar: currentUserAvatar,
+            name: currentUserName,
+            role: currentUserRole,
+            roleType: getRoleType(currentUserRole),
+            text: 'liked your post.',
+            action: 'View Post',
+            isUnread: true
+          });
+        }
+      }
       return {
         ...post,
         likedBy: isLiked 
@@ -1412,11 +1546,25 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       replies: [],
       parentId: parentId
     };
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { ...post, comments: addCommentToTree(post.comments, newComment, parentId) } 
-        : post
-    ));
+    setPosts(prev => prev.map(post => {
+      if (post.id === postId) {
+        // Add notification to post author
+        if (post.userId !== commentData.userId) {
+          addNotification({
+            userId: commentData.userId,
+            avatar: commentData.userAvatar,
+            name: commentData.userName,
+            role: commentData.userRole,
+            roleType: getRoleType(commentData.userRole),
+            text: parentId ? 'replied to your comment.' : 'commented on your post.',
+            action: 'View',
+            isUnread: true
+          });
+        }
+        return { ...post, comments: addCommentToTree(post.comments, newComment, parentId) }; 
+      }
+      return post;
+    }));
   };
 
   // --- New Functions ---
@@ -1435,9 +1583,14 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const deletePost = (postId: string) => {
-    setPosts(prev => prev.filter(post => post.id !== postId));
-    setPinnedPostIds(prev => prev.filter(id => id !== postId));
-    setHiddenPosts(prev => prev.filter(id => id !== postId));
+    // Find the post first
+    const postToDelete = posts.find(post => post.id === postId);
+    // Only allow deletion if the current user is the author of the post
+    if (postToDelete && postToDelete.userId === (userData?.uid || 'current-user')) {
+      setPosts(prev => prev.filter(post => post.id !== postId));
+      setPinnedPostIds(prev => prev.filter(id => id !== postId));
+      setHiddenPosts(prev => prev.filter(id => id !== postId));
+    }
   };
 
   const pinPost = (postId: string) => {
@@ -1638,6 +1791,29 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return text;
   };
 
+  // --- Notification Functions ---
+
+  const addNotification = (notificationData: Omit<Notification, 'id' | 'time' | 'timestamp'>) => {
+    const newNotification: Notification = {
+      ...notificationData,
+      id: Date.now().toString(),
+      timestamp: new Date(),
+      time: formatTimeAgo(new Date())
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isUnread: false })));
+  };
+
+  const getNotifications = () => {
+    return notifications.map(n => ({
+      ...n,
+      time: formatTimeAgo(n.timestamp)
+    }));
+  };
+
   // AI-Powered Discovery: Filter and rank posts based on role and interests
   const getFilteredFeed = (userRole: string, userTags?: string[]): Post[] => {
     // Define role-specific priority tags
@@ -1709,6 +1885,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       hiddenPosts,
       notInterestedTopics,
       pinnedPostIds,
+      notifications,
       addPost, 
       likePost, 
       addComment, 
@@ -1750,7 +1927,10 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       getScheduledPosts,
       getReposts,
       copyPostLink,
-      copyPostText
+      copyPostText,
+      addNotification,
+      markAllAsRead,
+      getNotifications
     }}>
       {children}
     </PostContext.Provider>

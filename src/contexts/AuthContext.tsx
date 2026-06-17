@@ -12,7 +12,8 @@ import {
   User,
   setPersistence,
   browserLocalPersistence,
-  sendPasswordResetEmail,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  sendEmailVerification,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword
@@ -22,50 +23,103 @@ import {
   doc, 
   getDoc, 
   setDoc, 
-  serverTimestamp 
+  serverTimestamp,
+  deleteDoc,
+  writeBatch,
+  collection,
+  query,
+  where,
+  getDocs
 } from 'firebase/firestore';
 import { app } from '../firebase';
 
 interface ProfileData {
   uid: string;
   name: string;
+  username?: string;
   email: string;
   photoURL: string;
   role: string | null;
+  roles?: string[];
   accountType: string;
   createdAt: any;
   lastLoginAt?: any;
   isVerified: boolean;
   prestigeLevel: number;
   trustIndex: number;
+  headline?: string;
+  connections?: string[];
 }
 
 interface AuthContextType {
   user: User | null;
   profile: ProfileData | null;
   loading: boolean;
-  isDemoMode: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   googleLogin: () => Promise<void>;
-  quickResetPassword: (email: string, newPassword: string, confirmPassword: string) => Promise<void>;
+  sendPasswordResetEmail: (email: string) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   updateProfileRole: (role: string) => Promise<void>;
-  setDemoMode: () => void;
+  deleteAccount: (currentPassword: string) => Promise<void>;
+  sendVerificationEmail: () => Promise<void>;
+  checkEmailVerification: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+
+// Optimize Google login speed and account picker experience
 provider.setCustomParameters({
-  prompt: 'select_account'
+  prompt: 'select_account',
+  ux_mode: 'popup',
+  access_type: 'online'
 });
 
+const getFriendlyErrorMessage = (error: any): string => {
+  const errorCode = error.code || '';
+  
+  switch (errorCode) {
+    case 'auth/user-not-found':
+      return 'No account found with this email.';
+    case 'auth/wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists.';
+    case 'auth/weak-password':
+      return 'Password should be at least 6 characters.';
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please try again.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please try again later.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled.';
+    case 'auth/invalid-credential':
+      return 'Invalid credentials. Please check your email and password.';
+    case 'auth/operation-not-allowed':
+      return 'This operation is not allowed.';
+    case 'auth/popup-blocked':
+      return 'Popup was blocked. Please allow popups and try again.';
+    case 'auth/cancelled-popup-request':
+    case 'auth/popup-closed-by-user':
+      return 'Login cancelled. Please try again.';
+    case 'auth/missing-email':
+      return 'Please enter your email.';
+    case 'auth/missing-password':
+      return 'Please enter your password.';
+    default:
+      return 'An error occurred. Please try again later.';
+  }
+};
+
 const createUserProfile = async (user: User, name: string = ''): Promise<ProfileData> => {
-  const userRef = doc(db, 'users', user.uid);
+  const userRef = doc(db, 'userProfiles', user.uid);
   const userDoc = await getDoc(userRef);
 
   if (userDoc.exists()) {
@@ -75,15 +129,19 @@ const createUserProfile = async (user: User, name: string = ''): Promise<Profile
   const profileData: ProfileData = {
     uid: user.uid,
     name: name || user.displayName || 'Anonymous',
+    username: name ? name.toLowerCase().replace(/\s+/g, '') : '',
     email: user.email || '',
     photoURL: user.photoURL || '',
     role: null,
+    roles: [],
     accountType: 'personal',
     createdAt: serverTimestamp(),
     lastLoginAt: serverTimestamp(),
     isVerified: user.emailVerified,
     prestigeLevel: 1,
-    trustIndex: 50
+    trustIndex: 50,
+    headline: '',
+    connections: []
   };
 
   await setDoc(userRef, profileData);
@@ -91,15 +149,18 @@ const createUserProfile = async (user: User, name: string = ''): Promise<Profile
 };
 
 const loadAndUpdateUserProfile = async (user: User): Promise<ProfileData> => {
-  const userRef = doc(db, 'users', user.uid);
+  const userRef = doc(db, 'userProfiles', user.uid);
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
     throw new Error('User profile not found');
   }
 
-  // Update lastLoginAt without overwriting other data
-  await setDoc(userRef, { lastLoginAt: serverTimestamp() }, { merge: true });
+  // Update lastLoginAt and isVerified without overwriting other data
+  await setDoc(userRef, { 
+    lastLoginAt: serverTimestamp(),
+    isVerified: user.emailVerified
+  }, { merge: true });
 
   // Fetch the updated profile
   const updatedDoc = await getDoc(userRef);
@@ -110,7 +171,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -128,7 +188,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (firebaseUser) {
         try {
           // Check if profile exists first
-          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userRef = doc(db, 'userProfiles', firebaseUser.uid);
           const userDoc = await getDoc(userRef);
           
           let userProfile;
@@ -156,7 +216,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         const result = await getRedirectResult(auth);
         if (result && result.user) {
-          const userRef = doc(db, 'users', result.user.uid);
+          const userRef = doc(db, 'userProfiles', result.user.uid);
           const userDoc = await getDoc(userRef);
           
           let userProfile;
@@ -179,6 +239,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signup = async (name: string, email: string, password: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    // Send verification email
+    await sendEmailVerification(userCredential.user);
     // Explicitly create new profile only on signup
     const newProfile = await createUserProfile(userCredential.user, name);
     setProfile(newProfile);
@@ -187,6 +249,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('triarcora-email', email);
     localStorage.setItem('triarcora-password', password);
     localStorage.setItem('triarcora-name', name);
+  };
+
+  const sendVerificationEmail = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('No user logged in');
+    }
+    await sendEmailVerification(currentUser);
+  };
+
+  const checkEmailVerification = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    
+    // Refresh user to get latest verification status
+    await currentUser.reload();
+    
+    // Update isVerified in profile (use merge: true to not overwrite other fields)
+    if (currentUser.emailVerified) {
+      const userRef = doc(db, 'userProfiles', currentUser.uid);
+      await setDoc(userRef, { isVerified: true }, { merge: true });
+      
+      // Refresh profile in state
+      const updatedDoc = await getDoc(userRef);
+      if (updatedDoc.exists()) {
+        setProfile(updatedDoc.data() as ProfileData);
+      }
+    }
   };
 
   const login = async (email: string, password: string) => {
@@ -209,19 +299,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const googleLogin = async () => {
     try {
       const userCredential = await signInWithPopup(auth, provider);
-      const userRef = doc(db, 'users', userCredential.user.uid);
-      const userDoc = await getDoc(userRef);
       
-      let userProfile;
-      if (userDoc.exists()) {
-        // Existing user: load and update lastLoginAt
-        userProfile = await loadAndUpdateUserProfile(userCredential.user);
-      } else {
-        // New user: create profile
-        userProfile = await createUserProfile(userCredential.user);
-      }
+      // Do Firestore operations in background to make login feel faster
+      const processUserProfile = async () => {
+        const userRef = doc(db, 'userProfiles', userCredential.user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        let userProfile;
+        if (userDoc.exists()) {
+          // Existing user: load and update lastLoginAt
+          userProfile = await loadAndUpdateUserProfile(userCredential.user);
+        } else {
+          // New user: create profile
+          userProfile = await createUserProfile(userCredential.user);
+        }
+        
+        setProfile(userProfile);
+      };
       
-      setProfile(userProfile);
+      // Start processing in background, navigate immediately
+      processUserProfile().catch(err => console.error('[AuthContext] Background profile processing error:', err));
     } catch (error: any) {
       console.error('[AuthContext] Google login error:', error);
       if (
@@ -236,10 +333,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const quickResetPassword = async (email: string, newPassword: string) => {
-    localStorage.setItem('triarcora-email', email);
-    localStorage.setItem('triarcora-password', newPassword);
-    console.log('[AuthContext] Password saved locally:', email);
+  const sendPasswordResetEmail = async (email: string) => {
+    await firebaseSendPasswordResetEmail(auth, email);
+    console.log('[AuthContext] Password reset email sent to:', email);
   };
 
   const changePassword = async (currentPassword: string, newPassword: string) => {
@@ -253,12 +349,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await updatePassword(currentUser, newPassword);
   };
 
-  const updateProfileRole = async (role: string) => {
+  const updateProfileRole = async (roleOrRoles: string | string[]) => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
     
-    const userRef = doc(db, 'users', currentUser.uid);
-    await setDoc(userRef, { role: role.toUpperCase() }, { merge: true });
+    const rolesArray = Array.isArray(roleOrRoles) 
+      ? roleOrRoles.map(r => r.toUpperCase()) 
+      : [roleOrRoles.toUpperCase()];
+    
+    const userRef = doc(db, 'userProfiles', currentUser.uid);
+    await setDoc(userRef, { 
+      role: rolesArray[0], 
+      roles: rolesArray 
+    }, { merge: true });
     
     const updatedProfile = await getDoc(userRef);
     if (updatedProfile.exists()) {
@@ -266,21 +369,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const setDemoMode = () => {
-    setIsDemoMode(true);
-    setProfile({
-      uid: 'demo-user',
-      name: 'Demo User',
-      email: 'demo@triarcora.com',
-      photoURL: '',
-      role: null,
-      accountType: 'personal',
-      createdAt: new Date(),
-      isVerified: true,
-      prestigeLevel: 1,
-      trustIndex: 50
-    });
+  const deleteAccount = async (currentPassword: string) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !currentUser.email) {
+      throw new Error('No user logged in');
+    }
+
+    // Step 1: Reauthenticate the user
+    const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+    await reauthenticateWithCredential(currentUser, credential);
+
+    // Step 2: Delete user document, but KEEP ALL POSTS!
+    const userRef = doc(db, 'userProfiles', currentUser.uid);
+    await deleteDoc(userRef);
+
+    // Step 3: Delete the user from Firebase Auth
+    await currentUser.delete();
+
+    // Step 4: Clear local storage and state
+    localStorage.clear();
     setUser(null);
+    setProfile(null);
   };
 
   return (
@@ -288,15 +397,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       user, 
       profile, 
       loading, 
-      isDemoMode,
       login, 
       signup, 
       logout, 
       googleLogin, 
-      quickResetPassword, 
+      sendPasswordResetEmail, 
       changePassword,
       updateProfileRole,
-      setDemoMode
+      deleteAccount,
+      sendVerificationEmail,
+      checkEmailVerification
     }}>
       {children}
     </AuthContext.Provider>
@@ -310,3 +420,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export { getFriendlyErrorMessage };

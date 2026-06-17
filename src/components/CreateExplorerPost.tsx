@@ -25,7 +25,6 @@ interface UploadedFile {
 }
 
 const CreateExplorerPost: React.FC<CreateExplorerPostProps> = ({ onClose }) => {
-  console.log('CreateExplorerPost RENDERED!');
   const { userData } = useUser();
   const { addPost } = usePosts();
 
@@ -429,7 +428,7 @@ const CreateExplorerPost: React.FC<CreateExplorerPostProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => console.log('Overlay clicked!')}>
+    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => {}}>
       <div className="create-post-modal role-explorer">
         <div className="create-post-header">
           <div className="create-post-header-left">

@@ -372,91 +372,6 @@ const LeafIcon = () => (
   </svg>
 );
 
-interface RoleData {
-  name: string;
-  title: string;
-  bio: string;
-  location: string;
-  badges: string[];
-  verificationColor: string;
-  primaryColor: string;
-  score: number;
-  scoreTier: string;
-  links: {
-    linkedin: string;
-    website: string;
-    twitter: string;
-  };
-}
-
-const ROLE_DATA: Record<string, RoleData> = {
-  ARCHITECT: {
-    name: "Unnati Chaudhary",
-    title: "Founder & CEO at Nexora AI",
-    bio: "Building the intelligence layer for modern startups.",
-    location: "Bangalore, India",
-    badges: ["Founder", "Builder", "AI Enthusiast"],
-    verificationColor: "#FFD700",
-    primaryColor: "gold",
-    score: 93,
-    scoreTier: "Sovereign",
-    links: {
-      linkedin: "linkedin.com/in/arjunmalhotra",
-      website: "www.nexora.ai",
-      twitter: "@arjunmalhotra_ai"
-    }
-  },
-  CATALYST: {
-    name: "David Morgan",
-    title: "Venture Capital Partner",
-    bio: "Catalyzing the next generation of disruptive startups.",
-    location: "San Francisco, California, USA",
-    badges: ["CATALYST", "VERIFIED INVESTOR"],
-    verificationColor: "#00C896",
-    primaryColor: "green",
-    score: 96,
-    scoreTier: "Sovereign",
-    links: {
-      linkedin: "linkedin.com/in/davidmorgan",
-      website: "www.morganventures.com",
-      twitter: "@davidmorgan_vc"
-    }
-  },
-  EXPLORER: {
-    name: "Alex Explorer",
-    title: "Curious. Connected. Growing Together.",
-    bio: "Exploring ideas, supporting founders, and learning every day in the Triarcora ecosystem.",
-    location: "Global Citizen",
-    badges: ["EXPLORER"],
-    verificationColor: "#3B82F6",
-    primaryColor: "blue",
-    score: 90,
-    scoreTier: "Elite",
-    links: {
-      linkedin: "linkedin.com/in/alexplorer",
-      website: "www.alexplorer.com",
-      twitter: "@alexplorer_tv"
-    }
-  }
-};
-
-interface RoleData {
-  name: string;
-  title: string;
-  bio: string;
-  location: string;
-  badges: string[];
-  verificationColor: string;
-  primaryColor: string;
-  score: number;
-  scoreTier: string;
-  links: {
-    linkedin: string;
-    website: string;
-    twitter: string;
-  };
-}
-
 interface Activity {
   id: string;
   title: string;
@@ -473,71 +388,12 @@ interface Asset {
   uploadTime: Date;
 }
 
-const DEMO_IMPACT_DATA = [
-  {
-    title: "Community Building",
-    description: "Actively participating in startup communities, sharing knowledge, and helping founders navigate challenges.",
-    icon: "community"
-  },
-  {
-    title: "Mentorship & Guidance",
-    description: "Providing mentorship to early-stage founders on product strategy, fundraising, and growth.",
-    icon: "mentorship"
-  },
-  {
-    title: "Feedback & Validation",
-    description: "Offering constructive feedback to help startups refine their ideas and build better products.",
-    icon: "feedback"
-  }
-];
-
-const DEMO_ACTIVITIES: Activity[] = [
-  {
-    id: "1",
-    title: "Launched MVP",
-    description: "Successfully launched the minimum viable product and got first 100 users.",
-    year: "2024"
-  },
-  {
-    id: "2",
-    title: "Raised Seed Funding",
-    description: "Secured seed round investment from leading venture capital firms.",
-    year: "2024"
-  },
-  {
-    id: "3",
-    title: "Joined Accelerator",
-    description: "Accepted into a top-tier startup accelerator program.",
-    year: "2023"
-  }
-];
-
-const DEMO_ASSETS: Asset[] = [
-  {
-    id: "1",
-    title: "Pitch Deck - Nexora AI",
-    description: "Investor pitch deck for our AI-powered SaaS platform",
-    fileUrl: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31", // placeholder, we'll create a dummy PDF
-    fileType: "PDF",
-    uploadTime: new Date(2024, 4, 29)
-  },
-  {
-    id: "2",
-    title: "Product Demo Video",
-    description: "Quick 2-minute product walkthrough",
-    fileUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728",
-    fileType: "Video",
-    uploadTime: new Date(2024, 3, 15)
-  },
-  {
-    id: "3",
-    title: "Business Plan 2024",
-    description: "Comprehensive business plan and roadmap",
-    fileUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-    fileType: "Docs",
-    uploadTime: new Date(2024, 2, 1)
-  }
-];
+// Role colors (no demo data, just styling config)
+const ROLE_COLORS: Record<string, { primary: string; verification: string }> = {
+  ARCHITECT: { primary: "#FFD700", verification: "#FFD700" },
+  CATALYST: { primary: "#00C896", verification: "#00C896" },
+  EXPLORER: { primary: "#3B82F6", verification: "#3B82F6" }
+};
 
 const profileInterests = {
   ARCHITECT: ['SaaS', 'Product Design', 'Scaling', 'AI Tools', 'Growth'],
@@ -554,7 +410,7 @@ const getInterestFontSize = (count: number) => {
 
 const ProfilePremium: React.FC = () => {
   const navigate = useNavigate();
-  const { userData, loading, updateUserData, isDemo, uploadImage, deleteImage } = useUser();
+  const { userData, loading, updateUserData, uploadImage, deleteImage } = useUser();
   const { 
     posts, 
     drafts, 
@@ -587,6 +443,8 @@ const ProfilePremium: React.FC = () => {
   const [editProfileModalOpen, setEditProfileModalOpen] = useState<boolean>(false);
   const [addActivityModalOpen, setAddActivityModalOpen] = useState<boolean>(false);
   const [uploadAssetModalOpen, setUploadAssetModalOpen] = useState<boolean>(false);
+  const [photoPreviewOpen, setPhotoPreviewOpen] = useState<boolean>(false);
+  const [photoPreviewSrc, setPhotoPreviewSrc] = useState<string>('');
   const [editFormData, setEditFormData] = useState({
     name: '',
     title: '',
@@ -613,70 +471,33 @@ const ProfilePremium: React.FC = () => {
     if (userData?.activities?.length) {
       return userData.activities;
     }
-    return isDemo ? DEMO_ACTIVITIES : [];
+    return [];
   });
   const [assets, setAssets] = useState<Asset[]>(() => {
     if (userData?.assets?.length) {
       return userData.assets;
     }
-    return isDemo ? DEMO_ASSETS : [];
+    return [];
   });
 
-  // Debug: log all values
-  console.log('ProfilePremium - activeProfileMode:', activeProfileMode);
-  console.log('ProfilePremium - ROLE_DATA keys:', Object.keys(ROLE_DATA));
-  console.log('ProfilePremium - ROLE_DATA[activeProfileMode]:', ROLE_DATA[activeProfileMode]);
-
   // Ensure safeActiveProfileMode is always a valid role
-  const safeActiveProfileMode = (activeProfileMode && ROLE_DATA[activeProfileMode]) ? activeProfileMode : 'ARCHITECT';
-  console.log('ProfilePremium - safeActiveProfileMode:', safeActiveProfileMode);
+  const safeActiveProfileMode = (activeProfileMode && ROLE_COLORS[activeProfileMode]) ? activeProfileMode : (userData?.mainRole || 'ARCHITECT');
   
-  // Ensure currentData is never undefined! (optimized with useMemo)
-  const currentData = useMemo(() => {
-    return ROLE_DATA[safeActiveProfileMode] || ROLE_DATA['ARCHITECT'];
-  }, [safeActiveProfileMode]);
-  console.log('ProfilePremium - currentData:', currentData);
-  
-  // Optimized displayProfile with useMemo
+  // Optimized displayProfile with useMemo (only uses userData)
   const displayProfile = useMemo(() => {
     return {
-      name: userData?.profile?.name || currentData.name,
-      title: userData?.profile?.title || currentData.title,
-      bio: userData?.profile?.bio || currentData.bio,
-      location: userData?.profile?.location || currentData.location,
+      name: userData?.profile?.name || '',
+      title: userData?.profile?.title || '',
+      bio: userData?.profile?.bio || '',
+      location: userData?.profile?.location || '',
       profileImage: userData?.profile?.profileImage || '',
-      linkedin: userData?.profile?.linkedin || currentData.links.linkedin,
-      website: userData?.profile?.website || currentData.links.website,
-      twitter: userData?.profile?.twitter || currentData.links.twitter
+      linkedin: userData?.profile?.linkedin || '',
+      website: userData?.profile?.website || '',
+      twitter: userData?.profile?.twitter || ''
     };
-  }, [userData, currentData]);
+  }, [userData]);
   
-  const getActiveRoleProfile = () => {
-    if (isDemo) {
-      return {
-        score: currentData.score,
-        scoreTier: currentData.scoreTier,
-        credibilityScore: 95,
-        credibilityTier: 'Elite',
-        executionScore: 92,
-        executionTier: 'Elite',
-        contributionScore: 88,
-        contributionTier: 'Elite',
-        ecosystemTrust: 94,
-        ecosystemTrustLevel: 'High',
-        founderPrestige: 90,
-        founderPrestigeLevel: 'Global',
-        reputationTrend: 5,
-        startupsBuilt: 3,
-        startupsBuiltDetail: '3 startups built',
-        startupsBacked: 0,
-        startupsBackedDetail: 'No backing yet',
-        avgFeedbackScore: 4.8,
-        feedbackCount: 47,
-        successfulMatches: 12,
-        successfulMatchesDetail: '12 successful matches'
-      };
-    }
+  const activeRoleProfile = useMemo(() => {
     if (userData) {
       switch (safeActiveProfileMode) {
         case 'ARCHITECT':
@@ -690,9 +511,7 @@ const ProfilePremium: React.FC = () => {
       }
     }
     return {};
-  };
-  
-  const activeRoleProfile = getActiveRoleProfile();
+  }, [userData, safeActiveProfileMode]);
   
   const DEFAULT_PROFILE_IMAGE = 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=180&h=180&fit=crop&crop=face';
 
@@ -700,28 +519,24 @@ const ProfilePremium: React.FC = () => {
   useEffect(() => {
     if (userData) {
       setEditFormData({
-        name: userData?.profile?.name || currentData.name,
-        title: userData?.profile?.title || currentData.title,
-        bio: userData?.profile?.bio || currentData.bio,
-        location: userData?.profile?.location || currentData.location,
+        name: userData?.profile?.name || '',
+        title: userData?.profile?.title || '',
+        bio: userData?.profile?.bio || '',
+        location: userData?.profile?.location || '',
         profileImage: userData?.profile?.profileImage || '',
-        linkedin: userData?.profile?.linkedin || currentData.links.linkedin,
-        website: userData?.profile?.website || currentData.links.website,
-        twitter: userData?.profile?.twitter || currentData.links.twitter
+        linkedin: userData?.profile?.linkedin || '',
+        website: userData?.profile?.website || '',
+        twitter: userData?.profile?.twitter || ''
       });
       // Sync activities and assets from userData
-      if (userData.activities && userData.activities.length > 0) {
+      if (userData.activities) {
         setActivities(userData.activities);
-      } else if (isDemo) {
-        setActivities(DEMO_ACTIVITIES);
       }
-      if (userData.assets && userData.assets.length > 0) {
+      if (userData.assets) {
         setAssets(userData.assets);
-      } else if (isDemo) {
-        setAssets(DEMO_ASSETS);
       }
     }
-  }, [userData, currentData, isDemo]);
+  }, [userData]);
 
   const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -768,9 +583,20 @@ const ProfilePremium: React.FC = () => {
         return;
       }
 
+      // First show immediate local preview!
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setEditFormData(prev => ({
+          ...prev,
+          profileImage: event.target?.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
+
+      // Then upload to Firebase Storage
       setUploadingImage(true);
       try {
-        const downloadURL = await uploadImage(file, `profileImages/${userData.uid}/${Date.now()}-${file.name}`);
+        const downloadURL = await uploadImage(file, `users/${userData.uid}/profileImage`);
         setEditFormData(prev => ({
           ...prev,
           profileImage: downloadURL
@@ -785,22 +611,11 @@ const ProfilePremium: React.FC = () => {
     }
   };
 
-  const removeProfileImage = async () => {
+  const removeProfileImage = () => {
     setEditFormData(prev => ({
       ...prev,
       profileImage: ''
     }));
-    
-    // If not demo, update user data immediately
-    if (userData && !isDemo) {
-      updateUserData({
-        profile: {
-          ...userData.profile,
-          profileImage: ''
-        }
-      });
-      showToast('Profile image removed successfully!', 'success');
-    }
   };
 
   const handleLogout = () => {
@@ -1032,6 +847,7 @@ const ProfilePremium: React.FC = () => {
 
   const addExtraRole = (role: string) => {
     setExtraRole(role);
+    setActiveProfileMode(mainRole); // Keep active profile as main role when adding new extra role
     setAddRoleModalOpen(false);
   };
 
@@ -1044,77 +860,20 @@ const ProfilePremium: React.FC = () => {
     // Populate edit form with current user data
     if (userData) {
       setEditFormData({
-        name: userData.profile.name || currentData.name,
-        title: userData.profile.title || currentData.title,
-        bio: userData.profile.bio || currentData.bio,
-        location: userData.profile.location || currentData.location,
+        name: userData.profile.name || '',
+        title: userData.profile.title || '',
+        bio: userData.profile.bio || '',
+        location: userData.profile.location || '',
         profileImage: userData.profile.profileImage || '',
-        linkedin: userData.profile.linkedin || currentData.links.linkedin,
-        website: userData.profile.website || currentData.links.website,
-        twitter: userData.profile.twitter || currentData.links.twitter
+        linkedin: userData.profile.linkedin || '',
+        website: userData.profile.website || '',
+        twitter: userData.profile.twitter || ''
       });
     }
     
     setEditProfileModalOpen(true);
     setDropdownOpen(false);
   };
-
-  // Debug info
-  console.log('ProfilePremium loading:', loading);
-  console.log('ProfilePremium userData:', userData);
-
-  // If loading, show loading screen
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#000814', color: 'white', fontSize: '24px' }}>
-        <div>LOADING...</div>
-        <div className="auth-loader-spinner"></div>
-        <h1 className="auth-loader-title">TRIARCORA</h1>
-        <p className="auth-loader-text">Loading your profile...</p>
-      </div>
-    );
-  }
-
-  // Premium Fallback UI if userData is null
-  if (!userData) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#000814', color: 'white' }}>
-        <div style={{ 
-          background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 200, 153, 0.1))',
-          borderRadius: '24px', 
-          padding: '48px', 
-          textAlign: 'center',
-          border: '1px solid rgba(255,255,255,0.05)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.4)'
-        }}>
-          <div style={{ 
-            fontSize: '28px', 
-            fontWeight: 700, 
-            marginBottom: '12px',
-            background: 'linear-gradient(135deg, #FFD700, #00C896)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>
-            TRIVENTA Profile
-          </div>
-          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.7)', marginBottom: '24px' }}>
-            Loading your sovereign digital reputation ledger...
-          </p>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ width: '10px', height: '10px', backgroundColor: '#FFD700', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '-0.32s' }}></div>
-            <div style={{ width: '10px', height: '10px', backgroundColor: '#00C896', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '-0.16s' }}></div>
-            <div style={{ width: '10px', height: '10px', backgroundColor: '#3B82F6', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both' }}></div>
-          </div>
-        </div>
-        <style>{`
-          @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-          }
-        `}</style>
-      </div>
-    );
-  }
 
   return (
     <div className={`profile-premium-container role-${safeActiveProfileMode.toLowerCase()}`}>
@@ -1208,6 +967,11 @@ const ProfilePremium: React.FC = () => {
                       alt={displayProfile.name || 'Your Profile'}
                       className="premium-profile-image"
                       loading="lazy"
+                      onClick={() => {
+                        setPhotoPreviewSrc(displayProfile.profileImage);
+                        setPhotoPreviewOpen(true);
+                      }}
+                      style={{ cursor: 'zoom-in' }}
                     />
                   ) : (
                     <div className="premium-default-avatar">
@@ -1216,7 +980,7 @@ const ProfilePremium: React.FC = () => {
                   )}
                   <div className="premium-verification-badge">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill={currentData.verificationColor}/>
+                      <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill={ROLE_COLORS[safeActiveProfileMode]?.verification || "#FFD700"}/>
                     </svg>
                   </div>
                 </div>
@@ -1224,7 +988,7 @@ const ProfilePremium: React.FC = () => {
 
               <div className="premium-profile-info">
                 <div className="premium-profile-badges-top">
-                  <span className={`premium-hero-badge ${currentData.primaryColor}`}>{safeActiveProfileMode}</span>
+                  <span className={`premium-hero-badge`} style={{ color: ROLE_COLORS[safeActiveProfileMode]?.primary || "#FFD700", borderColor: ROLE_COLORS[safeActiveProfileMode]?.primary || "#FFD700" }}>{safeActiveProfileMode}</span>
                 </div>
                 <div className="premium-profile-name-row">
                   <h1 className="premium-profile-name">
@@ -1467,7 +1231,15 @@ const ProfilePremium: React.FC = () => {
                       <div className="profile-photo-upload">
                         {editFormData.profileImage ? (
                           <div className="profile-photo-preview">
-                            <img src={editFormData.profileImage} alt="Profile Preview" />
+                            <img 
+                              src={editFormData.profileImage} 
+                              alt="Profile Preview" 
+                              onClick={() => {
+                                setPhotoPreviewSrc(editFormData.profileImage);
+                                setPhotoPreviewOpen(true);
+                              }}
+                              style={{ cursor: 'zoom-in' }}
+                            />
                             <button 
                               type="button" 
                               className="remove-photo-btn"
@@ -1679,6 +1451,52 @@ const ProfilePremium: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Photo Preview Modal */}
+          {photoPreviewOpen && photoPreviewSrc && (
+            <div 
+              className="premium-modal-overlay" 
+              onClick={() => setPhotoPreviewOpen(false)}
+              style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.95)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <button 
+                onClick={() => setPhotoPreviewOpen(false)}
+                style={{
+                  position: 'absolute',
+                  top: '24px',
+                  right: '24px',
+                  background: 'rgba(255,255,255,0.1)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '48px',
+                  height: '48px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  color: 'white',
+                  fontSize: '24px'
+                }}
+              >
+                ✕
+              </button>
+              <img 
+                src={photoPreviewSrc}
+                alt="Profile Photo Preview"
+                style={{
+                  maxWidth: '90%',
+                  maxHeight: '90%',
+                  objectFit: 'contain',
+                  borderRadius: '16px'
+                }}
+              />
             </div>
           )}
 
@@ -2148,35 +1966,19 @@ const ProfilePremium: React.FC = () => {
 
               <div className="premium-impact-section">
                 <h3 className="premium-section-title">ECOSYSTEM IMPACT</h3>
-                {isDemo ? (
-                  <div className="premium-impact-grid">
-                    {DEMO_IMPACT_DATA.map((item, index) => (
-                      <div key={index} className="premium-impact-card" style={{ animationDelay: `${index * 0.1}s` }}>
-                        <div className="premium-impact-icon">
-                          {item.icon === 'community' && <CommunityIcon />}
-                          {item.icon === 'mentorship' && <UsersIcon />}
-                          {item.icon === 'feedback' && <MessageSmallIcon />}
-                        </div>
-                        <h4 className="premium-impact-title">{item.title}</h4>
-                        <p className="premium-impact-description">{item.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="premium-empty-state">
-                    <div className="premium-empty-state-content">
-                      <div className="premium-empty-state-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(150,150,170,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                          <circle cx="9" cy="7" r="4"></circle>
-                          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                      </div>
-                      <p className="premium-empty-state-text">Your ecosystem impact will appear here</p>
+                <div className="premium-empty-state">
+                  <div className="premium-empty-state-content">
+                    <div className="premium-empty-state-icon">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(150,150,170,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
                     </div>
+                    <p className="premium-empty-state-text">Your ecosystem impact will appear here</p>
                   </div>
-                )}
+                </div>
                 <div className="premium-golden-circle"></div>
               </div>
             </>

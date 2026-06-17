@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, getFriendlyErrorMessage } from '../contexts/AuthContext';
+import { useUser } from '../contexts/UserContext';
 import './TriarcoraLogin.css';
 
 const TriarcoraLogin: React.FC = () => {
@@ -14,28 +15,27 @@ const TriarcoraLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotNewPassword, setForgotNewPassword] = useState('');
-  const [showForgotNewPassword, setShowForgotNewPassword] = useState(false);
-  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
-  const [showForgotConfirmPassword, setShowForgotConfirmPassword] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
-  const { login, signup, googleLogin, quickResetPassword, profile, loading, setDemoMode } = useAuth();
+  const { login, signup, googleLogin, sendPasswordResetEmail, profile, loading } = useAuth();
+
+  const { userData } = useUser();
 
   useEffect(() => {
     if (!loading && profile) {
-      navigate('/role-selection');
+      // Check if user already has a mainRole in userData or profile
+      const hasRole = userData?.mainRole || profile?.role;
+      if (hasRole) {
+        navigate('/home');
+      } else {
+        navigate('/role-selection');
+      }
     }
-  }, [profile, loading, navigate]);
-
-  const handleDemoClick = () => {
-    localStorage.removeItem('selectedRole');
-    localStorage.setItem('currentUserId', 'demo-user');
-    setDemoMode();
-    navigate('/role-selection');
-  };
+  }, [profile, loading, navigate, userData]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -207,15 +207,7 @@ const TriarcoraLogin: React.FC = () => {
       navigate('/role-selection');
     } catch (error: any) {
       console.error('[TriarcoraLogin] Signup error details:', error);
-      let errorMessage = 'An error occurred. Please try again.';
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = 'This email is already connected to an account.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = 'Please choose a stronger password.';
-      }
-      setErrors({ general: errorMessage });
+      setErrors({ general: getFriendlyErrorMessage(error) });
     } finally {
       setIsLoading(false);
     }
@@ -233,15 +225,7 @@ const TriarcoraLogin: React.FC = () => {
       navigate('/role-selection');
     } catch (error: any) {
       console.error('[TriarcoraLogin] Signin error details:', error);
-      let errorMessage = 'Invalid email or password.';
-      if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Please enter a valid email address.';
-      } else if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email.';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password.';
-      }
-      setErrors({ general: errorMessage });
+      setErrors({ general: getFriendlyErrorMessage(error) });
     } finally {
       setIsLoading(false);
     }
@@ -256,13 +240,7 @@ const TriarcoraLogin: React.FC = () => {
       navigate('/role-selection');
     } catch (error: any) {
       console.error('[TriarcoraLogin] Google login error details:', error);
-      let errorMessage = 'Unable to sign in with Google.';
-      if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Google sign-in cancelled.';
-      } else if (error.code === 'auth/network-request-failed') {
-        errorMessage = 'Network error. Try again.';
-      }
-      setErrors({ general: errorMessage });
+      setErrors({ general: getFriendlyErrorMessage(error) });
     } finally {
       setIsLoading(false);
     }
@@ -273,33 +251,32 @@ const TriarcoraLogin: React.FC = () => {
     setErrors({});
 
     if (!forgotEmail.trim()) {
-      setErrors({ forgotEmail: 'Enter your email.' });
+      setErrors({ forgotEmail: 'Please enter your email.' });
       return;
     }
-    if (!/\S+@\S+\.\S+/.test(forgotEmail)) {
-      setErrors({ forgotEmail: 'Invalid email address.' });
-      return;
-    }
-    if (forgotNewPassword.length < 6) {
-      setErrors({ forgotNewPassword: 'Password must be at least 6 characters.' });
-      return;
-    }
-    if (forgotNewPassword !== forgotConfirmPassword) {
-      setErrors({ forgotConfirmPassword: 'Passwords do not match.' });
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(forgotEmail)) {
+      setErrors({ forgotEmail: 'Please enter a valid email address.' });
       return;
     }
 
     setIsLoading(true);
-    await quickResetPassword(forgotEmail, forgotNewPassword);
-    setForgotSuccess(true);
-    setTimeout(() => {
-      setForgotPasswordOpen(false);
-      setForgotSuccess(false);
-      setForgotEmail('');
-      setForgotNewPassword('');
-      setForgotConfirmPassword('');
-    }, 3000);
-    setIsLoading(false);
+    try {
+      await sendPasswordResetEmail(forgotEmail);
+      setForgotSuccess(true);
+      setTimeout(() => {
+        setForgotPasswordOpen(false);
+        setForgotSuccess(false);
+        setForgotEmail('');
+        setErrors({});
+      }, 5000);
+    } catch (error: any) {
+      console.error('[TriarcoraLogin] Forgot password error:', error);
+      setErrors({ forgotEmail: getFriendlyErrorMessage(error) });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -316,11 +293,13 @@ const TriarcoraLogin: React.FC = () => {
                   <img 
                     src="/images/triarcora-png.png" 
                     alt="Triarcora" 
-                    className="logo-image"
+                    className="triarcora-logo-image"
                   />
                 </div>
               </div>
             </div>
+
+
 
             <div className="features">
               <div className="feature-card">
@@ -530,11 +509,7 @@ const TriarcoraLogin: React.FC = () => {
               Continue with Google
             </button>
 
-            <div className="auth-footer">
-              <button className="demo-link" onClick={handleDemoClick}>
-                Quick Demo - No Login Required
-              </button>
-            </div>
+
           </div>
         </div>
       </div>
@@ -557,12 +532,12 @@ const TriarcoraLogin: React.FC = () => {
                   <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#00C896" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
-                  <h4>Password Updated Successfully</h4>
-                  <p>You can now log in with your new password.</p>
+                  <h4>Reset Link Sent</h4>
+                  <p>Check your email for password reset instructions.<br />Don't forget to check your spam folder also!</p>
                 </div>
               ) : (
                 <form onSubmit={handleForgotPassword} className="edit-profile-form">
-                  <p className="forgot-description">Reset your password instantly.</p>
+                  <p className="forgot-description">Enter your email and we'll send you a reset link.</p>
                   <div className="form-group">
                     <label className="form-label">Email Address</label>
                     <input
@@ -573,66 +548,6 @@ const TriarcoraLogin: React.FC = () => {
                       placeholder="you@example.com"
                     />
                     {errors.forgotEmail && <p className="form-error">{errors.forgotEmail}</p>}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">New Password</label>
-                    <div className="password-input-container">
-                      <input
-                        type={showForgotNewPassword ? 'text' : 'password'}
-                        className={`form-input ${errors.forgotNewPassword ? 'error' : ''}`}
-                        value={forgotNewPassword}
-                        onChange={(e) => setForgotNewPassword(e.target.value)}
-                        placeholder="Enter new password"
-                      />
-                      <button
-                        type="button"
-                        className="password-toggle-btn"
-                        onClick={() => setShowForgotNewPassword(!showForgotNewPassword)}
-                      >
-                        {showForgotNewPassword ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
-                            <line x1="1" y1="1" x2="23" y2="23"/>
-                          </svg>
-                        ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    {errors.forgotNewPassword && <p className="form-error">{errors.forgotNewPassword}</p>}
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Confirm New Password</label>
-                    <div className="password-input-container">
-                      <input
-                        type={showForgotConfirmPassword ? 'text' : 'password'}
-                        className={`form-input ${errors.forgotConfirmPassword ? 'error' : ''}`}
-                        value={forgotConfirmPassword}
-                        onChange={(e) => setForgotConfirmPassword(e.target.value)}
-                        placeholder="Confirm new password"
-                      />
-                      <button
-                        type="button"
-                        className="password-toggle-btn"
-                        onClick={() => setShowForgotConfirmPassword(!showForgotConfirmPassword)}
-                      >
-                        {showForgotConfirmPassword ? (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
-                            <line x1="1" y1="1" x2="23" y2="23"/>
-                          </svg>
-                        ) : (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    {errors.forgotConfirmPassword && <p className="form-error">{errors.forgotConfirmPassword}</p>}
                   </div>
                   <div className="form-actions">
                     <button 
@@ -647,7 +562,23 @@ const TriarcoraLogin: React.FC = () => {
                       className="form-btn save"
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Resetting...' : 'Reset Password'}
+                      {isLoading ? (
+                        <>
+                          <span style={{ 
+                            width: '20px', 
+                            height: '20px', 
+                            border: '3px solid rgba(255, 255, 255, 0.3)', 
+                            borderTop: '3px solid white', 
+                            borderRadius: '50%', 
+                            animation: 'spin 1s linear infinite', 
+                            marginRight: '8px',
+                            display: 'inline-block'
+                          }}></span>
+                          Sending...
+                        </>
+                      ) : (
+                        'Send Reset Link'
+                      )}
                     </button>
                   </div>
                 </form>

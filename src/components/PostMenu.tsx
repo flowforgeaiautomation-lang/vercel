@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { usePosts, Post } from '../contexts/PostContext';
 import { useUser } from '../contexts/UserContext';
 
@@ -37,6 +37,7 @@ const PostMenu = ({ post, onClose, onEdit }: PostMenuProps) => {
   const [isSaved, setIsSaved] = useState(savedPosts.includes(post.id));
   const [isPinned, setIsPinned] = useState(pinnedPostIds.includes(post.id));
   const [selectedReportReason, setSelectedReportReason] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const currentUserId = userData?.uid || 'current-user';
   const isOwner = post.userId === currentUserId;
@@ -116,13 +117,22 @@ const PostMenu = ({ post, onClose, onEdit }: PostMenuProps) => {
     onClose();
   };
 
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const handleCopyLink = () => {
     copyPostLink(post.id);
+    setToast('Link copied to clipboard!');
     onClose();
   };
 
   const handleCopyText = () => {
     copyPostText(post.id);
+    setToast('Post text copied to clipboard!');
     onClose();
   };
 
@@ -148,171 +158,179 @@ const PostMenu = ({ post, onClose, onEdit }: PostMenuProps) => {
 
   if (showRepostOptions) {
     return (
-      <div className="post-menu-overlay" onClick={onClose}>
-        <div className="post-menu" onClick={(e) => e.stopPropagation()}>
-          <div className="post-menu-header">
-            <button className="menu-back-button" onClick={() => setShowRepostOptions(false)}>←</button>
-            <span className="menu-title">Repost</span>
-          </div>
-          <div className="menu-item" onClick={() => handleRepost(false)}>
-            <span>🔄</span>
-            <span>Repost Now</span>
-          </div>
-          <div className="menu-item" onClick={() => handleRepost(true)}>
-            <span>💬</span>
-            <span>Add Your Thoughts + Repost</span>
+      <Fragment>
+        {toast && <div className="post-menu-toast">{toast}</div>}
+        <div className="post-menu-overlay" onClick={onClose}>
+          <div className="post-menu" onClick={(e) => e.stopPropagation()}>
+            <div className="post-menu-header">
+              <button className="menu-back-button" onClick={() => setShowRepostOptions(false)}>←</button>
+              <span className="menu-title">Repost</span>
+            </div>
+            <div className="menu-item" onClick={() => handleRepost(false)}>
+              <span>🔄</span>
+              <span>Repost Now</span>
+            </div>
+            <div className="menu-item" onClick={() => handleRepost(true)}>
+              <span>💬</span>
+              <span>Add Your Thoughts + Repost</span>
+            </div>
           </div>
         </div>
-      </div>
+      </Fragment>
     );
   }
 
   if (showShareOptions) {
     return (
-      <div className="post-menu-overlay" onClick={onClose}>
-        <div className="post-menu" onClick={(e) => e.stopPropagation()}>
-          <div className="post-menu-header">
-            <button className="menu-back-button" onClick={() => setShowShareOptions(false)}>←</button>
-            <span className="menu-title">Share Via</span>
-          </div>
-          <div className="menu-item" onClick={() => handleCopyLink()}>
-            <span>🔗</span>
-            <span>Copy Link</span>
-          </div>
-          <div className="menu-item" onClick={() => handleShare('whatsapp')}>
-            <span>💬</span>
-            <span>Share to WhatsApp</span>
-          </div>
-          <div className="menu-item" onClick={() => handleShare('linkedin')}>
-            <span>💼</span>
-            <span>Share to LinkedIn</span>
-          </div>
-          <div className="menu-item" onClick={() => handleShare('x')}>
-            <span>🐦</span>
-            <span>Share to X</span>
-          </div>
-          <div className="menu-item" onClick={() => handleShare('email')}>
-            <span>📧</span>
-            <span>Share via Email</span>
-          </div>
-          <div className="menu-item" onClick={() => handleShare('native')}>
-            <span>📤</span>
-            <span>Share via Device</span>
+      <Fragment>
+        {toast && <div className="post-menu-toast">{toast}</div>}
+        <div className="post-menu-overlay" onClick={onClose}>
+          <div className="post-menu" onClick={(e) => e.stopPropagation()}>
+            <div className="post-menu-header">
+              <button className="menu-back-button" onClick={() => setShowShareOptions(false)}>←</button>
+              <span className="menu-title">Share Via</span>
+            </div>
+            <div className="menu-item" onClick={() => handleCopyLink()}>
+              <span>🔗</span>
+              <span>Copy Link</span>
+            </div>
+            <div className="menu-item" onClick={() => handleShare('whatsapp')}>
+              <span>💬</span>
+              <span>Share to WhatsApp</span>
+            </div>
+            <div className="menu-item" onClick={() => handleShare('linkedin')}>
+              <span>💼</span>
+              <span>Share to LinkedIn</span>
+            </div>
+            <div className="menu-item" onClick={() => handleShare('x')}>
+              <span>🐦</span>
+              <span>Share to X</span>
+            </div>
+            <div className="menu-item" onClick={() => handleShare('email')}>
+              <span>📧</span>
+              <span>Share via Email</span>
+            </div>
+            <div className="menu-item" onClick={() => handleShare('native')}>
+              <span>📤</span>
+              <span>Share via Device</span>
+            </div>
           </div>
         </div>
-      </div>
+      </Fragment>
     );
   }
 
   if (showReportOptions) {
     return (
-      <div className="post-menu-overlay" onClick={onClose}>
-        <div className="post-menu" onClick={(e) => e.stopPropagation()}>
-          <div className="post-menu-header">
-            <button className="menu-back-button" onClick={() => setShowReportOptions(false)}>←</button>
-            <span className="menu-title">Report Post</span>
+      <Fragment>
+        {toast && <div className="post-menu-toast">{toast}</div>}
+        <div className="post-menu-overlay" onClick={onClose}>
+          <div className="post-menu" onClick={(e) => e.stopPropagation()}>
+            <div className="post-menu-header">
+              <button className="menu-back-button" onClick={() => setShowReportOptions(false)}>←</button>
+              <span className="menu-title">Report Post</span>
+            </div>
+            {['Spam', 'Harassment', 'Misinformation', 'Scam', 'Hate Content', 'Copyright', 'Fake Startup', 'Fake Investment', 'Other'].map(reason => (
+              <div 
+                key={reason}
+                className={`menu-item ${selectedReportReason === reason ? 'active' : ''}`}
+                onClick={() => handleReport(reason)}
+              >
+                <span>{selectedReportReason === reason ? '✅' : '⭕'}</span>
+                <span>{reason}</span>
+              </div>
+            ))}
+            {selectedReportReason && (
+              <div className="menu-item danger" onClick={submitReport}>
+                <span>🚩</span>
+                <span>Submit Report</span>
+              </div>
+            )}
           </div>
-          {['Spam', 'Harassment', 'Misinformation', 'Scam', 'Hate Content', 'Copyright', 'Fake Startup', 'Fake Investment', 'Other'].map(reason => (
-            <div 
-              key={reason}
-              className={`menu-item ${selectedReportReason === reason ? 'active' : ''}`}
-              onClick={() => handleReport(reason)}
-            >
-              <span>{selectedReportReason === reason ? '✅' : '⭕'}</span>
-              <span>{reason}</span>
-            </div>
-          ))}
-          {selectedReportReason && (
-            <div className="menu-item danger" onClick={submitReport}>
-              <span>🚩</span>
-              <span>Submit Report</span>
-            </div>
-          )}
         </div>
-      </div>
+      </Fragment>
     );
   }
 
   if (showDeleteConfirm) {
     return (
-      <div className="post-menu-overlay" onClick={onClose}>
-        <div className="post-menu delete-confirm" onClick={(e) => e.stopPropagation()}>
-          <div className="delete-confirm-header">
-            <span>🗑️</span>
-            <h3>Delete Post?</h3>
-            <p>This action cannot be undone. This will permanently delete the post.</p>
-          </div>
-          <div className="delete-confirm-actions">
-            <button className="btn-cancel" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
-            <button className="btn-delete" onClick={handleDelete}>Delete</button>
+      <Fragment>
+        {toast && <div className="post-menu-toast">{toast}</div>}
+        <div className="post-menu-overlay" onClick={onClose}>
+          <div className="post-menu delete-confirm" onClick={(e) => e.stopPropagation()}>
+            <div className="delete-confirm-header">
+              <span>🗑️</span>
+              <h3>Delete Post?</h3>
+              <p>This action cannot be undone. This will permanently delete the post.</p>
+            </div>
+            <div className="delete-confirm-actions">
+              <button className="btn-cancel" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+              <button className="btn-delete" onClick={handleDelete}>Delete</button>
+            </div>
           </div>
         </div>
-      </div>
+      </Fragment>
     );
   }
 
   return (
-    <div className="post-menu-overlay" onClick={onClose}>
+    <Fragment>
+      {toast && <div className="post-menu-toast">{toast}</div>}
+      <div className="post-menu-overlay" onClick={onClose}>
       <div className="post-menu" onClick={(e) => e.stopPropagation()}>
         <div className="post-menu-header">
           <span className="menu-title">Actions</span>
           <button className="menu-close-button" onClick={onClose}>✕</button>
         </div>
 
-        {!isOwner && (
-          <>
-            <div className="menu-item" onClick={() => setShowRepostOptions(true)}>
-              <span>🔄</span>
-              <span>Repost</span>
-            </div>
-            <div className="menu-item" onClick={() => setShowShareOptions(true)}>
-              <span>📤</span>
-              <span>Share Via</span>
-            </div>
-            <div className="menu-item" onClick={handleTogglePin}>
-              <span>📌</span>
-              <span>{isPinned ? 'Unpin from Profile' : 'Pin to Profile'}</span>
-            </div>
-            <div className="menu-item">
-              <span>👤</span>
-              <span>View Author Profile</span>
-            </div>
-            <div className="menu-item" onClick={handleMuteUser}>
-              <span>🔕</span>
-              <span>Mute User</span>
-            </div>
-            <div className="menu-item" onClick={handleHidePost}>
-              <span>🙈</span>
-              <span>Hide Post</span>
-            </div>
-            <div className="menu-item" onClick={handleNotInterested}>
-              <span>🚫</span>
-              <span>Not Interested</span>
-            </div>
-            <div className="menu-item" onClick={() => setShowReportOptions(true)}>
-              <span>🚩</span>
-              <span>Report Post</span>
-            </div>
-            <div className="menu-item" onClick={handleCopyLink}>
-              <span>📋</span>
-              <span>Copy Link</span>
-            </div>
-            <div className="menu-item" onClick={handleCopyText}>
-              <span>📑</span>
-              <span>Copy Post Text</span>
-            </div>
-          </>
-        )}
+        {/* Always show these actions for everyone */}
+        <div className="menu-item" onClick={() => setShowRepostOptions(true)}>
+          <span>🔄</span>
+          <span>Repost</span>
+        </div>
+        <div className="menu-item" onClick={() => setShowShareOptions(true)}>
+          <span>📤</span>
+          <span>Share Via</span>
+        </div>
+        <div className="menu-item" onClick={handleTogglePin}>
+          <span>📌</span>
+          <span>{isPinned ? 'Unpin from Profile' : 'Pin to Profile'}</span>
+        </div>
+        <div className="menu-item">
+          <span>👤</span>
+          <span>View Author Profile</span>
+        </div>
+        <div className="menu-item" onClick={handleMuteUser}>
+          <span>🔕</span>
+          <span>Mute User</span>
+        </div>
+        <div className="menu-item" onClick={handleHidePost}>
+          <span>🙈</span>
+          <span>Hide Post</span>
+        </div>
+        <div className="menu-item" onClick={handleNotInterested}>
+          <span>🚫</span>
+          <span>Not Interested</span>
+        </div>
+        <div className="menu-item" onClick={() => setShowReportOptions(true)}>
+          <span>🚩</span>
+          <span>Report Post</span>
+        </div>
+        <div className="menu-item" onClick={handleCopyLink}>
+          <span>📋</span>
+          <span>Copy Link</span>
+        </div>
+        <div className="menu-item" onClick={handleCopyText}>
+          <span>📑</span>
+          <span>Copy Post Text</span>
+        </div>
 
+        {/* Owner-specific actions */}
         {isOwner && (
-          <>
+          <Fragment>
             <div className="menu-item" onClick={onEdit}>
               <span>✏️</span>
               <span>Edit Post</span>
-            </div>
-            <div className="menu-item" onClick={handleTogglePin}>
-              <span>📌</span>
-              <span>{isPinned ? 'Unpin from Profile' : 'Pin to Profile'}</span>
             </div>
             <div className="menu-item" onClick={handleArchive}>
               <span>📁</span>
@@ -322,10 +340,11 @@ const PostMenu = ({ post, onClose, onEdit }: PostMenuProps) => {
               <span>🗑️</span>
               <span>Delete Post</span>
             </div>
-          </>
+          </Fragment>
         )}
       </div>
     </div>
+    </Fragment>
   );
 };
 

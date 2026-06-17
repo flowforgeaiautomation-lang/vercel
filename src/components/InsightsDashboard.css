@@ -229,6 +229,11 @@
 
 .insights-page-header {
   margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .insights-page-header h1 {

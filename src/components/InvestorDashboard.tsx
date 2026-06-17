@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreateInvestorPost from './CreateInvestorPost';
+import PostMenu from './PostMenu';
 import { useAuth } from '../contexts/AuthContext';
 import { useUser } from '../contexts/UserContext';
 import { UserProfile, usePosts } from '../contexts/PostContext';
@@ -95,12 +96,16 @@ const BookmarkIcon = () => (
 
 const InvestorDashboard = () => {
   const { userName, userRole, userProfileImage, userData } = useUser();
-  const { likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts } = usePosts();
+  const { likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts, hiddenPosts, mutedUsers } = usePosts();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('discover');
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const feedPosts = posts;
+  const feedPosts = posts.filter(post => 
+    post.userRole?.toUpperCase() === 'CATALYST' &&
+    !hiddenPosts.includes(post.id) && 
+    !mutedUsers.includes(post.userId)
+  );
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
   const [showDetailedProfile, setShowDetailedProfile] = useState(false);
@@ -109,6 +114,7 @@ const InvestorDashboard = () => {
   const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState<string>('');
   const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(null);
+  const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
 
 
   const handleLikePost = (postId: string) => {
@@ -374,10 +380,7 @@ const InvestorDashboard = () => {
                 <h1>Investors</h1>
                 <p>Your hub for deal flow, portfolio, and network</p>
               </div>
-              <button className="id-customize">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                Customize Feed
-              </button>
+              
             </div>
 
             <div className="id-tabs">
@@ -395,51 +398,7 @@ const InvestorDashboard = () => {
               </div>
             </div>
 
-            <div className="id-quick-cards">
-              <div className="id-quick-card">
-                <div className="id-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                </div>
-                <div className="id-card-text">
-                  <strong>Portfolio Overview</strong>
-                  <p>Track your investments and returns</p>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,18 15,12 9,6"></polyline></svg>
-              </div>
 
-              <div className="id-quick-card">
-                <div className="id-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline><polyline points="17,6 23,6 23,12"></polyline></svg>
-                </div>
-                <div className="id-card-text">
-                  <strong>Deal Pipeline</strong>
-                  <p>Manage your incoming deal flow</p>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,18 15,12 9,6"></polyline></svg>
-              </div>
-
-              <div className="id-quick-card">
-                <div className="id-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                </div>
-                <div className="id-card-text">
-                  <strong>Co-investors</strong>
-                  <p>Find partners for your deals</p>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,18 15,12 9,6"></polyline></svg>
-              </div>
-
-              <div className="id-quick-card">
-                <div className="id-card-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"></polygon></svg>
-                </div>
-                <div className="id-card-text">
-                  <strong>AI Copilot</strong>
-                  <p>Get deal recommendations</p>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,18 15,12 9,6"></polyline></svg>
-              </div>
-            </div>
 
             <div className="feed-posts">
               {feedPosts.map(post => (
@@ -474,6 +433,15 @@ const InvestorDashboard = () => {
                         <span className="post-time">2h ago</span>
                       </div>
                     </div>
+                    <button 
+                      className="post-menu-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenMenuPostId(post.id);
+                      }}
+                    >
+                      ⋮
+                    </button>
                   </div>
                   
                   <div className="post-content">
@@ -588,7 +556,7 @@ const InvestorDashboard = () => {
                         color: '#fff', 
                         flexShrink: 0 
                       }}>
-                        {getInitials(getUserName())}
+                        {getInitials(userName)}
                       </div>
                       <input 
                         type="text" 
@@ -1132,6 +1100,14 @@ const InvestorDashboard = () => {
       )}
 
       <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />
+      
+      {/* Post Menu */}
+      {openMenuPostId && (
+        <PostMenu 
+          post={feedPosts.find(p => p.id === openMenuPostId)!}
+          onClose={() => setOpenMenuPostId(null)}
+        />
+      )}
       
       {/* Create Post Modal */}
       {createPostOpen && (

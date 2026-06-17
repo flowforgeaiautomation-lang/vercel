@@ -128,6 +128,21 @@ const getRoleColor = (role: string): string => {
   return '#9CA3AF';
 };
 
+const formatTimestamp = (timestamp: Date): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - timestamp.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffSec < 60) return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHour < 24) return `${diffHour}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return timestamp.toLocaleDateString();
+};
+
 const HomeDashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('following');
@@ -140,30 +155,43 @@ const HomeDashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const { userName, userRole, userProfileImage, userData } = useUser();
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+
+  useEffect(() => {
+    // Check if user has visited today
+    const today = new Date().toDateString();
+    const lastVisitDate = localStorage.getItem('triarcora-last-visit-date');
+    
+    if (lastVisitDate !== today) {
+      setShowWelcomeBack(true);
+      // Update last visit date
+      localStorage.setItem('triarcora-last-visit-date', today);
+      // Auto-hide after 5 seconds if we want
+      setTimeout(() => setShowWelcomeBack(false), 5000);
+    } else {
+      setShowWelcomeBack(false);
+    }
+  }, []);
   const { logout } = useAuth();
-  const { posts, demoUsers, likePost, addComment, savePost, unsavePost, savedPosts } = usePosts();
-  const feedPosts = posts;
+  const { posts, demoUsers, likePost, addComment, savePost, unsavePost, savedPosts, hiddenPosts, mutedUsers } = usePosts();
+  const feedPosts = posts.filter(post => !hiddenPosts.includes(post.id) && !mutedUsers.includes(post.userId));
   const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
   const [animatingPostId, setAnimatingPostId] = useState<string | null>(null);
 
   const handleLikePost = (postId: string) => {
     setAnimatingPostId(postId);
-    likePost(postId, userData?.uid || 'current-user');
+    likePost(postId);
     setTimeout(() => setAnimatingPostId(null), 600);
   };
 
   const handleSubmitComment = (postId: string) => {
     if (commentText.trim()) {
       addComment(postId, {
-        id: Date.now().toString(),
         userId: userData?.uid || 'current-user',
         userName: userName,
         userRole: userRole,
-        text: commentText,
-        timestamp: new Date(),
-        likes: [],
-        replies: []
+        content: commentText
       });
       setCommentText('');
       setCommentingPostId(null);
@@ -180,8 +208,9 @@ const HomeDashboard: React.FC = () => {
   }, []);
 
   // Get initials for default avatar
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (name?: string) => {
+    const safeName = name || 'User';
+    return safeName
       .split(' ')
       .map(word => word[0])
       .join('')
@@ -377,9 +406,11 @@ const HomeDashboard: React.FC = () => {
           </div>
           </header>
 
-          <div className="welcome-section">
-            <h1 className="welcome-title">Welcome back, {userName}👋</h1>
-          </div>
+          {showWelcomeBack && (
+            <div className="welcome-section">
+              <h1 className="welcome-title">Welcome back, {userName}👋</h1>
+            </div>
+          )}
 
           <div className="startup-premium-create-card">
             <button className="startup-create-signal-button" onClick={() => setCreatePostOpen(true)}>
@@ -426,7 +457,8 @@ const HomeDashboard: React.FC = () => {
                     <div className="author-info">
                       <div className="author-name">
                         {post.userName}
-                        <span className={`role-badge ${post.userRole === 'ARCHITECT' ? 'gold' : post.userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
+                        <span className="author-username" style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '8px', fontSize: '14px' }}>@{post.userUsername}</span>
+                        <span className={`role-badge ${post.userRole === 'ARCHITECT' ? 'gold' : post.userRole === 'CATALYST' ? 'green' : 'cyan'}`} style={{ marginLeft: '8px' }}>
                           {post.userRole === 'ARCHITECT' ? 'Architect' : post.userRole === 'CATALYST' ? 'Catalyst' : 'Explorer'}
                         </span>
                         {demoUsers[post.userId]?.prestigeSystem && (
@@ -437,7 +469,7 @@ const HomeDashboard: React.FC = () => {
                           />
                         )}
                       </div>
-                      <span className="post-time">2h ago</span>
+                      <span className="post-time">{formatTimestamp(post.timestamp)}</span>
                     </div>
                   </div>
                   <button 
@@ -562,7 +594,7 @@ const HomeDashboard: React.FC = () => {
                       color: '#fff',
                       flexShrink: 0
                     }}>
-                      {getInitials(getUserName())}
+                      {getInitials(userName)}
                     </div>
                     <input
                       type="text"

@@ -22,24 +22,26 @@ import TriarcoraSettings from './components/TriarcoraSettings';
 import AtlasDashboard from './components/AtlasDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import AICopilot from './components/AICopilot';
+import AICopilotPage from './components/AICopilotPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProvider, useUser } from './contexts/UserContext';
 import { PostProvider } from './contexts/PostContext';
+import { AIProvider } from './contexts/AIContext';
 import './App.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading, isDemoMode, profile } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  const { userData } = useUser();
 
-  if (loading) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#000' }}>Loading...</div>;
+  // If we have user data in localStorage, show the page even while Firebase is initializing
+  const hasStoredUser = !!localStorage.getItem('triarcora-lastUserId');
+
+  if (loading && !hasStoredUser) {
+    return null; // No loading screen!
   }
 
-  if (!user && !isDemoMode) {
-    return <Navigate to="/" state={{ from: location }} replace />;
-  }
-
-  if (isDemoMode && !profile) {
+  if (!user && !hasStoredUser) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
@@ -121,19 +123,25 @@ function WelcomeModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (userData && !userData.hasSeenWelcomeModal) {
+    const hasSeenLocal = localStorage.getItem('triarcora_hasSeenWelcome') === 'true';
+    if (userData && !userData.hasSeenWelcomeModal && !hasSeenLocal) {
       setIsOpen(true);
     }
   }, [userData]);
 
-  const handleCompleteProfile = () => {
+  const markWelcomeSeen = () => {
     updateUserData({ hasSeenWelcomeModal: true });
+    localStorage.setItem('triarcora_hasSeenWelcome', 'true');
+  };
+
+  const handleCompleteProfile = () => {
+    markWelcomeSeen();
     setIsOpen(false);
     navigate('/profile');
   };
 
   const handleGoToHome = () => {
-    updateUserData({ hasSeenWelcomeModal: true });
+    markWelcomeSeen();
     setIsOpen(false);
     navigate('/home');
   };
@@ -217,6 +225,111 @@ function WelcomeModal() {
   );
 }
 
+// Profile Modal
+function ProfileModal() {
+  const { userData, updateUserData } = useUser();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSeenLocal = localStorage.getItem('triarcora_hasSeenProfile') === 'true';
+    if (userData && !userData.hasSeenProfileModal && !hasSeenLocal) {
+      setIsOpen(true);
+    }
+  }, [userData]);
+
+  const markProfileSeen = () => {
+    updateUserData({ hasSeenProfileModal: true });
+    localStorage.setItem('triarcora_hasSeenProfile', 'true');
+  };
+
+  const handleGotIt = () => {
+    markProfileSeen();
+    setIsOpen(false);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="premium-modal-overlay"
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0,0,0,0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10000
+      }}
+    >
+      <div
+        className="premium-modal"
+        style={{
+          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+          borderRadius: '16px',
+          padding: '32px',
+          maxWidth: '480px',
+          width: '90%',
+          textAlign: 'center',
+          border: '1px solid rgba(255,215,0,0.3)',
+          boxShadow: '0 8px 32px rgba(255,215,0,0.15)'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 style={{ color: '#FFD700', marginBottom: '16px', fontSize: '28px' }}>
+          Complete Your Profile
+        </h2>
+        <p style={{ color: '#ccc', marginBottom: '32px', fontSize: '16px', lineHeight: '1.5' }}>
+          Hey {userData?.profile?.name}👋<br />
+          <br />
+          Let's set up your profile to get the most out of TRIARCORA.<br />
+          Add a profile photo, bio, and other details to help others connect with you.
+        </p>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <button
+            style={{
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              color: '#000',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              markProfileSeen();
+              setIsOpen(false);
+              navigate('/profile');
+            }}
+          >
+            Go to Profile
+          </button>
+          <button
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.2)',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer'
+            }}
+            onClick={handleGotIt}
+          >
+            Later
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Global AI button component
 function GlobalAICopilot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -270,38 +383,74 @@ function GlobalAICopilot() {
   );
 }
 
+function InitialRouteHandler() {
+  const { user, loading } = useAuth();
+  const { userData } = useUser();
+  const navigate = useNavigate();
+  const [hasChecked, setHasChecked] = useState(false);
+
+  useEffect(() => {
+    // Wait for auth to finish loading
+    if (loading) return;
+
+    if (user) {
+      // Check if user has Architect as any role
+      const hasArchitectRole = userData?.roles?.some(
+        (role: string) => role.toUpperCase() === 'ARCHITECT'
+      ) || userData?.mainRole?.toUpperCase() === 'ARCHITECT';
+      
+      if (hasArchitectRole) {
+        navigate('/startups', { replace: true });
+      } else {
+        navigate('/home', { replace: true });
+      }
+    } else {
+      // No user, stay on login
+      setHasChecked(true);
+    }
+  }, [user, loading, userData, navigate]);
+
+  if (loading) return null;
+
+  return <TriarcoraLogin />;
+}
+
 function App() {
   return (
     <AuthProvider>
       <UserProvider>
         <PostProvider>
-          <Router>
-            <AppWithUniverse>
-              <Routes>
-              <Route path="/" element={<TriarcoraLogin />} />
-              <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
-              <Route path="/home" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePremium /></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><TriarcoraSettings /></ProtectedRoute>} />
-                <Route path="/startups" element={<ProtectedRoute><StartupDashboard /></ProtectedRoute>} />
-                <Route path="/atlas" element={<ProtectedRoute><AtlasDashboard /></ProtectedRoute>} />
-                <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
-                <Route path="/startup-studio" element={<ProtectedRoute><StartupStudio /></ProtectedRoute>} />
-                <Route path="/my-startup" element={<ProtectedRoute><MyStartup /></ProtectedRoute>} />
-                <Route path="/investors" element={<ProtectedRoute><InvestorDashboard /></ProtectedRoute>} />
-                <Route path="/my-investments" element={<ProtectedRoute><MyInvestments /></ProtectedRoute>} />
-                <Route path="/catalyst-studio" element={<ProtectedRoute><CatalystStudio /></ProtectedRoute>} />
-                <Route path="/explorers" element={<ProtectedRoute><ExplorerDashboard /></ProtectedRoute>} />
-                <Route path="/my-reviews" element={<ProtectedRoute><MyReviews /></ProtectedRoute>} />
-                <Route path="/feedback-hub" element={<ProtectedRoute><FeedbackHub /></ProtectedRoute>} />
-                <Route path="/notifications" element={<ProtectedRoute><NotificationsDashboard /></ProtectedRoute>} />
-                <Route path="/bookmarks" element={<ProtectedRoute><BookmarksDashboard /></ProtectedRoute>} />
-                <Route path="/messages" element={<ProtectedRoute><MessagesDashboard /></ProtectedRoute>} />
-              </Routes>
-              <WelcomeModal />
-              <GlobalAICopilot />
-            </AppWithUniverse>
-          </Router>
+          <AIProvider>
+            <Router>
+              <AppWithUniverse>
+                <Routes>
+                <Route path="/" element={<InitialRouteHandler />} />
+                <Route path="/role-selection" element={<ProtectedRoute><RoleSelection /></ProtectedRoute>} />
+                <Route path="/home" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePremium /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute><TriarcoraSettings /></ProtectedRoute>} />
+                  <Route path="/startups" element={<ProtectedRoute><StartupDashboard /></ProtectedRoute>} />
+                  <Route path="/atlas" element={<ProtectedRoute><AtlasDashboard /></ProtectedRoute>} />
+                  <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
+                  <Route path="/startup-studio" element={<ProtectedRoute><StartupStudio /></ProtectedRoute>} />
+                  <Route path="/my-startup" element={<ProtectedRoute><MyStartup /></ProtectedRoute>} />
+                  <Route path="/investors" element={<ProtectedRoute><InvestorDashboard /></ProtectedRoute>} />
+                  <Route path="/my-investments" element={<ProtectedRoute><MyInvestments /></ProtectedRoute>} />
+                  <Route path="/catalyst-studio" element={<ProtectedRoute><CatalystStudio /></ProtectedRoute>} />
+                  <Route path="/explorers" element={<ProtectedRoute><ExplorerDashboard /></ProtectedRoute>} />
+                  <Route path="/my-reviews" element={<ProtectedRoute><MyReviews /></ProtectedRoute>} />
+                  <Route path="/feedback-hub" element={<ProtectedRoute><FeedbackHub /></ProtectedRoute>} />
+                  <Route path="/notifications" element={<ProtectedRoute><NotificationsDashboard /></ProtectedRoute>} />
+                  <Route path="/bookmarks" element={<ProtectedRoute><BookmarksDashboard /></ProtectedRoute>} />
+                  <Route path="/messages" element={<ProtectedRoute><MessagesDashboard /></ProtectedRoute>} />
+                  <Route path="/ai-copilot" element={<ProtectedRoute><AICopilotPage /></ProtectedRoute>} />
+                </Routes>
+                <WelcomeModal />
+                <ProfileModal />
+                <GlobalAICopilot />
+              </AppWithUniverse>
+            </Router>
+          </AIProvider>
         </PostProvider>
       </UserProvider>
     </AuthProvider>

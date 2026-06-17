@@ -69,7 +69,7 @@ const Home: React.FC = () => {
   return (
     <div className="home-container">
       {/* Sidebar */}
-      <div className="sidebar">
+      <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo">
             <img 

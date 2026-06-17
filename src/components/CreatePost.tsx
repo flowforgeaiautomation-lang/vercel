@@ -28,7 +28,7 @@ interface UploadedFile {
 }
 
 const CreatePost: React.FC<CreatePostProps> = ({ role: propRole, onClose }) => {
-  console.log("CreatePost RENDERED!");
+
   const { userData } = useUser();
   const { addPost } = usePosts();
   
@@ -542,7 +542,7 @@ ${selectedTags.map(t => `#${t}`).join(' ')}`;
   };
 
   return (
-    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => console.log("Overlay clicked!")}>
+    <div className="create-post-overlay" style={{ zIndex: 100000, display: 'flex' }} onClick={() => {}}>
       <div className={`create-post-modal role-${role.toLowerCase()}`}>
         <div className="create-post-header">
           <div className="create-post-header-left">
