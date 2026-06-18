@@ -13,16 +13,24 @@ const getRoleColor = (role: string): string => {
   return '#9CA3AF';
 };
 
+type NotificationType = 'message' | 'connection_request' | 'mention' | 'funding' | 'startup_update' | 'community';
+
 interface Notification {
   id: string;
+  type: NotificationType;
+  senderId?: string;
+  receiverId?: string;
   avatar?: string;
   name: string;
   role: string;
   roleType: 'gold' | 'green' | 'blue' | 'purple';
   text: string;
   time: string;
-  action?: string;
+  action?: { label: string; type: 'view_profile' | 'reply' | 'view_startup' | 'view_investor' | 'open_post' | 'open_message' | 'join_event' | 'save_opportunity' | 'accept_connection' };
   isUnread: boolean;
+  isArchived?: boolean;
+  referenceId?: string;
+  createdAt?: Date;
 }
 
 const connectionRequests = [
@@ -51,7 +59,7 @@ const connectionRequests = [
     avatar: undefined,
     name: 'Ananya Iyer',
     role: 'Explorer',
-    roleType: 'cyan',
+    roleType: 'blue',
     title: 'Product Reviewer',
     mutualConnections: 6,
     time: '1 day ago'
@@ -82,97 +90,62 @@ const NotificationsDashboard = () => {
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState<'notifications' | 'connections'>('notifications');
   const [activeTab, setActiveTab] = useState('All');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showNotificationMenu, setShowNotificationMenu] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    { id: '1', type: 'connection_request', name: 'Arjun Sharma', role: 'Architect', roleType: 'gold', text: 'accepted your connection request', time: '2m ago', action: { label: 'View Profile', type: 'view_profile' }, isUnread: true },
+    { id: '2', type: 'message', name: 'Maya Verma', role: 'Architect', roleType: 'gold', text: 'sent you a message', time: '5m ago', action: { label: 'Reply', type: 'reply' }, isUnread: true },
+    { id: '3', type: 'mention', name: 'Priya Singh', role: 'Architect', roleType: 'gold', text: 'mentioned you in a post', time: '10m ago', action: { label: 'Open Post', type: 'open_post' }, isUnread: true },
+    { id: '4', type: 'funding', name: 'FutureFund Capital', role: '', roleType: 'purple', text: 'posted a new funding opportunity', time: '30m ago', action: { label: 'Save Opportunity', type: 'save_opportunity' }, isUnread: true },
+    { id: '5', type: 'startup_update', name: 'Nebula AI', role: 'Startup', roleType: 'purple', text: 'launched a new product "Nebula Copilot"', time: '1h ago', action: { label: 'View Startup', type: 'view_startup' }, isUnread: false },
+    { id: '6', type: 'community', name: 'AI Innovators Community', role: '', roleType: 'blue', text: 'someone replied to your comment', time: '2h ago', action: { label: 'View Reply', type: 'open_post' }, isUnread: false },
+    { id: '7', type: 'startup_update', name: 'Nebula AI', role: 'Startup', roleType: 'purple', text: 'reached funding goal', time: '5h ago', action: { label: 'View Startup', type: 'view_startup' }, isUnread: false },
+    { id: '8', type: 'community', name: 'TRIVEON Community', role: '', roleType: 'blue', text: 'announced a community event', time: '1d ago', action: { label: 'Join Event', type: 'join_event' }, isUnread: false },
+    { id: '9', type: 'connection_request', name: 'Vikas Rao', role: 'Architect', roleType: 'gold', text: 'wants to connect with you', time: '1d ago', action: { label: 'Accept Connection', type: 'accept_connection' }, isUnread: false },
+    { id: '10', type: 'message', name: 'Startup Team', role: '', roleType: 'purple', text: 'mentioned you in a message', time: '2d ago', action: { label: 'Open Message', type: 'open_message' }, isUnread: false },
+    { id: '11', type: 'funding', name: 'Rohan Kapoor', role: 'Catalyst', roleType: 'green', text: 'invited you to join a syndicate', time: '3d ago', action: { label: 'View Opportunity', type: 'save_opportunity' }, isUnread: false },
+    { id: '12', type: 'startup_update', name: 'Nebula AI', role: 'Startup', roleType: 'purple', text: 'changed valuation', time: '4d ago', action: { label: 'View Startup', type: 'view_startup' }, isUnread: false },
+    { id: '13', type: 'startup_update', name: 'Nebula AI', role: 'Startup', roleType: 'purple', text: 'published pitch deck', time: '5d ago', action: { label: 'View Startup', type: 'view_startup' }, isUnread: false },
+    { id: '14', type: 'community', name: 'TRIVEON Community', role: '', roleType: 'blue', text: 'poll results are available', time: '1w ago', action: { label: 'View Results', type: 'open_post' }, isUnread: false },
+    { id: '15', type: 'connection_request', name: 'Anjali Desai', role: 'Explorer', roleType: 'blue', text: 'started following you', time: '1w ago', action: { label: 'View Profile', type: 'view_profile' }, isUnread: false },
+  ]);
 
-  const notifications: Notification[] = [
-    {
-      id: '1',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=180&h=180&fit=crop&crop=face',
-      name: 'Unnati Chaudhary',
-      role: 'Investor',
-      roleType: 'green',
-      text: 'accepted your connection request.',
-      time: '2m ago',
-      action: 'View Profile',
-      isUnread: true
-    },
-    {
-      id: '2',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=180&h=180&fit=crop&crop=face',
-      name: 'Maya Verma',
-      role: 'Architect',
-      roleType: 'gold',
-      text: 'sent you a message.',
-      time: '5m ago',
-      action: 'Reply',
-      isUnread: true
-    },
-    {
-      id: '3',
-      avatar: undefined,
-      name: 'Nebula AI',
-      role: 'Startup',
-      roleType: 'purple',
-      text: 'launched a new product "Nebula Copilot".',
-      time: '1h ago',
-      action: 'View Startup',
-      isUnread: false
-    },
-    {
-      id: '4',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=180&h=180&fit=crop&crop=face',
-      name: 'Rohan Kapoor',
-      role: 'Investor',
-      roleType: 'green',
-      text: 'invited you to join a syndicate.',
-      time: '2h ago',
-      action: 'View Opportunity',
-      isUnread: false
-    },
-    {
-      id: '5',
-      avatar: undefined,
-      name: 'AI Innovators Community',
-      role: '',
-      roleType: 'blue',
-      text: 'someone replied to your comment.',
-      time: '3h ago',
-      action: 'View Reply',
-      isUnread: false
-    },
-    {
-      id: '6',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=180&h=180&fit=crop&crop=face',
-      name: 'Priya Singh',
-      role: 'Architect',
-      roleType: 'gold',
-      text: 'mentioned you in a post.',
-      time: '5h ago',
-      action: 'Open Post',
-      isUnread: false
-    },
-    {
-      id: '7',
-      avatar: undefined,
-      name: 'FutureFund Capital',
-      role: '',
-      roleType: 'gold',
-      text: 'posted a new funding opportunity.',
-      time: '1d ago',
-      action: 'View Opportunity',
-      isUnread: false
-    },
-    {
-      id: '8',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=180&h=180&fit=crop&crop=face',
-      name: 'Vikas Rao',
-      role: 'Architect',
-      roleType: 'blue',
-      text: 'started following you.',
-      time: '1d ago',
-      action: 'View Profile',
-      isUnread: false
-    }
-  ];
+  const [settings, setSettings] = useState({
+    connections: true,
+    messages: true,
+    mentions: true,
+    fundingAlerts: true,
+    startupUpdates: true,
+    communityUpdates: true,
+    emailNotifications: false,
+    pushNotifications: true
+  });
+
+  const getSortedNotifications = () => {
+    const priorityOrder: NotificationType[] = ['message', 'connection_request', 'mention', 'funding', 'startup_update', 'community'];
+    return [...notifications].sort((a, b) => priorityOrder.indexOf(a.type) - priorityOrder.indexOf(b.type));
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(notif => ({ ...notif, isUnread: false })));
+  };
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev => prev.map(notif => notif.id === id ? { ...notif, isUnread: false } : notif));
+  };
+
+  const archiveNotification = (id: string) => {
+    setNotifications(prev => prev.map(notif => notif.id === id ? { ...notif, isArchived: true } : notif));
+  };
+
+  const deleteNotification = (id: string) => {
+    setNotifications(prev => prev.filter(notif => notif.id !== id));
+  };
+
+  const handleAction = (action: Notification['action'], id: string) => {
+    if (!action) return;
+    markAsRead(id);
+  };
 
   return (
     <div className="nd-container">
@@ -182,15 +155,15 @@ const NotificationsDashboard = () => {
             <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
               <defs>
                 <linearGradient id="logoGradNd" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{stopColor: '#8B5CF6'}} />
-                  <stop offset="100%" style={{stopColor: '#A78BFA'}} />
+                  <stop offset="0%" stopColor="#FFD700" />
+                  <stop offset="100%" stopColor="#FFA500" />
                 </linearGradient>
               </defs>
               <polygon points="20,80 50,20 80,80" fill="url(#logoGradNd)" />
               <text x="50" y="72" textAnchor="middle" fill="#000" fontSize="28" fontWeight="800" fontFamily="Arial">T</text>
             </svg>
           </div>
-          <span className="nd-logo-text">TRIARCORA</span>
+          <span className="nd-logo-text">TRIVEON</span>
         </div>
 
         <div className="nd-messaging-header">
@@ -221,23 +194,32 @@ const NotificationsDashboard = () => {
             <div className="nd-main-col">
               <div className="nd-page-header">
                 <h1 className="nd-page-title">All Notifications</h1>
-                <div className="nd-mark-all-read" onClick={() => {}}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-                  Mark all as read
+                <div className="nd-page-actions">
+                  <div className="nd-mark-all-read" onClick={markAllAsRead}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
+                    Mark all as read
+                  </div>
+                  <div className="nd-settings-btn" onClick={() => setShowSettingsModal(true)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                    Settings
+                  </div>
                 </div>
               </div>
 
               <div className="nd-tabs">
-                {['All', 'Unread', 'Important', 'Today', 'This Week', 'Earlier'].map(tab => (
+                {['All', 'Unread', 'Important', 'Today', 'This Week'].map(tab => (
                   <div key={tab} className={`nd-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
                     {tab}
-                    {tab === 'Unread' && <span className="nd-tab-badge">6</span>}
+                    {tab === 'Unread' && <span className="nd-tab-badge">{notifications.filter(n => n.isUnread).length}</span>}
                   </div>
                 ))}
               </div>
 
               <div className="nd-notifications-list">
-                {notifications.map((notif) => (
+                {getSortedNotifications().filter(notif => !notif.isArchived).map((notif) => (
                   <div key={notif.id} className={`nd-notification-card ${notif.isUnread ? 'unread' : ''}`}>
                     {notif.isUnread && <div className="nd-unread-dot"></div>}
                     <div className="nd-notification-avatar">
@@ -245,7 +227,7 @@ const NotificationsDashboard = () => {
                         <img src={notif.avatar} alt={notif.name} style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover'}} />
                       ) : (
                         <div className={`nd-avatar-initials ${notif.roleType}`}>
-                          {notif.name.charAt(0)}
+                          {getInitials(notif.name)}
                         </div>
                       )}
                     </div>
@@ -255,11 +237,39 @@ const NotificationsDashboard = () => {
                           <strong>{notif.name}</strong>
                           {notif.role && <span className={`nd-role-badge ${notif.roleType}`}>{notif.role}</span>}
                         </div>
-                        <span className="nd-notification-time">{notif.time}</span>
+                        <div className="nd-notification-right">
+                          <span className="nd-notification-time">{notif.time}</span>
+                          <button 
+                            className="nd-notification-menu-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowNotificationMenu(showNotificationMenu === notif.id ? null : notif.id);
+                            }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="12" cy="12" r="1" />
+                              <circle cx="12" cy="6" r="1" />
+                              <circle cx="12" cy="18" r="1" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                       <p className="nd-notification-text">{notif.text}</p>
                       {notif.action && (
-                        <button className="nd-action-button">{notif.action}</button>
+                        <button 
+                          className="nd-action-button"
+                          onClick={() => handleAction(notif.action, notif.id)}
+                        >
+                          {notif.action.label}
+                        </button>
+                      )}
+                      {showNotificationMenu === notif.id && (
+                        <div className="nd-notification-menu">
+                          <button onClick={() => { markAsRead(notif.id); setShowNotificationMenu(null); }}>Mark as {notif.isUnread ? 'Read' : 'Unread'}</button>
+                          <button onClick={() => { archiveNotification(notif.id); setShowNotificationMenu(null); }}>Archive</button>
+                          <button onClick={() => { deleteNotification(notif.id); setShowNotificationMenu(null); }}>Delete</button>
+                          <button onClick={() => setShowNotificationMenu(null)}>Turn off similar notifications</button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -329,11 +339,6 @@ const NotificationsDashboard = () => {
                       {tab}
                     </div>
                   ))}
-                  <button className="cd-filter-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polygon points="22 3 2 3 10 12.46V19 14 21 14 12.46L22 3" />
-                    </svg>
-                  </button>
                 </div>
 
                 <div className="cd-connections-list">
@@ -373,34 +378,89 @@ const NotificationsDashboard = () => {
                           <button className="cd-decline-btn">Decline</button>
                         </div>
                       </div>
-                      <div className="cd-connection-extra">
-                        <button className="cd-extra-btn">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                        </button>
-                        <button className="cd-extra-btn">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                          </svg>
-                        </button>
-                      </div>
                     </div>
                   ))}
-                </div>
-
-                <div className="cd-load-more">
-                  <span>Load more requests</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {showSettingsModal && (
+        <div className="nd-modal-overlay" onClick={() => setShowSettingsModal(false)}>
+          <div className="nd-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="nd-modal-header">
+              <h2>Notification Settings</h2>
+              <button className="nd-modal-close" onClick={() => setShowSettingsModal(false)}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+            <div className="nd-modal-body">
+              <div className="nd-setting-item">
+                <span>Connections</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.connections} onChange={(e) => setSettings(prev => ({ ...prev, connections: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-item">
+                <span>Messages</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.messages} onChange={(e) => setSettings(prev => ({ ...prev, messages: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-item">
+                <span>Mentions</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.mentions} onChange={(e) => setSettings(prev => ({ ...prev, mentions: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-item">
+                <span>Funding Alerts</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.fundingAlerts} onChange={(e) => setSettings(prev => ({ ...prev, fundingAlerts: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-item">
+                <span>Startup Updates</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.startupUpdates} onChange={(e) => setSettings(prev => ({ ...prev, startupUpdates: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-item">
+                <span>Community Updates</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.communityUpdates} onChange={(e) => setSettings(prev => ({ ...prev, communityUpdates: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-divider"></div>
+              <div className="nd-setting-item">
+                <span>Email Notifications</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.emailNotifications} onChange={(e) => setSettings(prev => ({ ...prev, emailNotifications: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+              <div className="nd-setting-item">
+                <span>Push Notifications</span>
+                <label className="nd-toggle">
+                  <input type="checkbox" checked={settings.pushNotifications} onChange={(e) => setSettings(prev => ({ ...prev, pushNotifications: e.target.checked }))} />
+                  <span className="nd-toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
