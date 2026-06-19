@@ -410,7 +410,7 @@ const getInterestFontSize = (count: number) => {
 
 const ProfilePremium: React.FC = () => {
   const navigate = useNavigate();
-  const { userData, loading, updateUserData, uploadImage, deleteImage } = useUser();
+  const { userData, loading, updateUserData, uploadImage, deleteImage, getProfileCompletionPercentage, getVerificationCompletionPercentage } = useUser();
   const { 
     posts, 
     drafts, 
@@ -445,6 +445,7 @@ const ProfilePremium: React.FC = () => {
   const [uploadAssetModalOpen, setUploadAssetModalOpen] = useState<boolean>(false);
   const [photoPreviewOpen, setPhotoPreviewOpen] = useState<boolean>(false);
   const [photoPreviewSrc, setPhotoPreviewSrc] = useState<string>('');
+  const [verificationCenterOpen, setVerificationCenterOpen] = useState<boolean>(false);
   const [editFormData, setEditFormData] = useState({
     name: '',
     title: '',
@@ -919,9 +920,9 @@ const ProfilePremium: React.FC = () => {
             {safeActiveProfileMode === 'ARCHITECT' && <span className="nav-badge">9</span>}
           </div>
           {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
-            <div className="premium-nav-item">
+            <div className="premium-nav-item" onClick={() => navigate('/signals')}>
               <BellIcon />
-              <span>Notifications</span>
+              <span>Signals</span>
             </div>
           ) : null}
           <div className="premium-nav-item" onClick={() => navigate('/bookmarks')}>
@@ -1083,8 +1084,13 @@ const ProfilePremium: React.FC = () => {
               </div>
             )}
 
-            {safeActiveProfileMode === 'ARCHITECT' && (
-              <div className="premium-triarcora-score">
+            {/* Show both cards for ALL roles */}
+            <div style={{ display: 'flex', gap: '24px' }}>
+              {/* Show TRIARCORA Score for ALL roles */}
+              <div 
+                className="premium-triarcora-score"
+                style={{ minWidth: '260px', width: '340px' }}
+              >
                 <div className="premium-score-header">
                   <span className="premium-score-label">TRIARCORA Score</span>
                   <InfoIcon />
@@ -1096,7 +1102,38 @@ const ProfilePremium: React.FC = () => {
                   <span>{activeRoleProfile.scoreTier || 'Beginner'}</span>
                 </div>
               </div>
-            )}
+              {/* Verification Score Card - for ALL roles */}
+              <div 
+                className="premium-triarcora-score"
+                onClick={() => {
+                  console.log('✅ Verification card clicked! Opening verification center!');
+                  setVerificationCenterOpen(true);
+                }}
+                style={{ 
+                  cursor: 'pointer', 
+                  minWidth: '260px', 
+                  width: '340px',
+                  transition: 'transform 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
+              >
+                <div className="premium-score-header">
+                  <span className="premium-score-label">Verification Score</span>
+                  <InfoIcon />
+                </div>
+                <div className="premium-score-value">
+                  {userData?.verification?.trustScore || 0}
+                </div>
+                <div className="premium-score-tier">
+                  <span>{userData?.verification?.verificationLevel || 'Unverified'}</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Add Role Modal */}
@@ -1204,6 +1241,170 @@ const ProfilePremium: React.FC = () => {
                       <LogoutIcon />
                       Logout
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Verification Center Modal */}
+          {verificationCenterOpen && (
+            <div 
+              className="premium-modal-overlay" 
+              onClick={() => {
+                console.log('✅ Overlay clicked! Closing verification center!');
+                setVerificationCenterOpen(false);
+              }}
+              style={{ zIndex: 99999 }}
+            >
+              <div className="premium-modal large" onClick={(e) => e.stopPropagation()}>
+                <div className="premium-modal-header">
+                  <h3 style={{ color: '#34D399' }}>Verification Center</h3>
+                  <button onClick={() => {
+                    console.log('✅ Close button clicked! Closing verification center!');
+                    setVerificationCenterOpen(false);
+                  }} className="premium-modal-close">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="premium-modal-content">
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                    gap: '20px', 
+                    marginBottom: '2rem' 
+                  }}>
+                    {/* Profile Completion Card */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      borderRadius: '12px', 
+                      padding: '24px',
+                      border: '1px solid rgba(255,255,255,0.08)'
+                    }}>
+                      <div style={{ 
+                        fontSize: '0.9rem', 
+                        color: 'rgba(200,200,220,0.9)', 
+                        marginBottom: '16px',
+                        fontWeight: 500
+                      }}>
+                        Profile Completion
+                      </div>
+                      <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '8px', color: '#60A5FA' }}>
+                        {getProfileCompletionPercentage()}%
+                      </div>
+                      <div style={{ 
+                        height: '8px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        marginBottom: '16px'
+                      }}>
+                        <div style={{ 
+                          height: '100%', 
+                          background: 'linear-gradient(90deg, #3B82F6, #60A5FA)', 
+                          width: `${getProfileCompletionPercentage()}%`,
+                          borderRadius: '4px'
+                        }}></div>
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'rgba(150,150,170,0.8)' }}>
+                        Complete your profile to unlock all features
+                      </div>
+                    </div>
+
+                    {/* Verification Score Card */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      borderRadius: '12px', 
+                      padding: '24px',
+                      border: '1px solid rgba(255,255,255,0.08)'
+                    }}>
+                      <div style={{ 
+                        fontSize: '0.9rem', 
+                        color: 'rgba(200,200,220,0.9)', 
+                        marginBottom: '16px',
+                        fontWeight: 500
+                      }}>
+                        Verification Progress
+                      </div>
+                      <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '8px', color: '#34D399' }}>
+                        {getVerificationCompletionPercentage()}%
+                      </div>
+                      <div style={{ 
+                        height: '8px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        marginBottom: '16px'
+                      }}>
+                        <div style={{ 
+                          height: '100%', 
+                          background: 'linear-gradient(90deg, #10B981, #34D399)', 
+                          width: `${getVerificationCompletionPercentage()}%`,
+                          borderRadius: '4px'
+                        }}></div>
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'rgba(150,150,170,0.8)' }}>
+                        Verification Level: {userData?.verification?.verificationLevel || 'Unverified'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verification Steps */}
+                  <h4 style={{ 
+                    fontSize: '1.1rem', 
+                    fontWeight: 600, 
+                    marginBottom: '20px',
+                    color: 'rgba(240,240,255,0.95)'
+                  }}>
+                    Verification Steps
+                  </h4>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {[
+                      { label: 'Email Verified', completed: userData?.verification?.emailVerified },
+                      { label: 'Phone Verified', completed: userData?.verification?.phoneVerified },
+                      { label: 'Identity Verified', completed: userData?.verification?.identityVerified },
+                      { label: 'LinkedIn Verified', completed: userData?.verification?.linkedinVerified },
+                      { label: 'Website Verified', completed: userData?.verification?.websiteVerified }
+                    ].map((step, index) => (
+                      <div 
+                        key={index} 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'space-between',
+                          padding: '16px 20px',
+                          background: 'rgba(255,255,255,0.02)',
+                          borderRadius: '10px',
+                          border: `1px solid ${step.completed ? 'rgba(52,211,153,0.3)' : 'rgba(255,255,255,0.06)'}`
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ 
+                            width: '24px', 
+                            height: '24px', 
+                            borderRadius: '50%', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            background: step.completed ? '#34D399' : 'rgba(255,255,255,0.1)',
+                            color: step.completed ? '#000' : 'rgba(150,150,170,0.8)'
+                          }}>
+                            {step.completed ? '✓' : '○'}
+                          </div>
+                          <span style={{ color: 'rgba(230,230,250,0.9)' }}>{step.label}</span>
+                        </div>
+                        <span style={{ 
+                          fontSize: '0.85rem',
+                          color: step.completed ? '#34D399' : 'rgba(150,150,170,0.7)'
+                        }}>
+                          {step.completed ? 'Completed' : 'Pending'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -2896,6 +3097,8 @@ const ProfilePremium: React.FC = () => {
           </div>
         </div>
       )}
+
+
 
       {/* Toast Notification */}
       {toastMessage && (

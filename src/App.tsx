@@ -15,7 +15,7 @@ import CatalystStudio from './components/CatalystStudio';
 import ExplorerDashboard from './components/ExplorerDashboard';
 import MyReviews from './components/MyReviews';
 import FeedbackHub from './components/FeedbackHub';
-import NotificationsDashboard from './components/NotificationsDashboard';
+import SignalsDashboard from './components/SignalsDashboard';
 import BookmarksDashboard from './components/BookmarksDashboard';
 import MessagesDashboard from './components/MessagesDashboard';
 import TriarcoraSettings from './components/TriarcoraSettings';
@@ -26,7 +26,7 @@ import AICopilotPage from './components/AICopilotPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProvider, useUser } from './contexts/UserContext';
 import { PostProvider } from './contexts/PostContext';
-import { AIProvider } from './contexts/AIContext';
+import { AIProvider, useAI } from './contexts/AIContext';
 import './App.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -332,7 +332,7 @@ function ProfileModal() {
 
 // Global AI button component
 function GlobalAICopilot() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useAI();
   const location = useLocation();
   
   // Don't show on login pages
@@ -342,43 +342,8 @@ function GlobalAICopilot() {
 
   return (
     <>
-      {/* Floating AI Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          width: '60px',
-          height: '60px',
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
-          border: 'none',
-          boxShadow: '0 6px 20px rgba(255, 165, 0, 0.4)',
-          cursor: 'pointer',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'transform 0.3s, box-shadow 0.3s'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
-          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 165, 0, 0.5)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 165, 0, 0.4)';
-        }}
-      >
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <polygon points="16.24,7.76 14.12,14.12 7.76,16.24 9.88,9.88 16.24,7.76" />
-        </svg>
-      </button>
-      
-      {/* AI Copilot Panel */}
-      {isOpen && <AICopilot isOpen={isOpen} onClose={() => setIsOpen(false)} />}
+      {/* Floating AI Button - Now handled in AICopilot component! */}
+      <AICopilot />
     </>
   );
 }
@@ -394,15 +359,22 @@ function InitialRouteHandler() {
     if (loading) return;
 
     if (user) {
-      // Check if user has Architect as any role
-      const hasArchitectRole = userData?.roles?.some(
-        (role: string) => role.toUpperCase() === 'ARCHITECT'
-      ) || userData?.mainRole?.toUpperCase() === 'ARCHITECT';
+      // Get user's main role
+      const userRole = (userData?.mainRole || 'ARCHITECT').toUpperCase();
       
-      if (hasArchitectRole) {
-        navigate('/startups', { replace: true });
-      } else {
-        navigate('/home', { replace: true });
+      // Navigate to role-specific page
+      switch (userRole) {
+        case 'ARCHITECT':
+          navigate('/startups', { replace: true });
+          break;
+        case 'CATALYST':
+          navigate('/investors', { replace: true });
+          break;
+        case 'EXPLORER':
+          navigate('/explorers', { replace: true });
+          break;
+        default:
+          navigate('/home', { replace: true });
       }
     } else {
       // No user, stay on login
@@ -420,8 +392,8 @@ function App() {
     <AuthProvider>
       <UserProvider>
         <PostProvider>
-          <AIProvider>
-            <Router>
+          <Router>
+            <AIProvider>
               <AppWithUniverse>
                 <Routes>
                 <Route path="/" element={<InitialRouteHandler />} />
@@ -440,7 +412,7 @@ function App() {
                   <Route path="/explorers" element={<ProtectedRoute><ExplorerDashboard /></ProtectedRoute>} />
                   <Route path="/my-reviews" element={<ProtectedRoute><MyReviews /></ProtectedRoute>} />
                   <Route path="/feedback-hub" element={<ProtectedRoute><FeedbackHub /></ProtectedRoute>} />
-                  <Route path="/notifications" element={<ProtectedRoute><NotificationsDashboard /></ProtectedRoute>} />
+                  <Route path="/signals" element={<ProtectedRoute><SignalsDashboard /></ProtectedRoute>} />
                   <Route path="/bookmarks" element={<ProtectedRoute><BookmarksDashboard /></ProtectedRoute>} />
                   <Route path="/messages" element={<ProtectedRoute><MessagesDashboard /></ProtectedRoute>} />
                   <Route path="/ai-copilot" element={<ProtectedRoute><AICopilotPage /></ProtectedRoute>} />
@@ -449,8 +421,8 @@ function App() {
                 <ProfileModal />
                 <GlobalAICopilot />
               </AppWithUniverse>
-            </Router>
-          </AIProvider>
+            </AIProvider>
+          </Router>
         </PostProvider>
       </UserProvider>
     </AuthProvider>

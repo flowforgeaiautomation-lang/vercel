@@ -102,7 +102,7 @@ const InvestorDashboard = () => {
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const feedPosts = posts.filter(post => 
-    post.userRole?.toUpperCase() === 'CATALYST' &&
+    post.userRole.toUpperCase() === 'CATALYST' && 
     !hiddenPosts.includes(post.id) && 
     !mutedUsers.includes(post.userId)
   );

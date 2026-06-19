@@ -38,12 +38,28 @@ export interface UserProfile {
     companies?: number;
   };
   stats: { followers: number; following: number; endorsements: number; };
+  following: string[]; // User IDs this user is following
+  followers: string[]; // User IDs following this user
   tags: string[];
   // TRIARCORA PRESTIGE STAR SYSTEM
   prestigeSystem: {
     currentStarId: number;
     currentStarName: string;
     progressPercent: number;
+  };
+  // Verification System
+  verification: {
+    emailVerified: boolean;
+    phoneVerified: boolean;
+    identityVerified: boolean;
+    linkedinVerified: boolean;
+    websiteVerified: boolean;
+    startupVerified: boolean;
+    investorVerified: boolean;
+    explorerVerified: boolean;
+    trustScore: number;
+    verificationLevel: 'Unverified' | 'Basic Verified' | 'Identity Verified' | 'Professional Verified' | 'Premium Verified' | 'TRIVEON Verified';
+    verificationStatus: 'Pending' | 'Under Review' | 'Approved' | 'Rejected' | 'Needs Action';
   };
 };
 
@@ -217,7 +233,7 @@ export interface SavedCollection {
   createdAt: Date;
 };
 
-export interface Notification {
+export interface Signal {
   id: string;
   userId: string;
   avatar?: string;
@@ -249,7 +265,7 @@ interface PostContextType {
   hiddenPosts: string[];
   notInterestedTopics: string[];
   pinnedPostIds: string[];
-  notifications: Notification[];
+  signals: Signal[];
   addPost: (post: Omit<Post, 'id' | 'likes' | 'comments' | 'shares' | 'timestamp' | 'engagementScore' | 'isSaved'>) => void;
   likePost: (postId: string) => void;
   addComment: (postId: string, comment: Omit<Comment, 'id' | 'timestamp'>, parentId?: string) => void;
@@ -297,9 +313,14 @@ interface PostContextType {
   // Copy functions
   copyPostLink: (postId: string) => string;
   copyPostText: (postId: string) => string;
-  addNotification: (notification: Omit<Notification, 'id' | 'time' | 'timestamp'>) => void;
+  addSignal: (signal: Omit<Signal, 'id' | 'time' | 'timestamp'>) => void;
   markAllAsRead: () => void;
-  getNotifications: () => Notification[];
+  getSignals: () => Signal[];
+  // Follow/Unfollow functions for demo users!
+  followDemoUser: (userIdToFollow: string) => void;
+  unfollowDemoUser: (userIdToUnfollow: string) => void;
+  // Get demo user by ID
+  getDemoUser: (userId: string) => UserProfile | undefined;
 }
 
 const PostContext = createContext<PostContextType | undefined>(undefined);
@@ -307,8 +328,8 @@ const PostContext = createContext<PostContextType | undefined>(undefined);
 export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { userData } = useUser();
   
-  // Demo users with detailed profiles
-  const demoUsers: Record<string, UserProfile> = {
+  // Initial demo users data
+  const initialDemoUsers: Record<string, UserProfile> = {
     'demo-1': {
       userId: 'demo-1',
       userName: 'Riya Sharma',
@@ -329,11 +350,26 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         companies: 3
       },
       stats: { followers: 1240, following: 320, endorsements: 89 },
+      following: ['demo-2', 'demo-4', 'demo-5'],
+      followers: ['demo-user', 'demo-2', 'demo-4'],
       tags: ['AI', 'Fintech', 'SaaS'],
       prestigeSystem: {
         currentStarId: 7,
         currentStarName: 'VEGA',
         progressPercent: 30
+      },
+      verification: {
+        emailVerified: true,
+        phoneVerified: true,
+        identityVerified: true,
+        linkedinVerified: true,
+        websiteVerified: true,
+        startupVerified: true,
+        investorVerified: false,
+        explorerVerified: false,
+        trustScore: 92,
+        verificationLevel: 'TRIVEON Verified',
+        verificationStatus: 'Approved'
       }
     },
     'demo-2': {
@@ -357,11 +393,26 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         companies: 7
       },
       stats: { followers: 3400, following: 210, endorsements: 212 },
+      following: ['demo-1', 'demo-4'],
+      followers: ['demo-user', 'demo-1', 'demo-3'],
       tags: ['Fintech', 'SaaS', 'B2B'],
       prestigeSystem: {
         currentStarId: 9,
         currentStarName: 'CANOPUS',
         progressPercent: 60
+      },
+      verification: {
+        emailVerified: true,
+        phoneVerified: true,
+        identityVerified: true,
+        linkedinVerified: true,
+        websiteVerified: true,
+        startupVerified: false,
+        investorVerified: true,
+        explorerVerified: false,
+        trustScore: 88,
+        verificationLevel: 'TRIVEON Verified',
+        verificationStatus: 'Approved'
       }
     },
     'demo-3': {
@@ -384,11 +435,26 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         companies: 2
       },
       stats: { followers: 820, following: 450, endorsements: 32 },
+      following: ['demo-1', 'demo-2'],
+      followers: ['demo-user'],
       tags: ['Web3', 'Social', 'Product'],
       prestigeSystem: {
         currentStarId: 3,
         currentStarName: 'REGULUS',
         progressPercent: 75
+      },
+      verification: {
+        emailVerified: true,
+        phoneVerified: true,
+        identityVerified: true,
+        linkedinVerified: true,
+        websiteVerified: false,
+        startupVerified: false,
+        investorVerified: false,
+        explorerVerified: true,
+        trustScore: 78,
+        verificationLevel: 'Professional Verified',
+        verificationStatus: 'Approved'
       }
     },
     'demo-4': {
@@ -411,11 +477,26 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         companies: 2
       },
       stats: { followers: 1890, following: 230, endorsements: 120 },
+      following: [],
+      followers: [],
       tags: ['Fintech', 'SaaS', 'Accounting'],
       prestigeSystem: {
         currentStarId: 5,
         currentStarName: 'CASTOR',
         progressPercent: 45
+      },
+      verification: {
+        emailVerified: true,
+        phoneVerified: true,
+        identityVerified: true,
+        linkedinVerified: true,
+        websiteVerified: true,
+        startupVerified: true,
+        investorVerified: false,
+        explorerVerified: false,
+        trustScore: 85,
+        verificationLevel: 'Premium Verified',
+        verificationStatus: 'Approved'
       }
     },
     'demo-5': {
@@ -439,11 +520,26 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         companies: 4
       },
       stats: { followers: 2200, following: 180, endorsements: 95 },
+      following: [],
+      followers: [],
       tags: ['ClimateTech', 'Impact', 'Investing'],
       prestigeSystem: {
         currentStarId: 8,
         currentStarName: 'CENTAURUS',
         progressPercent: 55
+      },
+      verification: {
+        emailVerified: true,
+        phoneVerified: true,
+        identityVerified: true,
+        linkedinVerified: true,
+        websiteVerified: false,
+        startupVerified: false,
+        investorVerified: true,
+        explorerVerified: false,
+        trustScore: 90,
+        verificationLevel: 'TRIVEON Verified',
+        verificationStatus: 'Approved'
       }
     },
     'demo-6': {
@@ -465,14 +561,32 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         companies: 3
       },
       stats: { followers: 3100, following: 290, endorsements: 175 },
+      following: [],
+      followers: [],
       tags: ['HealthTech', 'Product', 'Learning'],
       prestigeSystem: {
         currentStarId: 4,
         currentStarName: 'BELLATRIX',
         progressPercent: 38
+      },
+      verification: {
+        emailVerified: true,
+        phoneVerified: true,
+        identityVerified: true,
+        linkedinVerified: true,
+        websiteVerified: true,
+        startupVerified: false,
+        investorVerified: false,
+        explorerVerified: true,
+        trustScore: 82,
+        verificationLevel: 'Professional Verified',
+        verificationStatus: 'Approved'
       }
     }
   };
+
+  // Demo users as state variable to allow updates
+  const [demoUsers, setDemoUsers] = useState<Record<string, UserProfile>>(initialDemoUsers);
 
   // Trending hashtags data
   const initialTrendingHashtags: HashtagData[] = [
@@ -1181,11 +1295,11 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   });
 
-  const [notifications, setNotifications] = useState<Notification[]>(() => {
+  const [signals, setSignals] = useState<Signal[]>(() => {
     try {
-      const saved = localStorage.getItem('triarcora-notifications');
+      const saved = localStorage.getItem('triarcora-signals');
       if (!saved) {
-        // Initial demo notifications with real names
+        // Initial demo signals with real names
         return [
           {
             id: '1',
@@ -1455,8 +1569,8 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [pinnedPostIds]);
 
   useEffect(() => {
-    localStorage.setItem('triarcora-notifications', JSON.stringify(notifications));
-  }, [notifications]);
+    localStorage.setItem('triarcora-signals', JSON.stringify(signals));
+  }, [signals]);
 
   // Helper function for role type
   const getRoleType = (role: string): 'gold' | 'green' | 'cyan' | 'purple' => {
@@ -1490,9 +1604,9 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (post.id !== postId) return post;
       const isLiked = post.likedBy.includes(userId);
       if (!isLiked) {
-        // Add notification to post author
+        // Add signal to post author
         if (post.userId !== userId) {
-          addNotification({
+          addSignal({
             userId: userId,
             avatar: currentUserAvatar,
             name: currentUserName,
@@ -1548,9 +1662,9 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     setPosts(prev => prev.map(post => {
       if (post.id === postId) {
-        // Add notification to post author
+        // Add signal to post author
         if (post.userId !== commentData.userId) {
-          addNotification({
+          addSignal({
             userId: commentData.userId,
             avatar: commentData.userAvatar,
             name: commentData.userName,
@@ -1791,27 +1905,95 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return text;
   };
 
-  // --- Notification Functions ---
+  // --- Signal Functions ---
 
-  const addNotification = (notificationData: Omit<Notification, 'id' | 'time' | 'timestamp'>) => {
-    const newNotification: Notification = {
-      ...notificationData,
+  const addSignal = (signalData: Omit<Signal, 'id' | 'time' | 'timestamp'>) => {
+    const newSignal: Signal = {
+      ...signalData,
       id: Date.now().toString(),
       timestamp: new Date(),
       time: formatTimeAgo(new Date())
     };
-    setNotifications(prev => [newNotification, ...prev]);
+    setSignals(prev => [newSignal, ...prev]);
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isUnread: false })));
+    setSignals(prev => prev.map(s => ({ ...s, isUnread: false })));
   };
 
-  const getNotifications = () => {
-    return notifications.map(n => ({
-      ...n,
-      time: formatTimeAgo(n.timestamp)
+  const getSignals = () => {
+    return signals.map(s => ({
+      ...s,
+      time: formatTimeAgo(s.timestamp)
     }));
+  };
+
+  // Get demo user by ID
+  const getDemoUser = (userId: string) => {
+    return demoUsers[userId];
+  };
+
+  // Follow a demo user
+  const followDemoUser = (userIdToFollow: string) => {
+    const currentUserId = userData?.uid || 'demo-user';
+    if (currentUserId === userIdToFollow || !demoUsers[userIdToFollow]) return;
+
+    setDemoUsers(prev => {
+      const updatedUsers = { ...prev };
+      
+      // Add to current user's following (if current user is a demo user)
+      if (updatedUsers[currentUserId]) {
+        if (!updatedUsers[currentUserId].following.includes(userIdToFollow)) {
+          updatedUsers[currentUserId].following = [...updatedUsers[currentUserId].following, userIdToFollow];
+        }
+      }
+      
+      // Add to target user's followers
+      if (!updatedUsers[userIdToFollow].followers.includes(currentUserId)) {
+        updatedUsers[userIdToFollow].followers = [...updatedUsers[userIdToFollow].followers, currentUserId];
+        // Update follower count in stats
+        updatedUsers[userIdToFollow].stats.followers += 1;
+      }
+
+      // Add signal to the user being followed
+      addSignal({
+        userId: currentUserId,
+        name: userData?.profile?.name || 'User',
+        role: userData?.mainRole || 'User',
+        roleType: getRoleType(userData?.mainRole || 'User'),
+        text: 'started following you.',
+        action: 'View Profile',
+        isUnread: true
+      });
+
+      return updatedUsers;
+    });
+  };
+
+  // Unfollow a demo user
+  const unfollowDemoUser = (userIdToUnfollow: string) => {
+    const currentUserId = userData?.uid || 'demo-user';
+    if (currentUserId === userIdToUnfollow || !demoUsers[userIdToUnfollow]) return;
+
+    setDemoUsers(prev => {
+      const updatedUsers = { ...prev };
+      
+      // Remove from current user's following
+      if (updatedUsers[currentUserId]) {
+        updatedUsers[currentUserId].following = updatedUsers[currentUserId].following.filter(
+          id => id !== userIdToUnfollow
+        );
+      }
+      
+      // Remove from target user's followers
+      updatedUsers[userIdToUnfollow].followers = updatedUsers[userIdToUnfollow].followers.filter(
+        id => id !== currentUserId
+      );
+      // Update follower count in stats
+      updatedUsers[userIdToUnfollow].stats.followers = Math.max(0, updatedUsers[userIdToUnfollow].stats.followers - 1);
+
+      return updatedUsers;
+    });
   };
 
   // AI-Powered Discovery: Filter and rank posts based on role and interests
@@ -1885,7 +2067,7 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       hiddenPosts,
       notInterestedTopics,
       pinnedPostIds,
-      notifications,
+      signals,
       addPost, 
       likePost, 
       addComment, 
@@ -1928,9 +2110,12 @@ export const PostProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       getReposts,
       copyPostLink,
       copyPostText,
-      addNotification,
+      addSignal,
       markAllAsRead,
-      getNotifications
+      getSignals,
+      followDemoUser,
+      unfollowDemoUser,
+      getDemoUser
     }}>
       {children}
     </PostContext.Provider>

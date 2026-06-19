@@ -167,7 +167,7 @@ interface SettingsData {
       allowContextLearning: boolean;
     };
   };
-  notifications: {
+  signals: {
     push: {
       messages: boolean;
       mentions: boolean;
@@ -303,6 +303,20 @@ interface SettingsData {
   };
 }
 
+interface VerificationData {
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  identityVerified: boolean;
+  linkedinVerified: boolean;
+  websiteVerified: boolean;
+  startupVerified: boolean;
+  investorVerified: boolean;
+  explorerVerified: boolean;
+  trustScore: number;
+  verificationLevel: 'Unverified' | 'Basic Verified' | 'Identity Verified' | 'Professional Verified' | 'Premium Verified' | 'TRIVEON Verified';
+  verificationStatus: 'Pending' | 'Under Review' | 'Approved' | 'Rejected' | 'Needs Action';
+}
+
 interface UserData {
   uid: string;
   mainRole: string;
@@ -316,6 +330,8 @@ interface UserData {
   coverImage?: string;
   skills?: string[];
   industries?: string[];
+  following: string[]; // Array of user IDs the user is following
+  followers: string[]; // Array of user IDs following the user
   prestigeSystem: {
     currentStarId: number;
     currentStarName: string;
@@ -323,6 +339,7 @@ interface UserData {
     memberSince: string; // ISO date string when user joined
     lastActive: string; // ISO date string of last activity
   };
+  verification: VerificationData;
   profile: {
     name: string;
     title: string;
@@ -364,6 +381,10 @@ interface UserContextType {
   addExtraRole: (role: string) => void;
   deleteExtraRole: () => void;
   switchProfile: (role: string) => void;
+  followUser: (userId: string) => void; // Follow another user
+  unfollowUser: (userId: string) => void; // Unfollow another user
+  getProfileCompletionPercentage: () => number;
+  getVerificationCompletionPercentage: () => number;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -562,7 +583,7 @@ const getDefaultSettings = (): SettingsData => ({
       allowContextLearning: true
     }
   },
-  notifications: {
+  signals: {
     push: {
       messages: true,
       mentions: true,
@@ -715,10 +736,25 @@ const getDemoUserData = (): UserData => {
     hasSeenWelcomeModal: false,
     hasSeenProfileModal: false,
     username,
+    following: ['demo-1', 'demo-2', 'demo-3'],
+    followers: ['demo-1', 'demo-4', 'demo-5'],
     prestigeSystem: {
       currentStarId: 5,
       currentStarName: 'CASTOR',
       progressPercent: 45
+    },
+    verification: {
+      emailVerified: true,
+      phoneVerified: true,
+      identityVerified: true,
+      linkedinVerified: true,
+      websiteVerified: true,
+      startupVerified: role === 'ARCHITECT',
+      investorVerified: role === 'CATALYST',
+      explorerVerified: role === 'EXPLORER',
+      trustScore: 92,
+      verificationLevel: 'TRIVEON Verified',
+      verificationStatus: 'Approved'
     },
     profile: {
       name: roleData.name,
@@ -897,6 +933,8 @@ const getEmptyRealUserData = (userId: string, roleOrRoles: string | string[], na
     displayName: name,
     username,
     email: email,
+    following: [],
+    followers: [],
     hasSeenWelcomeModal: false,
     hasSeenProfileModal: false,
     prestigeSystem: {
@@ -905,6 +943,19 @@ const getEmptyRealUserData = (userId: string, roleOrRoles: string | string[], na
       progressPercent: 0,
       memberSince: new Date().toISOString(),
       lastActive: new Date().toISOString()
+    },
+    verification: {
+      emailVerified: false,
+      phoneVerified: false,
+      identityVerified: false,
+      linkedinVerified: false,
+      websiteVerified: false,
+      startupVerified: false,
+      investorVerified: false,
+      explorerVerified: false,
+      trustScore: 0,
+      verificationLevel: 'Unverified',
+      verificationStatus: 'Pending'
     },
     profile: {
       name: name || '',
@@ -1000,7 +1051,7 @@ const saveUserProfileToFirestore = async (userId: string, userData: UserData) =>
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, profile: authProfile } = useAuth();
-  // Initialize user data instantly from localStorage, NO LOADING!
+  // Initialize user data instantly from localStorage or default to demo data (NO LOADING EVER!)
   const [userData, setUserData] = useState<UserData | null>(() => {
     // Check for stored user data first!
     if (typeof window !== 'undefined') {
@@ -1012,7 +1063,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
     }
-    return null;
+    // Default to demo data if no stored user - instant display!
+    return getDemoUserData();
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [currentUserId, setCurrentUserId] = useState<string>(() => {
@@ -1103,40 +1155,43 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       saveUserProfile(user.uid, initialData);
       localStorage.setItem('triarcora-lastUserId', user.uid);
 
-      // Check Firestore for existing data in background
-      const userRef = doc(db, 'userProfiles', user.uid);
-      getDoc(userRef).then((docSnap) => {
-        let finalData: UserData = initialData;
-        
-        if (docSnap.exists()) {
-          const firestoreData = docSnap.data() as UserData;
-          finalData = { ...initialData, ...firestoreData };
-        }
-        
-        // Ensure userData has all required fields
-        if (!finalData.settings) {
-          finalData.settings = getDefaultSettings();
-        }
-        if (!finalData.prestigeSystem) {
-          finalData.prestigeSystem = {
-            currentStarId: 1,
-            currentStarName: 'ASTRA',
-            progressPercent: 0,
-            memberSince: new Date().toISOString(),
-            lastActive: new Date().toISOString()
-          };
-        }
-        if (!finalData.prestigeSystem.memberSince) {
-          finalData.prestigeSystem.memberSince = new Date().toISOString();
-        }
+      // Check Firestore for existing data in background (with safe error handling)
+          const userRef = doc(db, 'userProfiles', user.uid);
+          getDoc(userRef).then((docSnap) => {
+            let finalData: UserData = initialData;
+            
+            if (docSnap.exists()) {
+              const firestoreData = docSnap.data() as UserData;
+              finalData = { ...initialData, ...firestoreData };
+            }
+            
+            // Ensure userData has all required fields
+            if (!finalData.settings) {
+              finalData.settings = getDefaultSettings();
+            }
+            if (!finalData.prestigeSystem) {
+              finalData.prestigeSystem = {
+                currentStarId: 1,
+                currentStarName: 'ASTRA',
+                progressPercent: 0,
+                memberSince: new Date().toISOString(),
+                lastActive: new Date().toISOString()
+              };
+            }
+            if (!finalData.prestigeSystem.memberSince) {
+              finalData.prestigeSystem.memberSince = new Date().toISOString();
+            }
 
-        // Update state, localStorage, and Firestore
-        setUserData(finalData);
-        saveUserProfile(user.uid, finalData);
-        saveUserProfileToFirestore(user.uid, finalData);
-      }).catch((error) => {
-        console.error('[UserContext] Error fetching user data from Firestore:', error);
-      });
+            // Update state and localStorage only - skip Firestore write if needed
+            setUserData(finalData);
+            saveUserProfile(user.uid, finalData);
+            // Only try to save to Firestore if we want to (can comment out if needed)
+            saveUserProfileToFirestore(user.uid, finalData).catch((err) => {
+              console.error('[UserContext] Firestore write failed (non-critical):', err);
+            });
+          }).catch((error) => {
+            console.error('[UserContext] Error fetching user data from Firestore (non-critical):', error);
+          });
     } else if (!initialized.current) {
       // Only clear data if this is the first run
       setUserData(null);
@@ -1193,6 +1248,54 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateUserData({ activeProfileView: role });
   };
 
+  // Follow a user!
+  const followUser = (userIdToFollow: string) => {
+    if (!userData || userIdToFollow === userData.uid) return; // Don't follow yourself!
+
+    const newFollowing = [...userData.following];
+    if (!newFollowing.includes(userIdToFollow)) {
+      newFollowing.push(userIdToFollow);
+      updateUserData({ following: newFollowing });
+    }
+  };
+
+  // Unfollow a user!
+  const unfollowUser = (userIdToUnfollow: string) => {
+    if (!userData) return;
+
+    const newFollowing = userData.following.filter(id => id !== userIdToUnfollow);
+    updateUserData({ following: newFollowing });
+  };
+
+  const getProfileCompletionPercentage = () => {
+    if (!userData) return 0;
+    const fields = [
+      !!userData.profile.name,
+      !!userData.profile.title,
+      !!userData.profile.bio,
+      !!userData.profile.location,
+      !!userData.profile.profileImage,
+      !!userData.profile.linkedin,
+      !!userData.profile.website,
+      !!userData.profile.twitter
+    ];
+    const completed = fields.filter(Boolean).length;
+    return Math.round((completed / fields.length) * 100);
+  };
+
+  const getVerificationCompletionPercentage = () => {
+    if (!userData) return 0;
+    const fields = [
+      userData.verification.emailVerified,
+      userData.verification.phoneVerified,
+      userData.verification.identityVerified,
+      userData.verification.linkedinVerified,
+      userData.verification.websiteVerified
+    ];
+    const completed = fields.filter(Boolean).length;
+    return Math.round((completed / fields.length) * 100);
+  };
+
   return (
     <UserContext.Provider value={{ 
       userData, 
@@ -1211,7 +1314,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       deleteImage,
       addExtraRole,
       deleteExtraRole,
-      switchProfile
+      switchProfile,
+      followUser,
+      unfollowUser,
+      getProfileCompletionPercentage,
+      getVerificationCompletionPercentage
     }}>
       {children}
     </UserContext.Provider>

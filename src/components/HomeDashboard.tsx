@@ -5,10 +5,17 @@ import CreatePost from './CreatePost';
 import './HomeDashboard.css';
 import { useUser } from '../contexts/UserContext';
 import { useAuth } from '../contexts/AuthContext';
-import { usePosts } from '../contexts/PostContext';
+import { UserProfile, usePosts } from '../contexts/PostContext';
 import PrestigeStarBadge from './PrestigeStarBadge';
 import AICopilot from './AICopilot';
 import PostMenu from './PostMenu';
+
+const LocationIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
 const HomeIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -152,9 +159,19 @@ const HomeDashboard: React.FC = () => {
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [discoverDropdownOpen, setDiscoverDropdownOpen] = useState(false);
   const [openMenuPostId, setOpenMenuPostId] = useState<string | null>(null);
+  const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
+  const [showDetailedProfile, setShowDetailedProfile] = useState(false);
+  const [verificationCenterOpen, setVerificationCenterOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { userName, userRole, userProfileImage, userData } = useUser();
+  const { 
+    userName, 
+    userRole, 
+    userProfileImage, 
+    userData,
+    getProfileCompletionPercentage,
+    getVerificationCompletionPercentage
+  } = useUser();
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
 
   useEffect(() => {
@@ -173,7 +190,19 @@ const HomeDashboard: React.FC = () => {
     }
   }, []);
   const { logout } = useAuth();
-  const { posts, demoUsers, likePost, addComment, savePost, unsavePost, savedPosts, hiddenPosts, mutedUsers } = usePosts();
+  const { 
+    posts, 
+    demoUsers, 
+    likePost, 
+    addComment, 
+    savePost, 
+    unsavePost, 
+    savedPosts, 
+    hiddenPosts, 
+    mutedUsers,
+    followDemoUser,
+    unfollowDemoUser
+  } = usePosts();
   const feedPosts = posts.filter(post => !hiddenPosts.includes(post.id) && !mutedUsers.includes(post.userId));
   const [commentingPostId, setCommentingPostId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
@@ -336,9 +365,9 @@ const HomeDashboard: React.FC = () => {
                   <MessageIcon />
                   {!sidebarCollapsed && <span>Inbox</span>}
                 </div>
-                <div className="nav-item" onClick={() => navigate('/notifications')}>
+                <div className="nav-item" onClick={() => navigate('/signals')}>
             <BellIcon />
-            {!sidebarCollapsed && <span>Notifications</span>}
+            {!sidebarCollapsed && <span>Signals</span>}
           </div>
           <div className="nav-item" onClick={() => navigate('/bookmarks')}>
             <BookmarkIcon />
@@ -445,7 +474,7 @@ const HomeDashboard: React.FC = () => {
                   <div className="post-author">
                     <div className="author-avatar" style={{ cursor: 'pointer' }} onClick={() => {
                       if (demoUsers[post.userId]) {
-                        setProfileDrawerOpen(true);
+                        setViewProfilePopUp(demoUsers[post.userId]);
                       }
                     }}>
                       {post.userAvatar ? (
@@ -456,7 +485,13 @@ const HomeDashboard: React.FC = () => {
                     </div>
                     <div className="author-info">
                       <div className="author-name">
-                        {post.userName}
+                        <span style={{ cursor: 'pointer' }} onClick={() => {
+                          if (demoUsers[post.userId]) {
+                            setViewProfilePopUp(demoUsers[post.userId]);
+                          }
+                        }}>
+                          {post.userName}
+                        </span>
                         <span className="author-username" style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '8px', fontSize: '14px' }}>@{post.userUsername}</span>
                         <span className={`role-badge ${post.userRole === 'ARCHITECT' ? 'gold' : post.userRole === 'CATALYST' ? 'green' : 'cyan'}`} style={{ marginLeft: '8px' }}>
                           {post.userRole === 'ARCHITECT' ? 'Architect' : post.userRole === 'CATALYST' ? 'Catalyst' : 'Explorer'}
@@ -472,6 +507,41 @@ const HomeDashboard: React.FC = () => {
                       <span className="post-time">{formatTimestamp(post.timestamp)}</span>
                     </div>
                   </div>
+                  {/* Follow Button on Post Card */}
+                  {demoUsers[post.userId] && demoUsers[post.userId].userId !== (userData?.uid || 'demo-user') && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const currentUserId = userData?.uid || 'demo-user';
+                        const user = demoUsers[post.userId];
+                        const isFollowing = user.followers.includes(currentUserId);
+                        if (isFollowing) {
+                          unfollowDemoUser(user.userId);
+                        } else {
+                          followDemoUser(user.userId);
+                        }
+                      }}
+                      style={{
+                        padding: '0.4rem 1rem',
+                        background: demoUsers[post.userId].followers.includes(userData?.uid || 'demo-user') 
+                          ? 'rgba(255,255,255,0.1)' 
+                          : post.userRole === 'ARCHITECT' 
+                            ? 'linear-gradient(135deg, #B8860B, #DAA520)' 
+                            : post.userRole === 'CATALYST' 
+                              ? 'linear-gradient(135deg, #00C896, #34D399)' 
+                              : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                        border: demoUsers[post.userId].followers.includes(userData?.uid || 'demo-user') ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontWeight: 600,
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {demoUsers[post.userId].followers.includes(userData?.uid || 'demo-user') ? 'Following' : 'Follow'}
+                    </button>
+                  )}
                   <button 
                     className="post-menu-button"
                     onClick={(e) => {
@@ -556,7 +626,7 @@ const HomeDashboard: React.FC = () => {
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setProfileDrawerOpen(true);
+                            setViewProfilePopUp(user);
                           }}
                         >
                           {index > 0 ? ', ' : ''}{user.userName}
@@ -684,7 +754,7 @@ const HomeDashboard: React.FC = () => {
                 )}
               </div>
               <div className="drawer-name">{userName}</div>
-              <div className="drawer-role">
+              <div className="drawer-role" style={{ marginBottom: '1rem' }}>
                 <span className={`role-badge ${userRole === 'ARCHITECT' ? 'gold' : userRole === 'CATALYST' ? 'green' : 'cyan'}`}>
                   {userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase()}
                 </span>
@@ -696,6 +766,51 @@ const HomeDashboard: React.FC = () => {
                   />
                 )}
               </div>
+              {userData?.verification && (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.75rem', 
+                  padding: '0.75rem 1rem', 
+                  background: 'rgba(255,215,0,0.05)', 
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255,215,0,0.2)',
+                  cursor: 'pointer'
+                }} onClick={() => { setProfileDrawerOpen(false); setVerificationCenterOpen(true); }}>
+                  <div style={{ 
+                    width: '40px', 
+                    height: '40px', 
+                    borderRadius: '50%', 
+                    background: `conic-gradient(#FFD700 0% ${userData.verification.trustScore}%, rgba(255,255,255,0.1) ${userData.verification.trustScore}% 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <div style={{ 
+                      width: '32px', 
+                      height: '32px', 
+                      borderRadius: '50%', 
+                      background: '#0a0e1a', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center'
+                    }}>
+                      <span style={{ color: '#FFD700', fontSize: '14px', fontWeight: 700 }}>
+                        {userData.verification.trustScore}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ color: '#FFD700', fontSize: '13px', fontWeight: 700 }}>
+                      {userData.verification.verificationLevel}
+                    </div>
+                    <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '11px' }}>
+                      Trust Score
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>→</div>
+                </div>
+              )}
             </div>
             {showEcosystemOverview ? (
               <div className="drawer-eco">
@@ -731,6 +846,961 @@ const HomeDashboard: React.FC = () => {
                 <div className="drawer-item divider" onClick={() => {logout(); setProfileDrawerOpen(false);}}>Log Out</div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Simple Profile Pop-up */}
+      {viewProfilePopUp && !showDetailedProfile && (
+        <div 
+          className="profile-drawer-overlay" 
+          onClick={() => setViewProfilePopUp(null)}
+          style={{ zIndex: 1000 }}
+        >
+          <div 
+            className="profile-drawer" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              maxWidth: '400px', 
+              width: '90%', 
+              backgroundColor: '#0a0e1a',
+              border: '1px solid rgba(255,215,0,0.2)',
+              borderRadius: '16px'
+            }}
+          >
+            <button 
+              onClick={() => setViewProfilePopUp(null)}
+              style={{ 
+                position: 'absolute', 
+                top: '1rem', 
+                right: '1rem', 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '1.5rem',
+                zIndex: 10
+              }}
+            >
+              ×
+            </button>
+
+            {/* Profile Header */}
+            <div style={{ padding: '2rem 1.5rem 1.5rem', textAlign: 'center' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'linear-gradient(135deg, #B8860B, #DAA520)' : viewProfilePopUp.userRole === 'CATALYST' ? 'linear-gradient(135deg, #00C896, #34D399)' : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto',
+                  position: 'relative'
+                }}>
+                  {viewProfilePopUp.userAvatar ? (
+                    <img 
+                      src={viewProfilePopUp.userAvatar} 
+                      alt={viewProfilePopUp.userName} 
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff' }}>
+                      {getInitials(viewProfilePopUp.userName)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '0.5rem' }}>
+                <span style={{ 
+                  display: 'inline-block', 
+                  padding: '0.3rem 0.8rem', 
+                  borderRadius: '20px', 
+                  fontSize: '12px', 
+                  fontWeight: 600, 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.15)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.15)' : 'rgba(59,130,246,0.15)', 
+                  color: viewProfilePopUp.userRole === 'ARCHITECT' ? '#FFD700' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6'
+                }}>
+                  {viewProfilePopUp.userRole}
+                </span>
+              </div>
+
+              <h2 style={{ color: '#fff', fontSize: '20px', fontWeight: 700, marginBottom: '0.3rem' }}>
+                {viewProfilePopUp.userName}
+              </h2>
+
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', marginBottom: '1.5rem' }}>
+                {viewProfilePopUp.userTitle}
+              </p>
+
+              {/* Follow/Unfollow Button */}
+              {viewProfilePopUp.userId !== (userData?.uid || 'demo-user') && (
+                <button 
+                  onClick={() => {
+                    const currentUserId = userData?.uid || 'demo-user';
+                    const isFollowing = viewProfilePopUp.followers.includes(currentUserId);
+                    if (isFollowing) {
+                      unfollowDemoUser(viewProfilePopUp.userId);
+                    } else {
+                      followDemoUser(viewProfilePopUp.userId);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 1.2rem',
+                    background: viewProfilePopUp.followers.includes(userData?.uid || 'demo-user') 
+                      ? 'rgba(255,255,255,0.1)' 
+                      : viewProfilePopUp.userRole === 'ARCHITECT' 
+                        ? 'linear-gradient(135deg, #B8860B, #DAA520)' 
+                        : viewProfilePopUp.userRole === 'CATALYST' 
+                          ? 'linear-gradient(135deg, #00C896, #34D399)' 
+                          : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                    border: viewProfilePopUp.followers.includes(userData?.uid || 'demo-user') ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                    borderRadius: '10px',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    marginBottom: '0.75rem'
+                  }}
+                >
+                  {viewProfilePopUp.followers.includes(userData?.uid || 'demo-user') ? 'Following' : 'Follow'}
+                </button>
+              )}
+              
+              <button 
+                onClick={() => setShowDetailedProfile(true)}
+                style={{
+                  width: '100%',
+                  padding: '0.9rem 1.5rem',
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'linear-gradient(135deg, #B8860B, #DAA520)' : viewProfilePopUp.userRole === 'CATALYST' ? 'linear-gradient(135deg, #00C896, #34D399)' : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  cursor: 'pointer'
+                }}
+              >
+                See Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Profile Pop-up */}
+      {viewProfilePopUp && showDetailedProfile && (
+        <div 
+          className="profile-drawer-overlay" 
+          onClick={() => {
+            setShowDetailedProfile(false);
+            setViewProfilePopUp(null);
+          }}
+          style={{ zIndex: 1001 }}
+        >
+          <div 
+            className="profile-drawer" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              maxWidth: '500px', 
+              width: '90%', 
+              maxHeight: '90vh', 
+              overflowY: 'auto',
+              backgroundColor: '#0a0e1a',
+              border: '1px solid rgba(255,215,0,0.2)',
+              borderRadius: '16px'
+            }}
+          >
+            <button 
+              onClick={() => {
+                setShowDetailedProfile(false);
+                setViewProfilePopUp(null);
+              }}
+              style={{ 
+                position: 'absolute', 
+                top: '1rem', 
+                right: '1rem', 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '1.5rem',
+                zIndex: 10
+              }}
+            >
+              ×
+            </button>
+
+            {/* Profile Header */}
+            <div style={{ padding: '2rem 1.5rem 1rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ 
+                  width: '120px', 
+                  height: '120px', 
+                  borderRadius: '50%', 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'linear-gradient(135deg, #B8860B, #DAA520)' : viewProfilePopUp.userRole === 'CATALYST' ? 'linear-gradient(135deg, #00C896, #34D399)' : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto',
+                  position: 'relative'
+                }}>
+                  {viewProfilePopUp.userAvatar ? (
+                    <img 
+                      src={viewProfilePopUp.userAvatar} 
+                      alt={viewProfilePopUp.userName} 
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <span style={{ fontSize: '36px', fontWeight: 'bold', color: '#fff' }}>
+                      {getInitials(viewProfilePopUp.userName)}
+                    </span>
+                  )}
+                  {/* Verification Badge */}
+                  {viewProfilePopUp.userCredibility?.verified && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '5px',
+                      right: '5px',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #00C896, #34D399)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#fff"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '0.5rem' }}>
+                <span style={{ 
+                  display: 'inline-block', 
+                  padding: '0.4rem 1rem', 
+                  borderRadius: '20px', 
+                  fontSize: '13px', 
+                  fontWeight: 600, 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.15)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.15)' : 'rgba(59,130,246,0.15)', 
+                  color: viewProfilePopUp.userRole === 'ARCHITECT' ? '#FFD700' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6'
+                }}>
+                  {viewProfilePopUp.userRole}
+                </span>
+              </div>
+
+              <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: 700, marginBottom: '0.3rem' }}>
+                {viewProfilePopUp.userName}
+              </h1>
+
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', marginBottom: '0.5rem' }}>
+                {viewProfilePopUp.userTitle}
+              </p>
+
+              {viewProfilePopUp.userLocation && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginBottom: '1rem' }}>
+                  <LocationIcon />
+                  <span>{viewProfilePopUp.userLocation}</span>
+                </div>
+              )}
+
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '15px', lineHeight: '1.6' }}>
+                {viewProfilePopUp.userBio || 'No bio yet.'}
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div style={{ 
+              padding: '1.5rem', 
+              display: 'flex', 
+              justifyContent: 'space-around', 
+              borderBottom: '1px solid rgba(255,255,255,0.05)'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontSize: '24px', fontWeight: 700 }}>{viewProfilePopUp.stats.followers}</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Followers</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontSize: '24px', fontWeight: 700 }}>{viewProfilePopUp.stats.following}</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Following</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontSize: '24px', fontWeight: 700 }}>{viewProfilePopUp.stats.endorsements}</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Endorsements</div>
+              </div>
+            </div>
+
+            {/* Follow/Unfollow Button for Detailed Profile */}
+            {viewProfilePopUp.userId !== (userData?.uid || 'demo-user') && (
+              <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <button 
+                  onClick={() => {
+                    const currentUserId = userData?.uid || 'demo-user';
+                    const isFollowing = viewProfilePopUp.followers.includes(currentUserId);
+                    if (isFollowing) {
+                      unfollowDemoUser(viewProfilePopUp.userId);
+                    } else {
+                      followDemoUser(viewProfilePopUp.userId);
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem 1.5rem',
+                    background: viewProfilePopUp.followers.includes(userData?.uid || 'demo-user') 
+                      ? 'rgba(255,255,255,0.1)' 
+                      : viewProfilePopUp.userRole === 'ARCHITECT' 
+                        ? 'linear-gradient(135deg, #B8860B, #DAA520)' 
+                        : viewProfilePopUp.userRole === 'CATALYST' 
+                          ? 'linear-gradient(135deg, #00C896, #34D399)' 
+                          : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                    border: viewProfilePopUp.followers.includes(userData?.uid || 'demo-user') ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                    borderRadius: '10px',
+                    color: '#fff',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {viewProfilePopUp.followers.includes(userData?.uid || 'demo-user') ? 'Following' : 'Follow'}
+                </button>
+              </div>
+            )}
+
+            {/* Credibility Score */}
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '1rem' }}>Credibility Score</h4>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1.5rem'
+              }}>
+                <div style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: `conic-gradient(${viewProfilePopUp.userRole === 'ARCHITECT' ? '#B8860B' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6'} 0% ${viewProfilePopUp.userCredibility.score}%, rgba(255,255,255,0.1) ${viewProfilePopUp.userCredibility.score}% 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    background: '#0a0e1a', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ color: viewProfilePopUp.userRole === 'ARCHITECT' ? '#FFD700' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6', fontSize: '22px', fontWeight: 700 }}>
+                      {viewProfilePopUp.userCredibility.score}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  {viewProfilePopUp.userCredibility.startups !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Startups Built: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.startups}</span>
+                    </div>
+                  )}
+                  {viewProfilePopUp.userCredibility.investeeCount !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Investee Count: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.investeeCount}</span>
+                    </div>
+                  )}
+                  {viewProfilePopUp.userCredibility.years !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Years Active: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.years}</span>
+                    </div>
+                  )}
+                  {viewProfilePopUp.userCredibility.companies !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Companies: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.companies}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Verification Score */}
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, margin: 0 }}>Verification Score</h4>
+                <button 
+                  onClick={() => { setViewProfilePopUp(null); setVerificationCenterOpen(true); }}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    background: 'rgba(255,215,0,0.1)',
+                    border: '1px solid rgba(255,215,0,0.3)',
+                    borderRadius: '8px',
+                    color: '#FFD700',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Verification Center
+                </button>
+              </div>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1.5rem'
+              }}>
+                <div style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: `conic-gradient(#FFD700 0% ${viewProfilePopUp.verification.trustScore}%, rgba(255,255,255,0.1) ${viewProfilePopUp.verification.trustScore}% 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    background: '#0a0e1a', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ color: '#FFD700', fontSize: '22px', fontWeight: 700 }}>
+                      {viewProfilePopUp.verification.trustScore}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ marginBottom: '0.4rem' }}>
+                    <span style={{ color: 'rgba(255,215,0,0.8)', fontSize: '14px', fontWeight: 600 }}>
+                      {viewProfilePopUp.verification.verificationLevel}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                    {viewProfilePopUp.verification.emailVerified && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        background: 'rgba(0,200,150,0.2)',
+                        borderRadius: '4px',
+                        color: '#00C896',
+                        fontSize: '11px',
+                        fontWeight: 600
+                      }}>
+                        Email Verified
+                      </span>
+                    )}
+                    {viewProfilePopUp.verification.phoneVerified && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        background: 'rgba(0,200,150,0.2)',
+                        borderRadius: '4px',
+                        color: '#00C896',
+                        fontSize: '11px',
+                        fontWeight: 600
+                      }}>
+                        Phone Verified
+                      </span>
+                    )}
+                    {viewProfilePopUp.verification.identityVerified && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        background: 'rgba(0,200,150,0.2)',
+                        borderRadius: '4px',
+                        color: '#00C896',
+                        fontSize: '11px',
+                        fontWeight: 600
+                      }}>
+                        Identity Verified
+                      </span>
+                    )}
+                    {viewProfilePopUp.verification.linkedinVerified && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        background: 'rgba(0,200,150,0.2)',
+                        borderRadius: '4px',
+                        color: '#00C896',
+                        fontSize: '11px',
+                        fontWeight: 600
+                      }}>
+                        LinkedIn Verified
+                      </span>
+                    )}
+                    {viewProfilePopUp.verification.websiteVerified && (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        background: 'rgba(0,200,150,0.2)',
+                        borderRadius: '4px',
+                        color: '#00C896',
+                        fontSize: '11px',
+                        fontWeight: 600
+                      }}>
+                        Website Verified
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tags */}
+            {viewProfilePopUp.tags && viewProfilePopUp.tags.length > 0 && (
+              <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '1rem' }}>Interests</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                  {viewProfilePopUp.tags.map(tag => (
+                    <span key={tag} style={{ 
+                      padding: '0.5rem 1rem', 
+                      borderRadius: '20px', 
+                      background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.1)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.1)' : 'rgba(59,130,246,0.1)', 
+                      color: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.9)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.9)' : 'rgba(59,130,246,0.9)', 
+                      fontSize: '14px',
+                      fontWeight: 500
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Links */}
+            {viewProfilePopUp.userLinks && Object.keys(viewProfilePopUp.userLinks).length > 0 && (
+              <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '1rem' }}>Links</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                  {viewProfilePopUp.userLinks.linkedin && (
+                    <a 
+                      href={viewProfilePopUp.userLinks.linkedin.startsWith('http') ? viewProfilePopUp.userLinks.linkedin : `https://${viewProfilePopUp.userLinks.linkedin}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        color: 'rgba(255,255,255,0.9)', 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      LinkedIn
+                    </a>
+                  )}
+                  {viewProfilePopUp.userLinks.website && (
+                    <a 
+                      href={viewProfilePopUp.userLinks.website.startsWith('http') ? viewProfilePopUp.userLinks.website : `https://${viewProfilePopUp.userLinks.website}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        color: 'rgba(255,255,255,0.9)', 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Website
+                    </a>
+                  )}
+                  {viewProfilePopUp.userLinks.twitter && (
+                    <a 
+                      href={viewProfilePopUp.userLinks.twitter.startsWith('http') ? viewProfilePopUp.userLinks.twitter : `https://${viewProfilePopUp.userLinks.twitter}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        color: 'rgba(255,255,255,0.9)', 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Twitter
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Verification Center Popup */}
+      {verificationCenterOpen && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          background: 'rgba(0,0,0,0.8)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 2000 
+        }} onClick={() => setVerificationCenterOpen(false)}>
+          <div style={{ 
+            background: '#0a0e1a', 
+            borderRadius: '16px', 
+            maxWidth: '600px', 
+            width: '90%', 
+            maxHeight: '90vh', 
+            overflowY: 'auto',
+            border: '1px solid rgba(255,215,0,0.2)',
+            position: 'relative'
+          }} onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setVerificationCenterOpen(false)}
+              style={{ 
+                position: 'absolute', 
+                top: '1rem', 
+                right: '1rem', 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#fff', 
+                fontSize: '1.5rem', 
+                cursor: 'pointer' 
+              }}
+            >
+              ×
+            </button>
+            
+            <div style={{ padding: '2rem' }}>
+              <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                <h2 style={{ color: '#fff', fontSize: '24px', fontWeight: 700, marginBottom: '0.5rem' }}>
+                  Verification Center
+                </h2>
+                <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', margin: 0 }}>
+                  Build trust across the TRIVEON ecosystem
+                </p>
+              </div>
+
+              {userData && (
+                <>
+                  {/* Completion Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                    {/* Profile Completion */}
+                    <div style={{ 
+                      background: 'rgba(59,130,246,0.05)', 
+                      padding: '1.5rem', 
+                      borderRadius: '12px',
+                      border: '1px solid rgba(59,130,246,0.2)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ 
+                          width: '60px', 
+                          height: '60px', 
+                          borderRadius: '50%', 
+                          background: `conic-gradient(#3B82F6 0% ${getProfileCompletionPercentage()}%, rgba(255,255,255,0.1) ${getProfileCompletionPercentage()}% 100%)`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '50%', 
+                            background: '#0a0e1a', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center'
+                          }}>
+                            <span style={{ color: '#3B82F6', fontSize: '20px', fontWeight: 700 }}>
+                              {getProfileCompletionPercentage()}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#3B82F6', fontSize: '16px', fontWeight: 700 }}>
+                            Profile Complete
+                          </div>
+                          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>
+                            {getProfileCompletionPercentage()}% Complete
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Verification Completion */}
+                    <div style={{ 
+                      background: 'rgba(255,215,0,0.05)', 
+                      padding: '1.5rem', 
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255,215,0,0.2)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ 
+                          width: '60px', 
+                          height: '60px', 
+                          borderRadius: '50%', 
+                          background: `conic-gradient(#FFD700 0% ${getVerificationCompletionPercentage()}%, rgba(255,255,255,0.1) ${getVerificationCompletionPercentage()}% 100%)`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '50%', 
+                            background: '#0a0e1a', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center'
+                          }}>
+                            <span style={{ color: '#FFD700', fontSize: '20px', fontWeight: 700 }}>
+                              {getVerificationCompletionPercentage()}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#FFD700', fontSize: '16px', fontWeight: 700 }}>
+                            {userData.verification.verificationLevel}
+                          </div>
+                          <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px' }}>
+                            Status: {userData.verification.verificationStatus}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verification Steps */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 600, marginBottom: '1rem' }}>
+                      Complete Your Verification
+                    </h3>
+                    
+                    {/* Level 1: Basic */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      padding: '1rem', 
+                      borderRadius: '8px', 
+                      marginBottom: '1rem',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>Level 1: Basic Verification</span>
+                        <span style={{ 
+                          padding: '0.25rem 0.5rem',
+                          background: userData.verification.emailVerified && userData.verification.phoneVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.emailVerified && userData.verification.phoneVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600
+                        }}>
+                          {userData.verification.emailVerified && userData.verification.phoneVerified ? 'Completed' : 'In Progress'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: userData.verification.emailVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.emailVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          border: `1px solid ${userData.verification.emailVerified ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.2)'}`
+                        }}>
+                          {userData.verification.emailVerified ? '✓ ' : ''}Email Verified
+                        </span>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: userData.verification.phoneVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.phoneVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          border: `1px solid ${userData.verification.phoneVerified ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.2)'}`
+                        }}>
+                          {userData.verification.phoneVerified ? '✓ ' : ''}Phone Verified
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Level 2: Identity */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      padding: '1rem', 
+                      borderRadius: '8px', 
+                      marginBottom: '1rem',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>Level 2: Identity Verification</span>
+                        <span style={{ 
+                          padding: '0.25rem 0.5rem',
+                          background: userData.verification.identityVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.identityVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600
+                        }}>
+                          {userData.verification.identityVerified ? 'Completed' : 'Not Started'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: userData.verification.identityVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.identityVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          border: `1px solid ${userData.verification.identityVerified ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.2)'}`
+                        }}>
+                          {userData.verification.identityVerified ? '✓ ' : ''}Government ID
+                        </span>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: userData.verification.identityVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.identityVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          border: `1px solid ${userData.verification.identityVerified ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.2)'}`
+                        }}>
+                          {userData.verification.identityVerified ? '✓ ' : ''}Selfie Verification
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Level 3: Professional */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      padding: '1rem', 
+                      borderRadius: '8px', 
+                      marginBottom: '1rem',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>Level 3: Professional Verification</span>
+                        <span style={{ 
+                          padding: '0.25rem 0.5rem',
+                          background: userData.verification.linkedinVerified && userData.verification.websiteVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.linkedinVerified && userData.verification.websiteVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          fontWeight: 600
+                        }}>
+                          {userData.verification.linkedinVerified && userData.verification.websiteVerified ? 'Completed' : 'In Progress'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: userData.verification.linkedinVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.linkedinVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          border: `1px solid ${userData.verification.linkedinVerified ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.2)'}`
+                        }}>
+                          {userData.verification.linkedinVerified ? '✓ ' : ''}LinkedIn Verified
+                        </span>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: userData.verification.websiteVerified 
+                            ? 'rgba(0,200,150,0.2)' 
+                            : 'rgba(255,255,255,0.1)',
+                          color: userData.verification.websiteVerified 
+                            ? '#00C896' 
+                            : 'rgba(255,255,255,0.6)',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          border: `1px solid ${userData.verification.websiteVerified ? 'rgba(0,200,150,0.3)' : 'rgba(255,255,255,0.2)'}`
+                        }}>
+                          {userData.verification.websiteVerified ? '✓ ' : ''}Website Verified
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button 
+                      style={{
+                        flex: 1,
+                        padding: '0.75rem 1.5rem',
+                        background: 'linear-gradient(135deg, #B8860B, #DAA520)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Start Verification
+                    </button>
+                    <button 
+                      onClick={() => setVerificationCenterOpen(false)}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        background: 'rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        borderRadius: '8px',
+                        color: '#fff',
+                        fontSize: '14px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -62,7 +62,7 @@ const AICopilotPage: React.FC = () => {
     if (path.includes('/explorer')) return 'EXPLORER';
     if (path.includes('/messages') || path.includes('/chat')) return 'MESSAGING';
     if (path.includes('/bookmarks') || path.includes('/saved')) return 'BOOKMARK';
-    if (path.includes('/notifications')) return 'NOTIFICATION';
+    if (path.includes('/signals')) return 'SIGNAL';
     if (path.includes('/analytics')) return 'ANALYTICS';
     if (path.includes('/discover')) return 'DISCOVER';
     return 'HOME';
@@ -157,8 +157,8 @@ ${investmentInfo ? `
 29. Organize bookmarks into collections
 30. Summarize saved content
 
-### 🔔 NOTIFICATION ASSISTANT
-31. Prioritize important notifications first
+### 🔔 SIGNAL ASSISTANT
+31. Prioritize important signals first
 32. Summarize what happened today/this week
 
 ### 🌐 DISCOVER ASSISTANT
@@ -194,7 +194,7 @@ Use these keywords to navigate:
 - "Profile" → /profile
 - "Messages" → /messages
 - "Bookmarks" → /bookmarks
-- "Notifications" → /notifications
+- "Signals" → /signals
 - "Discover" → /discover
 - "Analytics" → /analytics
 - "Settings" → /settings
@@ -219,8 +219,8 @@ Use these keywords to navigate:
             return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Writing messages\n• Smart replies & summaries\n• Follow-up reminders`;
           case 'BOOKMARK':
             return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Finding saved items\n• Organizing bookmarks\n• Summarizing saved content`;
-          case 'NOTIFICATION':
-            return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Prioritizing notifications\n• Summarizing updates\n• Key events today`;
+          case 'SIGNAL':
+            return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Prioritizing signals\n• Summarizing updates\n• Key events today`;
           case 'DISCOVER':
             return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Finding people\n• Opportunities & grants\n• Communities to join`;
           case 'ANALYTICS':
@@ -256,7 +256,7 @@ Use these keywords to navigate:
       { keywords: ['profile', 'my profile', 'show profile'], path: '/profile', name: 'Profile' },
       { keywords: ['messages', 'chat', 'conversations'], path: '/messages', name: 'Messages' },
       { keywords: ['bookmarks', 'saved', 'saved items'], path: '/bookmarks', name: 'Bookmarks' },
-      { keywords: ['notifications', 'alerts', 'updates'], path: '/notifications', name: 'Notifications' },
+      { keywords: ['signals', 'alerts', 'updates'], path: '/signals', name: 'Signals' },
       { keywords: ['discover', 'explore', 'find people'], path: '/discover', name: 'Discover' },
       { keywords: ['analytics', 'stats', 'insights'], path: '/analytics', name: 'Analytics' },
       { keywords: ['settings', 'config', 'preferences'], path: '/settings', name: 'Settings' },
@@ -339,7 +339,9 @@ Use these keywords to navigate:
     let fallbackResponse = `Got it ${userName}! Here's how I can help:\n\n• Ask a direct question - I'll answer EXACTLY what you ask!\n• Use navigation keywords to go to pages\n• Ask about any of the 48 features!\n\nWhat would you like to know?`;
     
     if (input.toLowerCase().includes('list') && input.toLowerCase().includes('48')) {
-      fallbackResponse = `Here are ALL 48 features of TRIARCORA AI Copilot, ${userName}:\n\n🏠 HOME ASSISTANT\n1. Explain TRIARCORA and how everything works\n2. Navigate to any page using keywords\n3. Personalized recommendations based on user role\n\n🚀 STARTUP ASSISTANT (For Architects)\n4. Validate startup ideas\n5. Create pitch decks and improve existing ones\n6. Help with fundraising strategy\n7. Estimate valuations and explain dilution\n8. Suggest growth strategies and marketing ideas\n9. Write job descriptions and hiring plans\n10. Suggest partnership opportunities\n11. Give product feature suggestions and roadmap ideas\n\n💰 INVESTOR ASSISTANT (For Catalysts)\n12. Discover AI, fintech, pre-seed startups\n13. Analyze startups (red flags, strengths)\n14. Score startups (investment, founder, risk)\n15. Guide due diligence process\n16. Summarize portfolio and diversification\n17. Give market intelligence (trends, opportunities)\n18. Help find co-investors and create syndicates\n\n🔍 EXPLORER ASSISTANT\n19. Help write product reviews\n20. Suggest product/UX/growth feedback\n21. Do market research and competitor analysis\n22. Find trending startups and technologies\n23. Explain AI, SaaS, fundraising, etc.\n\n💬 MESSAGING ASSISTANT\n24. Write investor outreach and founder messages\n25. Suggest smart replies\n26. Summarize conversations and key action items\n27. Help draft follow-up messages and reminders\n\n📑 BOOKMARK ASSISTANT\n28. Find saved startups/investors/articles\n29. Organize bookmarks into collections\n30. Summarize saved content\n\n🔔 NOTIFICATION ASSISTANT\n31. Prioritize important notifications first\n32. Summarize what happened today/this week\n\n🌐 DISCOVER ASSISTANT\n33. Find founders/investors/reviewers\n34. Find grants, accelerators, competitions\n35. Suggest communities to join\n\n📊 ANALYTICS ASSISTANT\n36. Analyze startup growth/user/funding trends\n37. Give portfolio and sector analytics\n38. Show explorer contribution/review stats\n\n🧠 UNIVERSAL AI FEATURES\n39. Search the entire TRIARCORA ecosystem\n40. Analyze any founder or investor profile\n41. Match founders with investors and startups with talent\n42. Write posts, articles, updates\n43. Summarize profiles, startups, discussions\n44. Translate between English ↔ Hindi and other languages\n45. Teach fundraising, startup growth, investing\n46. Create reminders, follow-ups, watchlists\n47. Brainstorm startup and product ideas\n48. Help set and track SMART goals\n\nThat's all 48! Ask me about any specific one!`;
+      fallbackResponse = `Here are ALL 48 features of TRIARCORA AI Copilot, ${userName}:\n\n🏠 HOME ASSISTANT\n1. Explain TRIARCORA and how everything works\n2. Navigate to any page using keywords\n3. Personalized recommendations based on user role\n\n🚀 STARTUP ASSISTANT (For Architects)\n4. Validate startup ideas\n5. Create pitch decks and improve existing ones\n6. Help with fundraising strategy\n7. Estimate valuations and explain dilution\n8. Suggest growth strategies and marketing ideas\n9. Write job descriptions and hiring plans\n10. Suggest partnership opportunities\n11. Give product feature suggestions and roadmap ideas\n\n💰 INVESTOR ASSISTANT (For Catalysts)\n12. Discover AI, fintech, pre-seed startups\n13. Analyze startups (red flags, strengths)\n14. Score startups (investment, founder, risk)\n15. Guide due diligence process\n16. Summarize portfolio and diversification\n17. Give market intelligence (trends, opportunities)\n18. Help find co-investors and create syndicates\n\n🔍 EXPLORER ASSISTANT\n19. Help write product reviews\n20. Suggest product/UX/growth feedback\n21. Do market research and competitor analysis\n22. Find trending startups and technologies\n23. Explain AI, SaaS, fundraising, etc.\n\n💬 MESSAGING ASSISTANT\n24. Write investor outreach and founder messages\n25. Suggest smart replies\n26. Summarize conversations and key action items\n27. Help draft follow-up messages and reminders\n\n📑 BOOKMARK ASSISTANT\n28. Find saved startups/investors/articles\n29. Organize bookmarks into collections\n30. Summarize saved content\n\n🔔 SIGNAL ASSISTANT
+31. Prioritize important signals first
+32. Summarize what happened today/this week\n\n🌐 DISCOVER ASSISTANT\n33. Find founders/investors/reviewers\n34. Find grants, accelerators, competitions\n35. Suggest communities to join\n\n📊 ANALYTICS ASSISTANT\n36. Analyze startup growth/user/funding trends\n37. Give portfolio and sector analytics\n38. Show explorer contribution/review stats\n\n🧠 UNIVERSAL AI FEATURES\n39. Search the entire TRIARCORA ecosystem\n40. Analyze any founder or investor profile\n41. Match founders with investors and startups with talent\n42. Write posts, articles, updates\n43. Summarize profiles, startups, discussions\n44. Translate between English ↔ Hindi and other languages\n45. Teach fundraising, startup growth, investing\n46. Create reminders, follow-ups, watchlists\n47. Brainstorm startup and product ideas\n48. Help set and track SMART goals\n\nThat's all 48! Ask me about any specific one!`;
     } else if (input.toLowerCase().includes('what is') || input.toLowerCase().includes('explain')) {
       fallbackResponse = `TRIARCORA is a startup ecosystem platform that connects founders, investors, and reviewers! Here's what you can do:\n\n• **Architects**: Build startups, raise funding\n• **Catalysts**: Invest in promising startups\n• **Explorers**: Discover and review products\n\nWould you like to know more about any of these roles?`;
     } else if (input.toLowerCase().includes('how')) {
@@ -384,9 +386,9 @@ Use these keywords to navigate:
       { label: 'Find saved', prompt: 'Show me my saved AI startups' },
       { label: 'Organize', prompt: 'How can I organize my bookmarks?' },
       { label: 'Summarize', prompt: 'Summarize my saved articles' },
-    ] : pageContext === 'NOTIFICATION' ? [
-      { label: 'Prioritize', prompt: 'Show me my important notifications first' },
-      { label: 'Summary', prompt: 'What happened today in my notifications?' },
+    ] : pageContext === 'SIGNAL' ? [
+      { label: 'Prioritize', prompt: 'Show me my important signals first' },
+      { label: 'Summary', prompt: 'What happened today in my signals?' },
     ] : pageContext === 'DISCOVER' ? [
       { label: 'Find founders', prompt: 'Find promising AI founders to connect with' },
       { label: 'Opportunities', prompt: 'What grants or accelerators are available?' },
@@ -498,8 +500,8 @@ Use these keywords to navigate:
                     return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Writing messages\n• Smart replies & summaries\n• Follow-up reminders`;
                   case 'BOOKMARK':
                     return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Finding saved items\n• Organizing bookmarks\n• Summarizing saved content`;
-                  case 'NOTIFICATION':
-                    return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Prioritizing notifications\n• Summarizing updates\n• Key events today`;
+                  case 'SIGNAL':
+                    return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Prioritizing signals\n• Summarizing updates\n• Key events today`;
                   case 'DISCOVER':
                     return `Hello ${userName} 👋\n\nWelcome to your dedicated AI Copilot workspace!\n\nAsk me about:\n• Finding people\n• Opportunities & grants\n• Communities to join`;
                   case 'ANALYTICS':

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [react()],
   css: {
     postcss: {
@@ -15,7 +15,8 @@ export default defineConfig({
     sourcemap: true
   },
   server: {
-    port: 3001,
+    port: 3000,
+    strictPort: false,
     host: true
   }
 })

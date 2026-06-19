@@ -103,7 +103,7 @@ const ExplorerDashboard = () => {
   const [activeTab, setActiveTab] = useState('discover');
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  const feedPosts = posts.filter(post => !hiddenPosts.includes(post.id) && !mutedUsers.includes(post.userId));
+  const feedPosts = posts.filter(post => post.userRole.toUpperCase() === 'EXPLORER' && !hiddenPosts.includes(post.id) && !mutedUsers.includes(post.userId));
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
   const [showDetailedProfile, setShowDetailedProfile] = useState(false);

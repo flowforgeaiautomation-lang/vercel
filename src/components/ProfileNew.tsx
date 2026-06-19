@@ -4,7 +4,6 @@ import './ProfileNew.css';
 
 const ProfileNew: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check if user has proper navigation flow
@@ -14,15 +13,6 @@ const ProfileNew: React.FC = () => {
       navigate('/role-selection');
       return;
     }
-    
-    // Simulate loading and then show profile
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => {
-      clearTimeout(timer);
-    };
   }, [navigate]);
 
   const handleBackToNetwork = () => {
@@ -93,14 +83,7 @@ const ProfileNew: React.FC = () => {
     }
   ];
 
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner">◆</div>
-        <p className="loading-text">Loading profile...</p>
-      </div>
-    );
-  }
+
 
   return (
     <div className="profile-container">

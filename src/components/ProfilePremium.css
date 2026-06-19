@@ -59,11 +59,12 @@ body {
   overflow-x: hidden;
 }
 
-.profile-premium-container {
+.premium-profile-container {
   display: flex;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #050508 0%, #0a0a12 50%, #050508 100%);
+  height: 100vh;
+  background: var(--bg-darkest);
   position: relative;
+  overflow: hidden;
 }
 
 .premium-sidebar {

@@ -45,8 +45,20 @@ const RoleSelection: React.FC = () => {
   const goHome = async (role: string) => {
     const uppercaseRole = role.toUpperCase();
     localStorage.setItem('selectedRole', uppercaseRole);
-    // Navigate FIRST for instant response
-    navigate('/home');
+    // Navigate FIRST for instant response to role-specific page
+    switch (uppercaseRole) {
+      case 'ARCHITECT':
+        navigate('/startups');
+        break;
+      case 'CATALYST':
+        navigate('/investors');
+        break;
+      case 'EXPLORER':
+        navigate('/explorers');
+        break;
+      default:
+        navigate('/home');
+    }
     // Update roles in background
     try {
       if (user) {

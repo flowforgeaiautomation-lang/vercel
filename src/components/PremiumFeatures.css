@@ -139,6 +139,26 @@
 
 .premium-modal-content {
   padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.premium-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.premium-modal-content::-webkit-scrollbar-track {
+  background: rgba(30, 30, 45, 0.5);
+  border-radius: 3px;
+}
+
+.premium-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 120, 0.4);
+  border-radius: 3px;
+}
+
+.premium-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 140, 0.6);
 }
 
 .premium-modal-content p {

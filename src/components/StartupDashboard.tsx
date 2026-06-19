@@ -39,6 +39,13 @@ const SearchIcon = () => (
   </svg>
 );
 
+const LocationIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
 const StartupDashboard = () => {
   const { userName, userRole, userProfileImage, userData } = useUser();
   const { startups, marketplaceListings, aiRecommendations, productLaunches, upvoteProductLaunch, likePost, posts, demoUsers, addComment, savePost, unsavePost, savedPosts, hiddenPosts, mutedUsers } = usePosts();
@@ -50,7 +57,6 @@ const StartupDashboard = () => {
   const [activeTab, setActiveTab] = useState('feed'); // Default to feed!
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
-  // Filter posts to ONLY show ARCHITECT (founder/startup) posts!
   const feedPosts = posts.filter((post) => post.userRole.toUpperCase() === 'ARCHITECT' && !hiddenPosts.includes(post.id) && !mutedUsers.includes(post.userId));
   const [showEcosystemOverview, setShowEcosystemOverview] = useState(false);
   const [viewProfilePopUp, setViewProfilePopUp] = useState<UserProfile | null>(null);
@@ -1309,6 +1315,407 @@ const StartupDashboard = () => {
 
       {/* Create Post Component */}
       {createPostOpen && <CreatePost onClose={() => setCreatePostOpen(false)} />}
+      
+      {/* Simple Profile Pop-up */}
+      {viewProfilePopUp && !showDetailedProfile && (
+        <div 
+          className="profile-drawer-overlay" 
+          onClick={() => setViewProfilePopUp(null)}
+          style={{ zIndex: 1000 }}
+        >
+          <div 
+            className="profile-drawer" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              maxWidth: '400px', 
+              width: '90%', 
+              backgroundColor: '#0a0e1a',
+              border: '1px solid rgba(255,215,0,0.2)',
+              borderRadius: '16px'
+            }}
+          >
+            <button 
+              onClick={() => setViewProfilePopUp(null)}
+              style={{ 
+                position: 'absolute', 
+                top: '1rem', 
+                right: '1rem', 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '1.5rem',
+                zIndex: 10
+              }}
+            >
+              ×
+            </button>
+
+            {/* Profile Header */}
+            <div style={{ padding: '2rem 1.5rem 1.5rem', textAlign: 'center' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'linear-gradient(135deg, #B8860B, #DAA520)' : viewProfilePopUp.userRole === 'CATALYST' ? 'linear-gradient(135deg, #00C896, #34D399)' : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto',
+                  position: 'relative'
+                }}>
+                  {viewProfilePopUp.userAvatar ? (
+                    <img 
+                      src={viewProfilePopUp.userAvatar} 
+                      alt={viewProfilePopUp.userName} 
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff' }}>
+                      {getInitials(viewProfilePopUp.userName)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '0.5rem' }}>
+                <span style={{ 
+                  display: 'inline-block', 
+                  padding: '0.3rem 0.8rem', 
+                  borderRadius: '20px', 
+                  fontSize: '12px', 
+                  fontWeight: 600, 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.15)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.15)' : 'rgba(59,130,246,0.15)', 
+                  color: viewProfilePopUp.userRole === 'ARCHITECT' ? '#FFD700' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6'
+                }}>
+                  {viewProfilePopUp.userRole}
+                </span>
+              </div>
+
+              <h2 style={{ color: '#fff', fontSize: '20px', fontWeight: 700, marginBottom: '0.3rem' }}>
+                {viewProfilePopUp.userName}
+              </h2>
+
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', marginBottom: '1.5rem' }}>
+                {viewProfilePopUp.userTitle}
+              </p>
+
+              <button 
+                onClick={() => setShowDetailedProfile(true)}
+                style={{
+                  width: '100%',
+                  padding: '0.9rem 1.5rem',
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'linear-gradient(135deg, #B8860B, #DAA520)' : viewProfilePopUp.userRole === 'CATALYST' ? 'linear-gradient(135deg, #00C896, #34D399)' : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  cursor: 'pointer'
+                }}
+              >
+                See Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detailed Profile Pop-up */}
+      {viewProfilePopUp && showDetailedProfile && (
+        <div 
+          className="profile-drawer-overlay" 
+          onClick={() => {
+            setShowDetailedProfile(false);
+            setViewProfilePopUp(null);
+          }}
+          style={{ zIndex: 1001 }}
+        >
+          <div 
+            className="profile-drawer" 
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              maxWidth: '500px', 
+              width: '90%', 
+              maxHeight: '90vh', 
+              overflowY: 'auto',
+              backgroundColor: '#0a0e1a',
+              border: '1px solid rgba(255,215,0,0.2)',
+              borderRadius: '16px'
+            }}
+          >
+            <button 
+              onClick={() => {
+                setShowDetailedProfile(false);
+                setViewProfilePopUp(null);
+              }}
+              style={{ 
+                position: 'absolute', 
+                top: '1rem', 
+                right: '1rem', 
+                background: 'transparent', 
+                border: 'none', 
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '1.5rem',
+                zIndex: 10
+              }}
+            >
+              ×
+            </button>
+
+            {/* Profile Header */}
+            <div style={{ padding: '2rem 1.5rem 1rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ 
+                  width: '120px', 
+                  height: '120px', 
+                  borderRadius: '50%', 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'linear-gradient(135deg, #B8860B, #DAA520)' : viewProfilePopUp.userRole === 'CATALYST' ? 'linear-gradient(135deg, #00C896, #34D399)' : 'linear-gradient(135deg, #3B82F6, #60A5FA)',
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto',
+                  position: 'relative'
+                }}>
+                  {viewProfilePopUp.userAvatar ? (
+                    <img 
+                      src={viewProfilePopUp.userAvatar} 
+                      alt={viewProfilePopUp.userName} 
+                      style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                    />
+                  ) : (
+                    <span style={{ fontSize: '36px', fontWeight: 'bold', color: '#fff' }}>
+                      {getInitials(viewProfilePopUp.userName)}
+                    </span>
+                  )}
+                  {/* Verification Badge */}
+                  {viewProfilePopUp.userCredibility?.verified && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '5px',
+                      right: '5px',
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #00C896, #34D399)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#fff"/>
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '0.5rem' }}>
+                <span style={{ 
+                  display: 'inline-block', 
+                  padding: '0.4rem 1rem', 
+                  borderRadius: '20px', 
+                  fontSize: '13px', 
+                  fontWeight: 600, 
+                  background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.15)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.15)' : 'rgba(59,130,246,0.15)', 
+                  color: viewProfilePopUp.userRole === 'ARCHITECT' ? '#FFD700' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6'
+                }}>
+                  {viewProfilePopUp.userRole}
+                </span>
+              </div>
+
+              <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: 700, marginBottom: '0.3rem' }}>
+                {viewProfilePopUp.userName}
+              </h1>
+
+              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '15px', marginBottom: '0.5rem' }}>
+                {viewProfilePopUp.userTitle}
+              </p>
+
+              {viewProfilePopUp.userLocation && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', color: 'rgba(255,255,255,0.6)', fontSize: '14px', marginBottom: '1rem' }}>
+                  <LocationIcon />
+                  <span>{viewProfilePopUp.userLocation}</span>
+                </div>
+              )}
+
+              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '15px', lineHeight: '1.6' }}>
+                {viewProfilePopUp.userBio || 'No bio yet.'}
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div style={{ 
+              padding: '1.5rem', 
+              display: 'flex', 
+              justifyContent: 'space-around', 
+              borderBottom: '1px solid rgba(255,255,255,0.05)'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontSize: '24px', fontWeight: 700 }}>{viewProfilePopUp.stats.followers}</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Followers</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontSize: '24px', fontWeight: 700 }}>{viewProfilePopUp.stats.following}</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Following</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ color: '#fff', fontSize: '24px', fontWeight: 700 }}>{viewProfilePopUp.stats.endorsements}</div>
+                <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Endorsements</div>
+              </div>
+            </div>
+
+            {/* Credibility Score */}
+            <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '1rem' }}>Credibility Score</h4>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1.5rem'
+              }}>
+                <div style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: `conic-gradient(${viewProfilePopUp.userRole === 'ARCHITECT' ? '#B8860B' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6'} 0% ${viewProfilePopUp.userCredibility.score}%, rgba(255,255,255,0.1) ${viewProfilePopUp.userCredibility.score}% 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{ 
+                    width: '64px', 
+                    height: '64px', 
+                    borderRadius: '50%', 
+                    background: '#0a0e1a', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ color: viewProfilePopUp.userRole === 'ARCHITECT' ? '#FFD700' : viewProfilePopUp.userRole === 'CATALYST' ? '#00C896' : '#3B82F6', fontSize: '22px', fontWeight: 700 }}>
+                      {viewProfilePopUp.userCredibility.score}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  {viewProfilePopUp.userCredibility.startups !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Startups Built: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.startups}</span>
+                    </div>
+                  )}
+                  {viewProfilePopUp.userCredibility.investeeCount !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Investee Count: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.investeeCount}</span>
+                    </div>
+                  )}
+                  {viewProfilePopUp.userCredibility.years !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Years Active: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.years}</span>
+                    </div>
+                  )}
+                  {viewProfilePopUp.userCredibility.companies !== undefined && (
+                    <div style={{ marginBottom: '0.4rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Companies: </span>
+                      <span style={{ color: '#fff', fontWeight: 600, fontSize: '14px' }}>{viewProfilePopUp.userCredibility.companies}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Tags */}
+            {viewProfilePopUp.tags && viewProfilePopUp.tags.length > 0 && (
+              <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '1rem' }}>Interests</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                  {viewProfilePopUp.tags.map(tag => (
+                    <span key={tag} style={{ 
+                      padding: '0.5rem 1rem', 
+                      borderRadius: '20px', 
+                      background: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.1)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.1)' : 'rgba(59,130,246,0.1)', 
+                      color: viewProfilePopUp.userRole === 'ARCHITECT' ? 'rgba(255,215,0,0.9)' : viewProfilePopUp.userRole === 'CATALYST' ? 'rgba(0,200,150,0.9)' : 'rgba(59,130,246,0.9)', 
+                      fontSize: '14px',
+                      fontWeight: 500
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Links */}
+            {viewProfilePopUp.userLinks && Object.keys(viewProfilePopUp.userLinks).length > 0 && (
+              <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '1rem' }}>Links</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem' }}>
+                  {viewProfilePopUp.userLinks.linkedin && (
+                    <a 
+                      href={viewProfilePopUp.userLinks.linkedin.startsWith('http') ? viewProfilePopUp.userLinks.linkedin : `https://${viewProfilePopUp.userLinks.linkedin}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        color: 'rgba(255,255,255,0.9)', 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      LinkedIn
+                    </a>
+                  )}
+                  {viewProfilePopUp.userLinks.website && (
+                    <a 
+                      href={viewProfilePopUp.userLinks.website.startsWith('http') ? viewProfilePopUp.userLinks.website : `https://${viewProfilePopUp.userLinks.website}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        color: 'rgba(255,255,255,0.9)', 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Website
+                    </a>
+                  )}
+                  {viewProfilePopUp.userLinks.twitter && (
+                    <a 
+                      href={viewProfilePopUp.userLinks.twitter.startsWith('http') ? viewProfilePopUp.userLinks.twitter : `https://${viewProfilePopUp.userLinks.twitter}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        padding: '0.5rem 1rem', 
+                        borderRadius: '20px', 
+                        background: 'rgba(255,255,255,0.1)', 
+                        color: 'rgba(255,255,255,0.9)', 
+                        fontSize: '14px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Twitter
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
       {/* AI Copilot Component */}
       <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />

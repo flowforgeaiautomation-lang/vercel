@@ -11,7 +11,7 @@ type SettingsSection =
   | 'data-privacy' 
   | 'feed-preferences' 
   | 'ai-settings' 
-  | 'notifications' 
+  | 'signals' 
   | 'connections' 
   | 'architect-settings' 
   | 'catalyst-settings' 
@@ -33,6 +33,14 @@ const searchIndex: Record<string, SettingsSection[]> = {
   'two factor': ['sign-in-security'],
   'backup': ['sign-in-security'],
   'sessions': ['sign-in-security'],
+  'active sessions': ['sign-in-security'],
+  'login history': ['sign-in-security'],
+  'device history': ['sign-in-security'],
+  'security monitoring': ['sign-in-security'],
+  'security alerts': ['sign-in-security'],
+  'suspicious activity': ['sign-in-security'],
+  'recovery email': ['sign-in-security'],
+  'recovery phone': ['sign-in-security'],
   'connected accounts': ['sign-in-security'],
   'google': ['sign-in-security'],
   'apple': ['sign-in-security'],
@@ -76,14 +84,14 @@ const searchIndex: Record<string, SettingsSection[]> = {
   'assistant': ['ai-settings'],
   'context': ['ai-settings'],
   
-  'notifications': ['notifications'],
-  'push': ['notifications'],
-  'email': ['notifications'],
-  'messages': ['notifications', 'connections'],
-  'mentions': ['notifications'],
-  'comments': ['notifications'],
-  'funding': ['notifications', 'architect-settings'],
-  'deal': ['notifications', 'catalyst-settings'],
+  'signals': ['signals'],
+  'push': ['signals'],
+  'email': ['signals'],
+  'messages': ['signals', 'connections'],
+  'mentions': ['signals'],
+  'comments': ['signals'],
+  'funding': ['signals', 'architect-settings'],
+  'deal': ['signals', 'catalyst-settings'],
   
   'connect': ['connections'],
   'block': ['connections'],
@@ -98,6 +106,8 @@ const searchIndex: Record<string, SettingsSection[]> = {
   'investor': ['catalyst-settings'],
   'investment': ['catalyst-settings', 'analytics-export'],
   'portfolio': ['catalyst-settings'],
+  'geography': ['catalyst-settings'],
+  'preferred geography': ['catalyst-settings'],
   
   'explorer': ['explorer-settings'],
   'reviews': ['explorer-settings'],
@@ -160,12 +170,21 @@ const TriarcoraSettings: React.FC = () => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [currentUploadType, setCurrentUploadType] = useState<string | null>(null);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
+  const [currentEditField, setCurrentEditField] = useState<string>('');
   const [editFormData, setEditFormData] = useState({
     name: '',
     bio: '',
     title: '',
     website: '',
-    location: ''
+    location: '',
+    username: '',
+    email: '',
+    phone: '',
+    socialLinks: {
+      linkedin: '',
+      twitter: '',
+      github: ''
+    }
   });
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
@@ -228,7 +247,7 @@ const TriarcoraSettings: React.FC = () => {
     // Also search section names directly
     const allSections: SettingsSection[] = [
       'account-preferences', 'sign-in-security', 'visibility', 'data-privacy',
-      'feed-preferences', 'ai-settings', 'notifications', 'connections',
+      'feed-preferences', 'ai-settings', 'signals', 'connections',
       'architect-settings', 'catalyst-settings', 'explorer-settings',
       'content-management', 'analytics-export', 'appearance', 'advertising',
       'help-center', 'legal-policies', 'language-region', 'account-actions'
@@ -295,21 +314,61 @@ const TriarcoraSettings: React.FC = () => {
   };
 
   const handleEditProfile = (field: string) => {
+    setCurrentEditField(field);
+    // Initialize form data based on which field we're editing
+    if (userData) {
+      setEditFormData({
+        name: userData.profile?.name || '',
+        bio: userData.profile?.bio || '',
+        title: userData.profile?.title || '',
+        website: userData.profile?.website || '',
+        location: userData.profile?.location || '',
+        username: settings?.accountPreferences?.username || '',
+        email: userData.email || '',
+        phone: '',
+        socialLinks: {
+          linkedin: userData.profile?.linkedin || '',
+          twitter: userData.profile?.twitter || '',
+          github: ''
+        }
+      });
+    }
     setEditProfileModalOpen(true);
   };
 
   const handleSaveProfile = () => {
     if (userData) {
-      updateUserData({
-        profile: {
-          ...userData.profile,
-          name: editFormData.name,
-          bio: editFormData.bio,
-          title: editFormData.title,
-          website: editFormData.website,
-          location: editFormData.location
-        }
-      });
+      // Update profile data
+      const updatedProfile = {
+        ...userData.profile,
+        name: editFormData.name,
+        bio: editFormData.bio,
+        title: editFormData.title,
+        website: editFormData.website,
+        location: editFormData.location,
+        linkedin: editFormData.socialLinks.linkedin,
+        twitter: editFormData.socialLinks.twitter
+      };
+      
+      const updates: any = { profile: updatedProfile };
+      
+      // Update username if needed
+      if (editFormData.username) {
+        updates.settings = {
+          ...settings,
+          accountPreferences: {
+            ...settings?.accountPreferences,
+            username: editFormData.username
+          }
+        };
+      }
+      
+      // Update email if needed
+      if (editFormData.email) {
+        updates.email = editFormData.email;
+      }
+
+      updateUserData(updates);
       showToast('Profile updated successfully!', 'success');
       setEditProfileModalOpen(false);
     }
@@ -517,6 +576,11 @@ const TriarcoraSettings: React.FC = () => {
       }
       setDeleteAccountStep(2);
     } else if (deleteAccountStep === 2) {
+      setDeleteAccountStep(3);
+    } else if (deleteAccountStep === 3) {
+      setDeleteAccountStep(4);
+    } else if (deleteAccountStep === 4) {
+      setDeleteAccountStep(5);
       setIsDeletingAccount(true);
       try {
         await deleteAccount(deleteAccountPassword);
@@ -646,7 +710,7 @@ const TriarcoraSettings: React.FC = () => {
                 {section === 'data-privacy' && '🔒'}
                 {section === 'feed-preferences' && '🎯'}
                 {section === 'ai-settings' && '🤖'}
-                {section === 'notifications' && '🔔'}
+                {section === 'signals' && '🔔'}
                 {section === 'connections' && '🤝'}
                 {section === 'architect-settings' && '💼'}
                 {section === 'catalyst-settings' && '💰'}
@@ -666,7 +730,7 @@ const TriarcoraSettings: React.FC = () => {
                   {section === 'data-privacy' && 'Data Privacy'}
                   {section === 'feed-preferences' && 'Feed Preferences'}
                   {section === 'ai-settings' && 'AI Settings'}
-                  {section === 'notifications' && 'Notifications'}
+                  {section === 'signals' && 'Signals'}
                   {section === 'connections' && 'Connections'}
                   {section === 'architect-settings' && 'Architect Settings'}
                   {section === 'catalyst-settings' && 'Catalyst Settings'}
@@ -693,7 +757,7 @@ const TriarcoraSettings: React.FC = () => {
             { id: 'data-privacy', icon: '🔒', label: 'Data Privacy' },
             { id: 'feed-preferences', icon: '🎯', label: 'Feed Preferences' },
             { id: 'ai-settings', icon: '🤖', label: 'AI Settings' },
-            { id: 'notifications', icon: '🔔', label: 'Notifications' },
+            { id: 'signals', icon: '🔔', label: 'Signals' },
             { id: 'connections', icon: '🤝', label: 'Connections' },
             { id: 'architect-settings', icon: '💼', label: 'Architect Settings', show: userRoles.includes('architect') },
             { id: 'catalyst-settings', icon: '💰', label: 'Catalyst Settings', show: userRoles.includes('catalyst') },
@@ -827,7 +891,14 @@ const TriarcoraSettings: React.FC = () => {
                 <div className="settings-item">
                   <div className="settings-item-content">
                     <h4>Date Joined</h4>
-                    <p>January 15, 2025</p>
+                    <p>{userData?.prestigeSystem?.memberSince 
+                      ? new Date(userData.prestigeSystem.memberSince).toLocaleDateString('en-US', { 
+                          month: 'long', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        })
+                      : 'January 15, 2025'
+                    }</p>
                   </div>
                 </div>
                 
@@ -925,6 +996,20 @@ const TriarcoraSettings: React.FC = () => {
                   
                   <div className="settings-item">
                     <div className="settings-item-content">
+                      <h4>Forgot Password</h4>
+                      <p>Send a password reset link to your email</p>
+                    </div>
+                    <button className="settings-btn" onClick={() => {
+                      if (userData?.email) {
+                        showToast('Password reset link sent to your email!', 'success');
+                      } else {
+                        showToast('Please set an email first!', 'error');
+                      }
+                    }}>Send Reset Link</button>
+                  </div>
+                  
+                  <div className="settings-item">
+                    <div className="settings-item-content">
                       <h4>Passkeys</h4>
                       <p>Sign in without a password using passkeys</p>
                     </div>
@@ -1000,6 +1085,100 @@ const TriarcoraSettings: React.FC = () => {
                   </div>
                   <button className="settings-btn" onClick={() => handleConnectedAccount('github', settings?.signInSecurity?.connectedAccounts?.github)}>
                     {settings?.signInSecurity?.connectedAccounts?.github ? 'Disconnect' : 'Connect'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-card">
+                <h3>Session Management</h3>
+                
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Active Sessions</h4>
+                    <p>View and manage your active sign-in sessions</p>
+                  </div>
+                  <button className="settings-btn" onClick={() => showToast('Active sessions feature coming soon!', 'success')}>
+                    View Sessions
+                  </button>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Login History</h4>
+                    <p>View your recent login activity</p>
+                  </div>
+                  <button className="settings-btn" onClick={() => showToast('Login history feature coming soon!', 'success')}>
+                    View History
+                  </button>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Device History</h4>
+                    <p>View devices that have accessed your account</p>
+                  </div>
+                  <button className="settings-btn" onClick={() => showToast('Device history feature coming soon!', 'success')}>
+                    View Devices
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-card">
+                <h3>Security Monitoring</h3>
+                
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Security Alerts</h4>
+                    <p>Receive alerts for suspicious account activity</p>
+                  </div>
+                  <ToggleSwitch 
+                    checked={true}
+                    onChange={() => {}}
+                  />
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Suspicious Activity Detection</h4>
+                    <p>Automatically detect and alert on suspicious activity</p>
+                  </div>
+                  <ToggleSwitch 
+                    checked={true}
+                    onChange={() => {}}
+                  />
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Recent Login Locations</h4>
+                    <p>View locations where your account was recently accessed</p>
+                  </div>
+                  <button className="settings-btn" onClick={() => showToast('Recent login locations feature coming soon!', 'success')}>
+                    View Locations
+                  </button>
+                </div>
+              </div>
+
+              <div className="settings-card">
+                <h3>Account Recovery</h3>
+                
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Recovery Email</h4>
+                    <p>Add or update your recovery email address</p>
+                  </div>
+                  <button className="settings-btn" onClick={() => showToast('Recovery email feature coming soon!', 'success')}>
+                    Manage
+                  </button>
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Recovery Phone</h4>
+                    <p>Add or update your recovery phone number</p>
+                  </div>
+                  <button className="settings-btn" onClick={() => showToast('Recovery phone feature coming soon!', 'success')}>
+                    Manage
                   </button>
                 </div>
               </div>
@@ -1604,16 +1783,16 @@ const TriarcoraSettings: React.FC = () => {
             </div>
           )}
 
-          {/* Notifications */}
-          {activeSection === 'notifications' && (
+          {/* Signals */}
+          {activeSection === 'signals' && (
             <div className="settings-section">
               <div className="settings-section-header">
-                <h1>Notifications</h1>
-                <p>Manage your notification preferences</p>
+                <h1>Signals</h1>
+                <p>Manage your signal preferences</p>
               </div>
               
               <div className="settings-card">
-                <h3>Push Notifications</h3>
+                <h3>Push Signals</h3>
                 
                 {[
                   { key: 'messages', label: 'Messages' },
@@ -1627,18 +1806,18 @@ const TriarcoraSettings: React.FC = () => {
                   <div key={item.key} className="settings-item">
                     <div className="settings-item-content">
                       <h4>{item.label}</h4>
-                      <p>Receive notifications for {item.label.toLowerCase()}</p>
+                      <p>Receive signals for {item.label.toLowerCase()}</p>
                     </div>
                     <ToggleSwitch 
-                      checked={settings?.notifications?.push?.[item.key as keyof typeof settings.notifications.push] || true}
-                      onChange={(checked) => handleSettingChange(`notifications.push.${item.key}`, checked)}
+                      checked={settings?.signals?.push?.[item.key as keyof typeof settings.signals.push] || true}
+                      onChange={(checked) => handleSettingChange(`signals.push.${item.key}`, checked)}
                     />
                   </div>
                 ))}
               </div>
 
               <div className="settings-card">
-                <h3>Startup Notifications</h3>
+                <h3>Startup Signals</h3>
                 
                 {[
                   { key: 'fundingUpdates', label: 'Funding Updates' },
@@ -1648,18 +1827,18 @@ const TriarcoraSettings: React.FC = () => {
                   <div key={item.key} className="settings-item">
                     <div className="settings-item-content">
                       <h4>{item.label}</h4>
-                      <p>Receive notifications for {item.label.toLowerCase()}</p>
+                      <p>Receive signals for {item.label.toLowerCase()}</p>
                     </div>
                     <ToggleSwitch 
-                      checked={settings?.notifications?.startup?.[item.key as keyof typeof settings.notifications.startup] || true}
-                      onChange={(checked) => handleSettingChange(`notifications.startup.${item.key}`, checked)}
+                      checked={settings?.signals?.startup?.[item.key as keyof typeof settings.signals.startup] || true}
+                      onChange={(checked) => handleSettingChange(`signals.startup.${item.key}`, checked)}
                     />
                   </div>
                 ))}
               </div>
 
               <div className="settings-card">
-                <h3>Investor Notifications</h3>
+                <h3>Investor Signals</h3>
                 
                 {[
                   { key: 'dealFlow', label: 'Deal Flow' },
@@ -1669,18 +1848,18 @@ const TriarcoraSettings: React.FC = () => {
                   <div key={item.key} className="settings-item">
                     <div className="settings-item-content">
                       <h4>{item.label}</h4>
-                      <p>Receive notifications for {item.label.toLowerCase()}</p>
+                      <p>Receive signals for {item.label.toLowerCase()}</p>
                     </div>
                     <ToggleSwitch 
-                      checked={settings?.notifications?.investor?.[item.key as keyof typeof settings.notifications.investor] || true}
-                      onChange={(checked) => handleSettingChange(`notifications.investor.${item.key}`, checked)}
+                      checked={settings?.signals?.investor?.[item.key as keyof typeof settings.signals.investor] || true}
+                      onChange={(checked) => handleSettingChange(`signals.investor.${item.key}`, checked)}
                     />
                   </div>
                 ))}
               </div>
 
               <div className="settings-card">
-                <h3>Explorer Notifications</h3>
+                <h3>Explorer Signals</h3>
                 
                 {[
                   { key: 'reviews', label: 'Reviews' },
@@ -1690,18 +1869,18 @@ const TriarcoraSettings: React.FC = () => {
                   <div key={item.key} className="settings-item">
                     <div className="settings-item-content">
                       <h4>{item.label}</h4>
-                      <p>Receive notifications for {item.label.toLowerCase()}</p>
+                      <p>Receive signals for {item.label.toLowerCase()}</p>
                     </div>
                     <ToggleSwitch 
-                      checked={settings?.notifications?.explorer?.[item.key as keyof typeof settings.notifications.explorer] || true}
-                      onChange={(checked) => handleSettingChange(`notifications.explorer.${item.key}`, checked)}
+                      checked={settings?.signals?.explorer?.[item.key as keyof typeof settings.signals.explorer] || true}
+                      onChange={(checked) => handleSettingChange(`signals.explorer.${item.key}`, checked)}
                     />
                   </div>
                 ))}
               </div>
 
               <div className="settings-card">
-                <h3>Community Notifications</h3>
+                <h3>Community Signals</h3>
                 
                 {[
                   { key: 'communities', label: 'Communities' },
@@ -1711,18 +1890,18 @@ const TriarcoraSettings: React.FC = () => {
                   <div key={item.key} className="settings-item">
                     <div className="settings-item-content">
                       <h4>{item.label}</h4>
-                      <p>Receive notifications for {item.label.toLowerCase()}</p>
+                      <p>Receive signals for {item.label.toLowerCase()}</p>
                     </div>
                     <ToggleSwitch 
-                      checked={settings?.notifications?.community?.[item.key as keyof typeof settings.notifications.community] || true}
-                      onChange={(checked) => handleSettingChange(`notifications.community.${item.key}`, checked)}
+                      checked={settings?.signals?.community?.[item.key as keyof typeof settings.signals.community] || true}
+                      onChange={(checked) => handleSettingChange(`signals.community.${item.key}`, checked)}
                     />
                   </div>
                 ))}
               </div>
 
               <div className="settings-card">
-                <h3>Notification Delivery</h3>
+                <h3>Signal Delivery</h3>
                 
                 {[
                   { key: 'push', label: 'Push' },
@@ -1732,11 +1911,11 @@ const TriarcoraSettings: React.FC = () => {
                   <div key={item.key} className="settings-item">
                     <div className="settings-item-content">
                       <h4>{item.label}</h4>
-                      <p>Receive notifications via {item.label.toLowerCase()}</p>
+                      <p>Receive signals via {item.label.toLowerCase()}</p>
                     </div>
                     <ToggleSwitch 
-                      checked={settings?.notifications?.delivery?.[item.key as keyof typeof settings.notifications.delivery] || true}
-                      onChange={(checked) => handleSettingChange(`notifications.delivery.${item.key}`, checked)}
+                      checked={settings?.signals?.delivery?.[item.key as keyof typeof settings.signals.delivery] || true}
+                      onChange={(checked) => handleSettingChange(`signals.delivery.${item.key}`, checked)}
                     />
                   </div>
                 ))}
@@ -2001,6 +2180,52 @@ const TriarcoraSettings: React.FC = () => {
                         }}
                       >
                         {industry}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="settings-item">
+                  <div className="settings-item-content">
+                    <h4>Preferred Geography</h4>
+                    <p>Select your preferred geographic regions</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                  {['North America', 'Europe', 'Asia', 'Latin America', 'Africa', 'Oceania'].map(geo => {
+                    const isSelected = settings?.catalystSettings?.investmentProfile?.preferredGeography?.includes(geo);
+                    return (
+                      <button
+                        key={geo}
+                        style={{
+                          padding: '10px 18px',
+                          borderRadius: '12px',
+                          border: isSelected ? '1px solid var(--gold-primary)' : '1px solid var(--border-subtle)',
+                          background: isSelected ? 'rgba(245, 158, 11, 0.2)' : 'var(--dark-card-lighter)',
+                          color: isSelected ? 'var(--gold-primary)' : 'var(--text-gray)',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onClick={() => {
+                          const current = settings?.catalystSettings?.investmentProfile?.preferredGeography || [];
+                          const newGeos = current.includes(geo) 
+                            ? current.filter(g => g !== geo)
+                            : [...current, geo];
+                          handleSettingChange('catalystSettings.investmentProfile.preferredGeography', newGeos);
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.borderColor = 'var(--gold-soft)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                          }
+                        }}
+                      >
+                        {geo}
                       </button>
                     );
                   })}
@@ -2730,6 +2955,7 @@ const TriarcoraSettings: React.FC = () => {
                     onChange={(e) => handleSettingChange('languageRegion.language', e.target.value)}
                   >
                     <option value="en">English</option>
+                    <option value="hi">हिन्दी</option>
                     <option value="es">Español</option>
                     <option value="fr">Français</option>
                     <option value="de">Deutsch</option>
@@ -2897,14 +3123,14 @@ const TriarcoraSettings: React.FC = () => {
       {/* Edit Profile Modal */}
       {editProfileModalOpen && (
         <div className="profile-modal-overlay" onClick={() => setEditProfileModalOpen(false)}>
-          <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="profile-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
             <div className="profile-modal-header">
               <h3>Edit Profile</h3>
               <button className="profile-modal-close" onClick={() => setEditProfileModalOpen(false)}>
                 ×
               </button>
             </div>
-            <div className="profile-modal-body">
+            <div className="profile-modal-body" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
               <div className="profile-edit-section">
                 <label className="profile-edit-label">Full Name</label>
                 <input
@@ -2912,6 +3138,37 @@ const TriarcoraSettings: React.FC = () => {
                   className="profile-edit-input"
                   value={editFormData.name}
                   onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                />
+              </div>
+              <div className="profile-edit-section">
+                <label className="profile-edit-label">Username</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ color: '#9CA3AF' }}>@</span>
+                  <input
+                    type="text"
+                    className="profile-edit-input"
+                    style={{ marginBottom: 0 }}
+                    value={editFormData.username}
+                    onChange={(e) => setEditFormData({ ...editFormData, username: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="profile-edit-section">
+                <label className="profile-edit-label">Email Address</label>
+                <input
+                  type="email"
+                  className="profile-edit-input"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                />
+              </div>
+              <div className="profile-edit-section">
+                <label className="profile-edit-label">Phone Number</label>
+                <input
+                  type="tel"
+                  className="profile-edit-input"
+                  value={editFormData.phone}
+                  onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
                 />
               </div>
               <div className="profile-edit-section">
@@ -2947,6 +3204,42 @@ const TriarcoraSettings: React.FC = () => {
                   className="profile-edit-input"
                   value={editFormData.location}
                   onChange={(e) => setEditFormData({ ...editFormData, location: e.target.value })}
+                />
+              </div>
+              <div className="profile-edit-section">
+                <label className="profile-edit-label">LinkedIn</label>
+                <input
+                  type="text"
+                  className="profile-edit-input"
+                  value={editFormData.socialLinks.linkedin}
+                  onChange={(e) => setEditFormData({ 
+                    ...editFormData, 
+                    socialLinks: { ...editFormData.socialLinks, linkedin: e.target.value }
+                  })}
+                />
+              </div>
+              <div className="profile-edit-section">
+                <label className="profile-edit-label">Twitter</label>
+                <input
+                  type="text"
+                  className="profile-edit-input"
+                  value={editFormData.socialLinks.twitter}
+                  onChange={(e) => setEditFormData({ 
+                    ...editFormData, 
+                    socialLinks: { ...editFormData.socialLinks, twitter: e.target.value }
+                  })}
+                />
+              </div>
+              <div className="profile-edit-section">
+                <label className="profile-edit-label">GitHub</label>
+                <input
+                  type="text"
+                  className="profile-edit-input"
+                  value={editFormData.socialLinks.github}
+                  onChange={(e) => setEditFormData({ 
+                    ...editFormData, 
+                    socialLinks: { ...editFormData.socialLinks, github: e.target.value }
+                  })}
                 />
               </div>
             </div>
@@ -3499,6 +3792,9 @@ const TriarcoraSettings: React.FC = () => {
               {deleteAccountStep === 1 ? (
                 <div>
                   <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
+                    Step 1: Password Confirmation
+                  </p>
+                  <p style={{ color: '#9CA3AF', marginBottom: '20px' }}>
                     To continue, please enter your password:
                   </p>
                   <div className="profile-edit-section">
@@ -3512,10 +3808,19 @@ const TriarcoraSettings: React.FC = () => {
                     />
                   </div>
                 </div>
-              ) : (
+              ) : deleteAccountStep === 2 ? (
                 <div>
                   <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
-                    Are you absolutely sure you want to delete your account?
+                    Step 2: Warning
+                  </p>
+                  <p style={{ color: '#9CA3AF', marginBottom: '20px' }}>
+                    Deleting your account is a permanent action that cannot be undone.
+                  </p>
+                </div>
+              ) : deleteAccountStep === 3 ? (
+                <div>
+                  <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
+                    Step 3: Data Loss Warning
                   </p>
                   <p style={{ color: '#9CA3AF', marginBottom: '20px' }}>
                     This will permanently delete:
@@ -3524,12 +3829,27 @@ const TriarcoraSettings: React.FC = () => {
                     <li>Your profile and personal information</li>
                     <li>All your posts, drafts, and saved items</li>
                     <li>Connections and messages</li>
-                    <li>Notifications</li>
+                    <li>Signals</li>
                     <li>Role data and settings</li>
                     <li>User account and authentication</li>
                   </ul>
-                  <p style={{ color: '#EF4444', fontSize: '14px' }}>
-                    This action is irreversible!
+                </div>
+              ) : deleteAccountStep === 4 ? (
+                <div>
+                  <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
+                    Step 4: Final Confirmation
+                  </p>
+                  <p style={{ color: '#EF4444', marginBottom: '20px' }}>
+                    Are you absolutely sure you want to delete your account? This action cannot be reversed.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ color: '#fff', marginBottom: '16px', fontSize: '16px', fontWeight: '500' }}>
+                    Step 5: Processing
+                  </p>
+                  <p style={{ color: '#9CA3AF', marginBottom: '20px' }}>
+                    Your account deletion request is being processed...
                   </p>
                 </div>
               )}
@@ -3538,18 +3858,22 @@ const TriarcoraSettings: React.FC = () => {
               <button className="profile-modal-btn cancel" onClick={cancelDeleteAccount}>
                 Cancel
               </button>
-              <button 
-                className="profile-modal-btn" 
-                style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)' }}
-                onClick={confirmDeleteAccount}
-                disabled={isDeletingAccount}
-              >
-                {isDeletingAccount 
-                  ? 'Deleting...' 
-                  : deleteAccountStep === 1 
-                    ? 'Continue' 
-                    : 'Delete Account'}
-              </button>
+              {deleteAccountStep < 5 && (
+                <button 
+                  className="profile-modal-btn" 
+                  style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)' }}
+                  onClick={confirmDeleteAccount}
+                  disabled={isDeletingAccount}
+                >
+                  {isDeletingAccount 
+                    ? 'Deleting...' 
+                    : deleteAccountStep === 1 
+                      ? 'Continue' 
+                      : deleteAccountStep === 4 
+                        ? 'Delete Account' 
+                        : 'Next'}
+                </button>
+              )}
             </div>
           </div>
         </div>

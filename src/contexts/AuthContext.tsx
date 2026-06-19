@@ -170,7 +170,7 @@ const loadAndUpdateUserProfile = async (user: User): Promise<ProfileData> => {
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const initAuth = async () => {
