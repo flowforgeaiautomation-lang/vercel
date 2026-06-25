@@ -49,6 +49,7 @@ interface ProfileData {
   trustIndex: number;
   headline?: string;
   connections?: string[];
+  verification?: any;
 }
 
 interface AuthContextType {
@@ -139,9 +140,24 @@ const createUserProfile = async (user: User, name: string = ''): Promise<Profile
     lastLoginAt: serverTimestamp(),
     isVerified: user.emailVerified,
     prestigeLevel: 1,
-    trustIndex: 50,
+    trustIndex: 0,
     headline: '',
-    connections: []
+    connections: [],
+    verification: {
+      emailVerified: user.emailVerified,
+      phoneVerified: false,
+      identityVerified: false,
+      linkedinVerified: false,
+      websiteVerified: false,
+      startupVerified: false,
+      investorVerified: false,
+      explorerVerified: false,
+      trustScore: user.emailVerified ? 10 : 0,
+      verificationLevel: user.emailVerified ? 'Basic Verified' : 'unverified',
+      submittedAt: null,
+      reviewedAt: null,
+      status: 'pending'
+    }
   };
 
   await setDoc(userRef, profileData);
@@ -159,7 +175,10 @@ const loadAndUpdateUserProfile = async (user: User): Promise<ProfileData> => {
   // Update lastLoginAt and isVerified without overwriting other data
   await setDoc(userRef, { 
     lastLoginAt: serverTimestamp(),
-    isVerified: user.emailVerified
+    isVerified: user.emailVerified,
+    verification: {
+      emailVerified: user.emailVerified
+    }
   }, { merge: true });
 
   // Fetch the updated profile
@@ -269,7 +288,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Update isVerified in profile (use merge: true to not overwrite other fields)
     if (currentUser.emailVerified) {
       const userRef = doc(db, 'userProfiles', currentUser.uid);
-      await setDoc(userRef, { isVerified: true }, { merge: true });
+      await setDoc(userRef, { 
+        isVerified: true,
+        verification: {
+          emailVerified: true
+        }
+      }, { merge: true });
       
       // Refresh profile in state
       const updatedDoc = await getDoc(userRef);

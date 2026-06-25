@@ -391,7 +391,7 @@ interface Asset {
 // Role colors (no demo data, just styling config)
 const ROLE_COLORS: Record<string, { primary: string; verification: string }> = {
   ARCHITECT: { primary: "#FFD700", verification: "#FFD700" },
-  CATALYST: { primary: "#00C896", verification: "#00C896" },
+  CATALYST: { primary: "#00C896", verification: "#FFD700" },
   EXPLORER: { primary: "#3B82F6", verification: "#3B82F6" }
 };
 
@@ -933,6 +933,13 @@ const ProfilePremium: React.FC = () => {
             <ProfileIcon />
             <span>Profile</span>
           </div>
+          <div className="premium-nav-item" onClick={() => navigate('/verification')}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <polyline points="9 12 11 14 15 10" />
+            </svg>
+            <span>Verification Center</span>
+          </div>
         </nav>
 
         {safeActiveProfileMode === 'CATALYST' || safeActiveProfileMode === 'EXPLORER' ? (
@@ -1106,9 +1113,9 @@ const ProfilePremium: React.FC = () => {
               <div 
                 className="premium-triarcora-score"
                 onClick={() => {
-                  console.log('✅ Verification card clicked! Opening verification center!');
-                  setVerificationCenterOpen(true);
-                }}
+                    console.log('✅ Verification card clicked! Navigating to verification center!');
+                    navigate('/verification');
+                  }}
                 style={{ 
                   cursor: 'pointer', 
                   minWidth: '260px', 
@@ -1257,154 +1264,593 @@ const ProfilePremium: React.FC = () => {
               }}
               style={{ zIndex: 99999 }}
             >
-              <div className="premium-modal large" onClick={(e) => e.stopPropagation()}>
-                <div className="premium-modal-header">
-                  <h3 style={{ color: '#34D399' }}>Verification Center</h3>
-                  <button onClick={() => {
-                    console.log('✅ Close button clicked! Closing verification center!');
-                    setVerificationCenterOpen(false);
-                  }} className="premium-modal-close">
+              <div 
+                className="premium-modal" 
+                onClick={(e) => e.stopPropagation()}
+                style={{ 
+                  maxWidth: '1000px', 
+                  width: '95%',
+                  background: 'linear-gradient(145deg, #0a0a12 0%, #0f0f1a 100%)',
+                  border: '1px solid rgba(139, 92, 246, 0.3)',
+                  boxShadow: '0 25px 80px rgba(139, 92, 246, 0.15)'
+                }}
+              >
+                <div 
+                  className="premium-modal-header"
+                  style={{ 
+                    borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
+                    background: 'rgba(139, 92, 246, 0.03)'
+                  }}
+                >
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <h3 style={{ 
+                      color: '#8B5CF6', 
+                      fontSize: '1.5rem',
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px'
+                    }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#8B5CF6" />
+                        <path d="M2 17L12 22L22 17V7L12 12L2 7V17Z" fill="#A78BFA" opacity="0.7" />
+                      </svg>
+                      Verification Center
+                    </h3>
+                    <p style={{ 
+                      color: 'rgba(180,180,200,0.8)', 
+                      fontSize: '0.9rem',
+                      margin: 0
+                    }}>
+                      Build trust across the TRIVEON ecosystem.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      console.log('✅ Close button clicked! Closing verification center!');
+                      setVerificationCenterOpen(false);
+                    }} 
+                    className="premium-modal-close"
+                    style={{
+                      background: 'rgba(139, 92, 246, 0.1)',
+                      border: '1px solid rgba(139, 92, 246, 0.2)',
+                      borderRadius: '8px'
+                    }}
+                  >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <line x1="18" y1="6" x2="6" y2="18" />
                       <line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                   </button>
                 </div>
-                <div className="premium-modal-content">
+                <div className="premium-modal-content" style={{ padding: '24px' }}>
+                  {/* Top Stats Row */}
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                    gridTemplateColumns: 'repeat(3, 1fr)', 
                     gap: '20px', 
-                    marginBottom: '2rem' 
+                    marginBottom: '24px'
                   }}>
-                    {/* Profile Completion Card */}
+                    {/* Verification Level Card */}
                     <div style={{ 
-                      background: 'rgba(255,255,255,0.03)', 
+                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.05) 100%)', 
                       borderRadius: '12px', 
-                      padding: '24px',
-                      border: '1px solid rgba(255,255,255,0.08)'
+                      padding: '20px',
+                      border: '1px solid rgba(139, 92, 246, 0.25)',
+                      display: 'flex',
+                      gap: '14px',
+                      alignItems: 'center'
                     }}>
-                      <div style={{ 
-                        fontSize: '0.9rem', 
-                        color: 'rgba(200,200,220,0.9)', 
-                        marginBottom: '16px',
-                        fontWeight: 500
+                      <div style={{
+                        width: '56px',
+                        height: '56px',
+                        background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
                       }}>
-                        Profile Completion
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" />
+                          <path d="M2 17L12 22L22 17V7L12 12L2 7V17Z" fill="white" opacity="0.6" />
+                        </svg>
                       </div>
-                      <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '8px', color: '#60A5FA' }}>
-                        {getProfileCompletionPercentage()}%
-                      </div>
-                      <div style={{ 
-                        height: '8px', 
-                        background: 'rgba(255,255,255,0.1)', 
-                        borderRadius: '4px',
-                        overflow: 'hidden',
-                        marginBottom: '16px'
-                      }}>
+                      <div>
                         <div style={{ 
-                          height: '100%', 
-                          background: 'linear-gradient(90deg, #3B82F6, #60A5FA)', 
-                          width: `${getProfileCompletionPercentage()}%`,
-                          borderRadius: '4px'
-                        }}></div>
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'rgba(150,150,170,0.8)' }}>
-                        Complete your profile to unlock all features
+                          fontSize: '0.78rem', 
+                          color: 'rgba(200,200,220,0.75)', 
+                          marginBottom: '4px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          fontWeight: 600
+                        }}>
+                          Verification Level
+                        </div>
+                        <div style={{ 
+                          fontSize: '1.4rem', 
+                          fontWeight: 800, 
+                          marginBottom: '2px',
+                          color: '#A78BFA',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          Professional
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#8B5CF6"/>
+                          </svg>
+                        </div>
+                        <div style={{ 
+                          fontSize: '0.78rem', 
+                          color: 'rgba(150,150,170,0.7)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}>
+                          TRIVEON Verified
+                          <span style={{
+                            background: 'rgba(16, 185, 129, 0.15)',
+                            color: '#10B981',
+                            padding: '2px 8px',
+                            borderRadius: '10px',
+                            fontSize: '0.72rem',
+                            fontWeight: 600
+                          }}>
+                            Active
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Verification Score Card */}
+                    {/* Trust Score Card */}
                     <div style={{ 
                       background: 'rgba(255,255,255,0.03)', 
                       borderRadius: '12px', 
-                      padding: '24px',
+                      padding: '20px',
                       border: '1px solid rgba(255,255,255,0.08)'
                     }}>
                       <div style={{ 
-                        fontSize: '0.9rem', 
-                        color: 'rgba(200,200,220,0.9)', 
-                        marginBottom: '16px',
-                        fontWeight: 500
+                        fontSize: '0.78rem', 
+                        color: 'rgba(200,200,220,0.75)', 
+                        marginBottom: '8px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
                       }}>
-                        Verification Progress
-                      </div>
-                      <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '8px', color: '#34D399' }}>
-                        {getVerificationCompletionPercentage()}%
+                        Trust Score
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.6 }}>
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" y1="16" x2="12" y2="12"></line>
+                          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
                       </div>
                       <div style={{ 
-                        height: '8px', 
-                        background: 'rgba(255,255,255,0.1)', 
-                        borderRadius: '4px',
+                        fontSize: '2.6rem', 
+                        fontWeight: 800, 
+                        marginBottom: '10px',
+                        background: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        lineHeight: 1
+                      }}>
+                        92/100
+                      </div>
+                      <div style={{ 
+                        height: '10px', 
+                        background: 'rgba(255,255,255,0.08)', 
+                        borderRadius: '20px',
                         overflow: 'hidden',
-                        marginBottom: '16px'
+                        marginBottom: '6px',
+                        border: '1px solid rgba(16, 185, 129, 0.2)'
                       }}>
                         <div style={{ 
                           height: '100%', 
-                          background: 'linear-gradient(90deg, #10B981, #34D399)', 
-                          width: `${getVerificationCompletionPercentage()}%`,
-                          borderRadius: '4px'
+                          background: 'linear-gradient(90deg, #10B981, #34D399, #6EE7B7)', 
+                          width: '92%',
+                          borderRadius: '20px',
+                          boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)'
                         }}></div>
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: 'rgba(150,150,170,0.8)' }}>
-                        Verification Level: {userData?.verification?.verificationLevel || 'Unverified'}
+                      <div style={{ 
+                        fontSize: '0.8rem', 
+                        color: '#10B981',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        Excellent
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="18 15 12 21 6 15"></polyline>
+                          <polyline points="18 9 12 15 6 9"></polyline>
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Overall Status Card */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.03)', 
+                      borderRadius: '12px', 
+                      padding: '20px',
+                      border: '1px solid rgba(255,255,255,0.08)'
+                    }}>
+                      <div style={{ 
+                        fontSize: '0.78rem', 
+                        color: 'rgba(200,200,220,0.75)', 
+                        marginBottom: '12px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        fontWeight: 600
+                      }}>
+                        Overall Status
+                      </div>
+                      <div style={{ 
+                        fontSize: '0.85rem', 
+                        color: 'rgba(220,220,240,0.9)', 
+                        marginBottom: '12px',
+                        lineHeight: 1.5
+                      }}>
+                        All verifications are complete.
+                      </div>
+                      <div style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        <span style={{
+                          width: '10px',
+                          height: '10px',
+                          background: '#10B981',
+                          borderRadius: '50%',
+                          boxShadow: '0 0 12px rgba(16, 185, 129, 0.5)'
+                        }}></span>
+                        <span style={{ 
+                          color: '#10B981',
+                          fontWeight: 700,
+                          fontSize: '0.95rem'
+                        }}>
+                          Verified
+                        </span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                          <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#10B981"/>
+                        </svg>
                       </div>
                     </div>
                   </div>
 
-                  {/* Verification Steps */}
-                  <h4 style={{ 
-                    fontSize: '1.1rem', 
-                    fontWeight: 600, 
-                    marginBottom: '20px',
-                    color: 'rgba(240,240,255,0.95)'
+                  {/* Tabs */}
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '8px', 
+                    marginBottom: '24px',
+                    borderBottom: '1px solid rgba(139, 92, 246, 0.15)',
+                    paddingBottom: '0px'
                   }}>
-                    Verification Steps
-                  </h4>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {[
-                      { label: 'Email Verified', completed: userData?.verification?.emailVerified },
-                      { label: 'Phone Verified', completed: userData?.verification?.phoneVerified },
-                      { label: 'Identity Verified', completed: userData?.verification?.identityVerified },
-                      { label: 'LinkedIn Verified', completed: userData?.verification?.linkedinVerified },
-                      { label: 'Website Verified', completed: userData?.verification?.websiteVerified }
-                    ].map((step, index) => (
-                      <div 
-                        key={index} 
-                        style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'space-between',
-                          padding: '16px 20px',
-                          background: 'rgba(255,255,255,0.02)',
-                          borderRadius: '10px',
-                          border: `1px solid ${step.completed ? 'rgba(52,211,153,0.3)' : 'rgba(255,255,255,0.06)'}`
+                    {['Overview', 'Basic', 'Identity', 'Professional', 'Startup', 'Investor', 'Explorer', 'History'].map((tab, i) => (
+                      <button 
+                        key={tab}
+                        style={{
+                          padding: '10px 16px',
+                          background: i === 0 ? 'rgba(139, 92, 246, 0.15)' : 'transparent',
+                          border: 'none',
+                          borderRadius: '8px 8px 0 0',
+                          color: i === 0 ? '#A78BFA' : 'rgba(180,180,200,0.7)',
+                          fontSize: '0.82rem',
+                          fontWeight: i === 0 ? 700 : 500,
+                          cursor: 'pointer',
+                          borderBottom: i === 0 ? '2px solid #8B5CF6' : '2px solid transparent',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          transition: 'all 0.2s ease'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div style={{ 
-                            width: '24px', 
-                            height: '24px', 
-                            borderRadius: '50%', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            background: step.completed ? '#34D399' : 'rgba(255,255,255,0.1)',
-                            color: step.completed ? '#000' : 'rgba(150,150,170,0.8)'
-                          }}>
-                            {step.completed ? '✓' : '○'}
-                          </div>
-                          <span style={{ color: 'rgba(230,230,250,0.9)' }}>{step.label}</span>
-                        </div>
-                        <span style={{ 
-                          fontSize: '0.85rem',
-                          color: step.completed ? '#34D399' : 'rgba(150,150,170,0.7)'
-                        }}>
-                          {step.completed ? 'Completed' : 'Pending'}
-                        </span>
-                      </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="3"></circle>
+                          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-1.82.33 1.65 1.65 0 0 0-1.01 2.83v.06a2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.01-2.83v-.06a2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.01-2.83v-.06a2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33 1.65 1.65 0 0 0 1.01 2.83z"></path>
+                        </svg>
+                        {tab}
+                      </button>
                     ))}
+                  </div>
+
+                  {/* Content Grid */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '2fr 1fr', 
+                    gap: '20px'
+                  }}>
+                    {/* Verification Steps */}
+                    <div style={{ 
+                      background: 'rgba(255,255,255,0.02)', 
+                      borderRadius: '12px', 
+                      padding: '20px',
+                      border: '1px solid rgba(255,255,255,0.06)'
+                    }}>
+                      <h4 style={{ 
+                        fontSize: '1rem', 
+                        fontWeight: 700, 
+                        marginBottom: '16px',
+                        color: 'rgba(240,240,255,0.95)'
+                      }}>
+                        Verification Progress
+                      </h4>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {[
+                          { icon: '📧', label: 'Email Verification', subtitle: 'Verify your email address', completed: true },
+                          { icon: '📞', label: 'Phone Verification', subtitle: 'Verify your phone number', completed: true },
+                          { icon: '🪪', label: 'Identity Verification', subtitle: 'Upload ID and verify your identity', completed: true },
+                          { icon: '💼', label: 'Professional Verification', subtitle: 'Verify your professional identity', completed: true },
+                          { icon: '🚀', label: 'Startup Verification', subtitle: 'Verify your startup and documents', completed: true },
+                          { icon: '📈', label: 'Investor Verification', subtitle: 'Verify your investor profile and history', completed: true },
+                          { icon: '🧭', label: 'Explorer Verification', subtitle: 'Verify your explorer profile', completed: true }
+                        ].map((step, index) => (
+                          <div 
+                            key={index} 
+                            style={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              padding: '14px 16px',
+                              background: step.completed ? 'rgba(16, 185, 129, 0.06)' : 'rgba(255,255,255,0.02)',
+                              borderRadius: '10px',
+                              border: `1px solid ${step.completed ? 'rgba(16, 185, 129, 0.25)' : 'rgba(255,255,255,0.06)'}`
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                              <div style={{ 
+                                width: '44px', 
+                                height: '44px', 
+                                borderRadius: '10px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                background: step.completed ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.05)',
+                                border: `1px solid ${step.completed ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255,255,255,0.08)'}`,
+                                fontSize: '20px'
+                              }}>
+                                {step.icon}
+                              </div>
+                              <div>
+                                <span style={{ 
+                                  color: 'rgba(230,230,250,0.95)',
+                                  fontWeight: 600,
+                                  fontSize: '0.9rem',
+                                  display: 'block',
+                                  marginBottom: '2px'
+                                }}>{step.label}</span>
+                                <span style={{ 
+                                  color: 'rgba(150,150,170,0.7)',
+                                  fontSize: '0.78rem'
+                                }}>{step.subtitle}</span>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <span style={{ 
+                                fontSize: '0.8rem',
+                                color: step.completed ? '#10B981' : 'rgba(150,150,170,0.7)',
+                                fontWeight: 600
+                              }}>
+                                {step.completed ? 'Verified' : 'Pending'}
+                              </span>
+                              {step.completed ? (
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                  <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#10B981"/>
+                                </svg>
+                              ) : (
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'rgba(180,180,200,0.5)' }}>
+                                  <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right Column - Benefits & Actions */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      {/* Benefits Card */}
+                      <div style={{ 
+                        background: 'rgba(255,255,255,0.02)', 
+                        borderRadius: '12px', 
+                        padding: '20px',
+                        border: '1px solid rgba(255,255,255,0.06)'
+                      }}>
+                        <h4 style={{ 
+                          fontSize: '1rem', 
+                          fontWeight: 700, 
+                          marginBottom: '16px',
+                          color: 'rgba(240,240,255,0.95)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#8B5CF6" />
+                            <path d="M2 17L12 22L22 17V7L12 12L2 7V17Z" fill="#A78BFA" opacity="0.7" />
+                          </svg>
+                          Verification Benefits
+                        </h4>
+                        <ul style={{ 
+                          listStyle: 'none', 
+                          padding: 0, 
+                          margin: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '10px'
+                        }}>
+                          {[
+                            'Increase profile trust & credibility',
+                            'Get more visibility in search results',
+                            'Higher priority in recommendations',
+                            'Access to premium opportunities',
+                            'Build stronger connections',
+                            'Reduce fraud and increase safety'
+                          ].map((benefit, i) => (
+                            <li key={i} style={{ 
+                              display: 'flex', 
+                              alignItems: 'flex-start',
+                              gap: '10px',
+                              color: 'rgba(210,210,230,0.85)',
+                              fontSize: '0.82rem',
+                              lineHeight: 1.5
+                            }}>
+                              <span style={{ 
+                                color: '#8B5CF6',
+                                flexShrink: 0,
+                                marginTop: '2px'
+                              }}>•</span>
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Actions Card */}
+                      <div style={{ 
+                        background: 'rgba(255,255,255,0.02)', 
+                        borderRadius: '12px', 
+                        padding: '20px',
+                        border: '1px solid rgba(255,255,255,0.06)'
+                      }}>
+                        <h4 style={{ 
+                          fontSize: '1rem', 
+                          fontWeight: 700, 
+                          marginBottom: '16px',
+                          color: 'rgba(240,240,255,0.95)'
+                        }}>
+                          Actions
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {[
+                            { icon: '📝', label: 'Update Information', subtitle: 'Update your profile details' },
+                            { icon: '📤', label: 'Upload Documents', subtitle: 'Upload or replace documents' },
+                            { icon: '📖', label: 'View Verification Guide', subtitle: 'Learn more about verification' },
+                            { icon: '💬', label: 'Contact Support', subtitle: 'Need help? We\'re here' }
+                          ].map((action, i) => (
+                            <button 
+                              key={i}
+                              style={{
+                                width: '100%',
+                                padding: '12px 14px',
+                                background: 'rgba(255,255,255,0.03)',
+                                border: '1px solid rgba(139, 92, 246, 0.2)',
+                                borderRadius: '8px',
+                                color: 'rgba(230,230,250,0.9)',
+                                fontSize: '0.85rem',
+                                fontWeight: 500,
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                transition: 'all 0.2s ease'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '18px' }}>{action.icon}</span>
+                                <div>
+                                  <div style={{ fontWeight: 600, marginBottom: '2px' }}>{action.label}</div>
+                                  <div style={{ fontSize: '0.75rem', color: 'rgba(150,150,170,0.7)' }}>{action.subtitle}</div>
+                                </div>
+                              </div>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'rgba(180,180,200,0.6)' }}>
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                              </svg>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Banner */}
+                  <div style={{
+                    marginTop: '24px',
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.03) 100%)',
+                    borderRadius: '12px',
+                    padding: '18px 22px',
+                    border: '1px solid rgba(139, 92, 246, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px'
+                  }}>
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      boxShadow: '0 10px 30px rgba(139, 92, 246, 0.3)'
+                    }}>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="white"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ 
+                        fontSize: '1rem', 
+                        fontWeight: 700, 
+                        marginBottom: '4px',
+                        color: 'rgba(240,240,255,0.95)'
+                      }}>
+                        TRIVEON Verified Member
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ marginLeft: '6px', display: 'inline-block' }}>
+                          <path d="M12 0C5.37 0 0 5.37 0 12C0 18.63 5.37 24 12 24C18.63 24 24 18.63 24 12C24 5.37 18.63 0 12 0ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#8B5CF6"/>
+                        </svg>
+                      </h4>
+                      <p style={{ 
+                        color: 'rgba(180,180,200,0.8)', 
+                        fontSize: '0.85rem',
+                        margin: 0
+                      }}>
+                        You have completed all verification steps. Thank you for being a trusted member of the TRIVEON ecosystem.
+                      </p>
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      gap: '12px'
+                    }}>
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid rgba(139, 92, 246, 0.2)'
+                      }}>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="1.5">
+                          <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                          <path d="M2 17L12 22L22 17V7L12 12L2 7V17Z"></path>
+                        </svg>
+                      </div>
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '1px solid rgba(139, 92, 246, 0.2)'
+                      }}>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" strokeWidth="1.5">
+                          <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                          <path d="M2 17L12 22L22 17V7L12 12L2 7V17Z"></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

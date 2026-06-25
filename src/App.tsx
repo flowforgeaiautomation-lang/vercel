@@ -23,6 +23,7 @@ import AtlasDashboard from './components/AtlasDashboard';
 import InsightsDashboard from './components/InsightsDashboard';
 import AICopilot from './components/AICopilot';
 import AICopilotPage from './components/AICopilotPage';
+import VerificationCenter from './components/VerificationCenter';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserProvider, useUser } from './contexts/UserContext';
 import { PostProvider } from './contexts/PostContext';
@@ -416,6 +417,7 @@ function App() {
                   <Route path="/bookmarks" element={<ProtectedRoute><BookmarksDashboard /></ProtectedRoute>} />
                   <Route path="/messages" element={<ProtectedRoute><MessagesDashboard /></ProtectedRoute>} />
                   <Route path="/ai-copilot" element={<ProtectedRoute><AICopilotPage /></ProtectedRoute>} />
+                  <Route path="/verification" element={<ProtectedRoute><VerificationCenter /></ProtectedRoute>} />
                 </Routes>
                 <WelcomeModal />
                 <ProfileModal />

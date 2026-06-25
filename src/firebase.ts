@@ -35,58 +35,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-// Disable any realtime listeners that might be causing ERR_ABORTED
+// Use Firestore without persistent listeners
 const storage = getStorage(app);
 const auth = getAuth(app);
-
-// Strong error suppression for Firestore connection issues
-if (typeof window !== 'undefined') {
-  // Suppress all network-related errors from Firebase
-  const originalAddEventListener = window.addEventListener;
-  window.addEventListener = function(type, listener, options) {
-    if (type === 'error') {
-      const wrappedListener = function(event) {
-        if (
-          event.message?.includes('firestore') || 
-          event.message?.includes('ERR_ABORTED') || 
-          event.message?.includes('Firebase')
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          return;
-        }
-        return listener(event);
-      };
-      return originalAddEventListener.call(this, type, wrappedListener, options);
-    }
-    return originalAddEventListener.call(this, type, listener, options);
-  };
-
-  // Also suppress unhandled promise rejections from Firebase
-  const originalConsoleError = console.error;
-  console.error = (...args) => {
-    // Check if this is a Firebase/Firestore error we want to suppress
-    const isSuppressable = args.some(arg => {
-      if (typeof arg === 'string') {
-        return arg.includes('firestore') || 
-               arg.includes('ERR_ABORTED') || 
-               arg.includes('FirebaseError') ||
-               arg.includes('google.firestore');
-      }
-      if (arg && typeof arg === 'object') {
-        const errorStr = JSON.stringify(arg);
-        return errorStr.includes('firestore') || 
-               errorStr.includes('ERR_ABORTED') || 
-               errorStr.includes('FirebaseError');
-      }
-      return false;
-    });
-    
-    if (!isSuppressable) {
-      originalConsoleError(...args);
-    }
-  };
-}
 
 // Interfaces
 export interface UserProfile {

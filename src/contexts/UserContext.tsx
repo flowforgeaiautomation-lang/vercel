@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '../firebase';
 
@@ -312,9 +312,29 @@ interface VerificationData {
   startupVerified: boolean;
   investorVerified: boolean;
   explorerVerified: boolean;
+  verificationLevel: 'unverified' | 'Basic Verified' | 'Identity Verified' | 'Professional Verified' | 'TRIVEON Verified';
   trustScore: number;
-  verificationLevel: 'Unverified' | 'Basic Verified' | 'Identity Verified' | 'Professional Verified' | 'Premium Verified' | 'TRIVEON Verified';
-  verificationStatus: 'Pending' | 'Under Review' | 'Approved' | 'Rejected' | 'Needs Action';
+  submittedAt: Timestamp | null;
+  reviewedAt: Timestamp | null;
+  status: 'unverified' | 'pending' | 'ready_for_approval' | 'approved' | 'rejected' | 'needs_action';
+  
+  // Confidence scores
+  emailConfidenceScore: number;
+  phoneConfidenceScore: number;
+  identityConfidenceScore: number;
+  linkedinConfidenceScore: number;
+  websiteConfidenceScore: number;
+  startupConfidenceScore: number;
+  investorConfidenceScore: number;
+  explorerConfidenceScore: number;
+  
+  // Risk engine
+  verificationRiskScore: number;
+  riskLevel: 'Low' | 'Medium' | 'High';
+  
+  // Verification history
+  failedAttempts: number;
+  lastVerificationAttempt: Timestamp | null;
 }
 
 interface UserData {
@@ -323,7 +343,6 @@ interface UserData {
   extraRole: string | null;
   roles: string[];
   activeProfileView: string;
-  isDemo: boolean;
   displayName?: string;
   username: string;
   email?: string;
@@ -363,7 +382,6 @@ interface UserData {
 interface UserContextType {
   userData: UserData | null;
   loading: boolean;
-  isDemo: boolean;
   userName: string;
   userUsername: string;
   userEmail: string;
@@ -374,8 +392,6 @@ interface UserContextType {
   updateSettings: (newSettings: Partial<SettingsData>) => void;
   setCurrentUserId: (userId: string) => void;
   createNewUserProfile: () => void;
-  switchToDemo: () => void;
-  switchToReal: () => void;
   uploadImage: (file: File, path: string) => Promise<string>;
   deleteImage: (path: string) => Promise<void>;
   addExtraRole: (role: string) => void;
@@ -385,26 +401,12 @@ interface UserContextType {
   unfollowUser: (userId: string) => void; // Unfollow another user
   getProfileCompletionPercentage: () => number;
   getVerificationCompletionPercentage: () => number;
+  isDemo: boolean;
+  aiVerificationEngine: typeof aiVerificationEngine;
+  riskEngine: typeof riskEngine;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
-
-interface RoleData {
-  name: string;
-  title: string;
-  bio: string;
-  location: string;
-  badges: string[];
-  verificationColor: string;
-  primaryColor: string;
-  score: number;
-  scoreTier: string;
-  links: {
-    linkedin: string;
-    website: string;
-    twitter: string;
-  };
-}
 
 const generateUsername = (name: string): string => {
   return name.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '') || 'user';
@@ -453,57 +455,6 @@ const calculatePrestigeStar = (memberSince: string, lastActive: string) => {
     starName: star?.displayName || 'ASTRA',
     progressPercent
   };
-};
-
-const ROLE_DATA: Record<string, RoleData> = {
-  ARCHITECT: {
-    name: "Unnati Chaudhary",
-    title: "Architect",
-    bio: "Building the intelligence layer for modern startups.",
-    location: "Bangalore, India",
-    badges: ["Founder", "Builder", "AI Enthusiast"],
-    verificationColor: "#FFD700",
-    primaryColor: "gold",
-    score: 93,
-    scoreTier: "Sovereign",
-    links: {
-      linkedin: "linkedin.com/in/arjunmalhotra",
-      website: "www.nexora.ai",
-      twitter: "@arjunmalhotra_ai"
-    }
-  },
-  CATALYST: {
-    name: "David Morgan",
-    title: "Venture Capital Partner",
-    bio: "Catalyzing the next generation of disruptive startups.",
-    location: "San Francisco, California, USA",
-    badges: ["CATALYST", "VERIFIED INVESTOR"],
-    verificationColor: "#00C896",
-    primaryColor: "green",
-    score: 96,
-    scoreTier: "Sovereign",
-    links: {
-      linkedin: "linkedin.com/in/davidmorgan",
-      website: "www.morganventures.com",
-      twitter: "@davidmorgan_vc"
-    }
-  },
-  EXPLORER: {
-    name: "Alex Explorer",
-    title: "Curious. Connected. Growing Together.",
-    bio: "Exploring ideas, supporting founders, and learning every day in the Triarcora ecosystem.",
-    location: "Global Citizen",
-    badges: ["EXPLORER"],
-    verificationColor: "#3B82F6",
-    primaryColor: "blue",
-    score: 90,
-    scoreTier: "Elite",
-    links: {
-      linkedin: "linkedin.com/in/alexplorer",
-      website: "www.alexplorer.com",
-      twitter: "@alexplorer_tv"
-    }
-  }
 };
 
 const getDefaultSettings = (): SettingsData => ({
@@ -719,203 +670,6 @@ const getDefaultSettings = (): SettingsData => ({
   }
 });
 
-const getDemoUserData = (): UserData => {
-  const selectedRole = localStorage.getItem('selectedRole') || 'ARCHITECT';
-  const role = selectedRole.toUpperCase();
-  const roleData = ROLE_DATA[role] || ROLE_DATA['ARCHITECT'];
-  
-  const username = generateUsername(roleData.name);
-  
-  return {
-    uid: 'demo-user',
-    mainRole: role,
-    extraRole: null,
-    roles: [role],
-    activeProfileView: role,
-    isDemo: true,
-    hasSeenWelcomeModal: false,
-    hasSeenProfileModal: false,
-    username,
-    following: ['demo-1', 'demo-2', 'demo-3'],
-    followers: ['demo-1', 'demo-4', 'demo-5'],
-    prestigeSystem: {
-      currentStarId: 5,
-      currentStarName: 'CASTOR',
-      progressPercent: 45
-    },
-    verification: {
-      emailVerified: true,
-      phoneVerified: true,
-      identityVerified: true,
-      linkedinVerified: true,
-      websiteVerified: true,
-      startupVerified: role === 'ARCHITECT',
-      investorVerified: role === 'CATALYST',
-      explorerVerified: role === 'EXPLORER',
-      trustScore: 92,
-      verificationLevel: 'TRIVEON Verified',
-      verificationStatus: 'Approved'
-    },
-    profile: {
-      name: roleData.name,
-      title: roleData.title,
-      bio: roleData.bio,
-      location: roleData.location,
-      profileImage: '',
-      linkedin: roleData.links.linkedin,
-      website: roleData.links.website,
-      twitter: roleData.links.twitter
-    },
-    architectProfile: {
-      score: roleData.score,
-      scoreTier: roleData.scoreTier,
-      credibilityScore: 95,
-      credibilityTier: 'Elite',
-      executionScore: 92,
-      executionTier: 'Elite',
-      contributionScore: 88,
-      contributionTier: 'Elite',
-      ecosystemTrust: 94,
-      ecosystemTrustLevel: 'High',
-      founderPrestige: 90,
-      founderPrestigeLevel: 'Global',
-      reputationTrend: 18,
-      startupsBuilt: 3,
-      startupsBuiltDetail: '2 Exited • 1 Active',
-      startupsBacked: 7,
-      startupsBackedDetail: '2 Unicorns • 1 Soonicorn',
-      avgFeedbackScore: 4.8,
-      feedbackCount: 128,
-      successfulMatches: 23,
-      successfulMatchesDetail: 'Founders • Investors • Mentors'
-    },
-    catalystProfile: {
-      score: 96,
-      scoreTier: 'Sovereign',
-      memberSince: 'Jan 2022',
-      totalInvestments: 48,
-      portfolioCompanies: 23,
-      ecosystemImpact: 'High',
-      trustScore: 98,
-      savedStartups: 12,
-      investmentRange: '$500K - $15M',
-      investmentInterests: ['SaaS', 'AI/ML', 'FinTech', 'Web3', 'HealthTech'],
-      preferredStartupStages: ['Seed', 'Series A', 'Series B'],
-      geographicFocus: ['North America', 'Europe', 'Asia'],
-      investmentThesis: 'Backing visionary founders building scalable solutions with massive global impact. Focus on innovation, team, and execution.',
-      capitalDeployed: '$42.8M',
-      activeInvestments: 23,
-      exits: 7,
-      roi: '3.7x',
-      topSectors: [
-        { name: 'SaaS', percentage: 38 },
-        { name: 'AI/ML', percentage: 24 },
-        { name: 'FinTech', percentage: 18 },
-        { name: 'Web3', percentage: 12 },
-        { name: 'HealthTech', percentage: 8 }
-      ],
-      areasOfExpertise: ['Deep Tech', 'Climate', 'Enterprise SaaS', 'BioTech', 'AI'],
-      openToMentorship: true,
-      mentorshipFocus: 'Helping early-stage founders with fundraising, product strategy, and go-to-market.',
-      portfolioHighlights: [
-        { name: 'NextGen AI', stage: 'Series A', sector: 'AI Platform' },
-        { name: 'FinFlow', stage: 'Series B', sector: 'FinTech' },
-        { name: 'WebVerse', stage: 'Seed', sector: 'Web3' },
-        { name: 'Health Plus', stage: 'Series A', sector: 'HealthTech' }
-      ]
-    },
-    explorerProfile: {
-      score: 90,
-      scoreTier: 'Elite',
-      communitiesJoined: 12,
-      discussionsParticipated: 28,
-      feedbackGiven: 34,
-      connections: 156,
-      aboutMe: 'I love exploring new ideas, supporting amazing founders, and learning something new every day.',
-      interests: ['AI', 'Web3', 'FinTech', 'Sustainability', 'HealthTech'],
-      skills: ['Community Support', 'Research', 'Feedback'],
-      learningGoals: ['Understand startups', 'Invest wisely', 'Build connections'],
-      communities: [
-        { name: 'AI Innovators', icon: 'brain' },
-        { name: 'Web3 Builders', icon: 'web3' },
-        { name: 'Startup Supporters', icon: 'rocket' },
-        { name: 'Sustainability Leaders', icon: 'leaf' }
-      ],
-      recentActivity: [
-        { id: '1', title: 'Joined AI Innovators Community', time: '1h ago' },
-        { id: '2', title: 'Gave feedback on 3 startups', time: '3h ago' },
-        { id: '3', title: 'Participated in Web3 discussion', time: '5h ago' },
-        { id: '4', title: 'Saved 2 new startups', time: '1d ago' }
-      ]
-    },
-    activities: [
-      {
-        id: '1',
-        title: 'Nexora AI raised $2.4M Pre-Seed',
-        description: '',
-        year: '2024'
-      },
-      {
-        id: '2',
-        title: 'Shared a deep dive: AI in Early Stage Startups',
-        description: '',
-        year: '2024'
-      },
-      {
-        id: '3',
-        title: 'Provided feedback on 5 startups',
-        description: '',
-        year: '2024'
-      },
-      {
-        id: '4',
-        title: 'Spoke at TRIARCORA Summit \'24',
-        description: '',
-        year: '2024'
-      },
-      {
-        id: '5',
-        title: 'Exited NexStack (Acquired by BrowserStack)',
-        description: '',
-        year: '2023'
-      },
-      {
-        id: '6',
-        title: 'Joined TRIARCORA',
-        description: '',
-        year: '2022'
-      }
-    ],
-    assets: [
-      {
-        id: '1',
-        title: 'Pitch Deck - Nexora AI',
-        description: 'Investor pitch deck for our AI-powered SaaS platform',
-        fileUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31',
-        fileType: 'PDF',
-        uploadTime: new Date(2024, 4, 29)
-      },
-      {
-        id: '2',
-        title: 'Product Demo Video',
-        description: 'Quick 2-minute product walkthrough',
-        fileUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728',
-        fileType: 'Video',
-        uploadTime: new Date(2024, 3, 15)
-      },
-      {
-        id: '3',
-        title: 'Business Plan 2024',
-        description: 'Comprehensive business plan and roadmap',
-        fileUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
-        fileType: 'Docs',
-        uploadTime: new Date(2024, 2, 1)
-      }
-    ],
-    settings: getDefaultSettings()
-  };
-};
-
 // Empty real user profile data
 const getEmptyRealUserData = (userId: string, roleOrRoles: string | string[], name: string = '', email: string = ''): UserData => {
   const rolesArray = Array.isArray(roleOrRoles) 
@@ -929,7 +683,6 @@ const getEmptyRealUserData = (userId: string, roleOrRoles: string | string[], na
     extraRole: rolesArray.length > 1 ? rolesArray[1] : null,
     roles: rolesArray,
     activeProfileView: selectedRole,
-    isDemo: false,
     displayName: name,
     username,
     email: email,
@@ -954,8 +707,28 @@ const getEmptyRealUserData = (userId: string, roleOrRoles: string | string[], na
       investorVerified: false,
       explorerVerified: false,
       trustScore: 0,
-      verificationLevel: 'Unverified',
-      verificationStatus: 'Pending'
+      verificationLevel: 'unverified',
+      submittedAt: null,
+      reviewedAt: null,
+      status: 'unverified',
+      
+      // Confidence scores
+      emailConfidenceScore: 0,
+      phoneConfidenceScore: 0,
+      identityConfidenceScore: 0,
+      linkedinConfidenceScore: 0,
+      websiteConfidenceScore: 0,
+      startupConfidenceScore: 0,
+      investorConfidenceScore: 0,
+      explorerConfidenceScore: 0,
+      
+      // Risk engine
+      verificationRiskScore: 0,
+      riskLevel: 'Low',
+      
+      // Verification history
+      failedAttempts: 0,
+      lastVerificationAttempt: null,
     },
     profile: {
       name: name || '',
@@ -1044,14 +817,16 @@ const saveUserProfileToFirestore = async (userId: string, userData: UserData) =>
   try {
     const userRef = doc(db, 'userProfiles', userId);
     await setDoc(userRef, userData, { merge: true });
+    console.log('[UserContext] Saved user profile to Firestore successfully');
   } catch (error) {
     console.error('[UserContext] Error saving to Firestore:', error);
+    // Don't throw - keep the app working with localStorage
   }
 };
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, profile: authProfile } = useAuth();
-  // Initialize user data instantly from localStorage or default to demo data (NO LOADING EVER!)
+  // Initialize user data instantly from localStorage or default to null (NO DEMO DATA!)
   const [userData, setUserData] = useState<UserData | null>(() => {
     // Check for stored user data first!
     if (typeof window !== 'undefined') {
@@ -1063,8 +838,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
     }
-    // Default to demo data if no stored user - instant display!
-    return getDemoUserData();
+    // Default to null
+    return null;
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [currentUserId, setCurrentUserId] = useState<string>(() => {
@@ -1201,10 +976,218 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initialized.current = true;
   }, [user?.uid, authProfile?.uid]);
 
+  const calculateTrustScore = (verification: any, profileCompletion: number = 0, accountAgeBonus: number = 0) => {
+    let score = 0;
+    if (verification?.emailVerified) score += 10;
+    if (verification?.phoneVerified) score += 10;
+    if (verification?.identityVerified) score += 20;
+    if (verification?.linkedinVerified) score += 10;
+    if (verification?.websiteVerified) score += 10;
+    if (verification?.startupVerified) score += 15;
+    if (verification?.investorVerified) score += 15;
+    if (verification?.explorerVerified) score += 10;
+    // Profile completion and account age bonus (up to 10 each)
+    score += Math.min(profileCompletion, 10);
+    score += Math.min(accountAgeBonus, 10);
+    return Math.min(score, 100);
+  };
+
+  const calculateVerificationLevel = (trustScore: number) => {
+    if (trustScore >= 90) return 'TRIVEON Verified';
+    if (trustScore >= 70) return 'Professional Verified';
+    if (trustScore >= 50) return 'Identity Verified';
+    if (trustScore >= 30) return 'Basic Verified';
+    return 'unverified';
+  };
+
+  // AI Verification Engine
+  const aiVerificationEngine = {
+    // LinkedIn verification checks
+    verifyLinkedIn: (url: string, userName: string): { confidenceScore: number, recommendation: 'approve' | 'review' | 'reject' } => {
+      let score = 0;
+      
+      // URL format valid
+      if (url.includes('linkedin.com')) score += 30;
+      
+      // URL has profile path
+      if (url.includes('/in/')) score += 20;
+      
+      // Simulate public profile check
+      if (Math.random() > 0.3) score += 25;
+      
+      // Simulate name similarity check
+      if (Math.random() > 0.2) score += 25;
+      
+      // Determine recommendation
+      let recommendation: 'approve' | 'review' | 'reject';
+      if (score > 80) recommendation = 'approve';
+      else if (score > 50) recommendation = 'review';
+      else recommendation = 'reject';
+      
+      return { confidenceScore: score, recommendation };
+    },
+
+    // Website verification checks
+    verifyWebsite: (url: string): { confidenceScore: number, recommendation: 'approve' | 'review' | 'reject' } => {
+      let score = 0;
+      
+      // URL has valid format
+      if (url.startsWith('http://') || url.startsWith('https://')) score += 20;
+      
+      // HTTPS enabled
+      if (url.startsWith('https://')) score += 30;
+      
+      // Simulate not parked domain
+      if (Math.random() > 0.15) score += 25;
+      
+      // Simulate not suspicious
+      if (Math.random() > 0.1) score += 25;
+      
+      let recommendation: 'approve' | 'review' | 'reject';
+      if (score > 80) recommendation = 'approve';
+      else if (score > 50) recommendation = 'review';
+      else recommendation = 'reject';
+      
+      return { confidenceScore: score, recommendation };
+    },
+
+    // Startup verification checks
+    verifyStartup: (data: { name: string, website: string, email: string, country: string, industry: string }): { confidenceScore: number, recommendation: 'approve' | 'review' | 'reject' } => {
+      let score = 0;
+      
+      // Check if domain matches company
+      if (data.email.split('@')[1] && data.website.includes(data.email.split('@')[1].replace('www.', ''))) {
+        score += 30;
+      }
+      
+      // Simulate website legitimacy
+      if (Math.random() > 0.2) score += 30;
+      
+      // Simulate info consistency
+      if (Math.random() > 0.15) score += 20;
+      
+      // All required fields present
+      if (data.name && data.website && data.email && data.country) score += 20;
+      
+      let recommendation: 'approve' | 'review' | 'reject';
+      if (score > 80) recommendation = 'approve';
+      else if (score > 50) recommendation = 'review';
+      else recommendation = 'reject';
+      
+      return { confidenceScore: score, recommendation };
+    },
+
+    // Document review
+    reviewDocument: (file: File): { confidenceScore: number, recommendation: 'approve' | 'review' | 'reject' } => {
+      let score = 0;
+      
+      // File readable (simulated)
+      if (file.size > 1000) score += 25;
+      
+      // Not blank (simulated)
+      if (Math.random() > 0.05) score += 25;
+      
+      // Image quality sufficient (simulated)
+      if (Math.random() > 0.1) score += 25;
+      
+      // No obvious fraud indicators (simulated)
+      if (Math.random() > 0.15) score += 25;
+      
+      let recommendation: 'approve' | 'review' | 'reject';
+      if (score > 80) recommendation = 'approve';
+      else if (score > 50) recommendation = 'review';
+      else recommendation = 'reject';
+      
+      return { confidenceScore: score, recommendation };
+    },
+
+    // Selfie review
+    reviewSelfie: (file: File): { confidenceScore: number, recommendation: 'approve' | 'review' | 'reject' } => {
+      let score = 0;
+      
+      // Face visible (simulated)
+      if (Math.random() > 0.1) score += 30;
+      
+      // Image quality acceptable (simulated)
+      if (Math.random() > 0.1) score += 25;
+      
+      // Not screenshot (simulated)
+      if (Math.random() > 0.15) score += 20;
+      
+      // Not stock/AI image (simulated)
+      if (Math.random() > 0.2) score += 25;
+      
+      let recommendation: 'approve' | 'review' | 'reject';
+      if (score > 80) recommendation = 'approve';
+      else if (score > 50) recommendation = 'review';
+      else recommendation = 'reject';
+      
+      return { confidenceScore: score, recommendation };
+    }
+  };
+
+  // Risk Engine
+  const riskEngine = {
+    calculateRiskScore: (verification: any): { riskScore: number, riskLevel: 'Low' | 'Medium' | 'High' } => {
+      let riskScore = 0;
+      
+      // New account (first 7 days)
+      if (!verification?.submittedAt) riskScore += 30;
+      
+      // Multiple failed attempts
+      if (verification?.failedAttempts >= 5) riskScore += 40;
+      else if (verification?.failedAttempts >= 2) riskScore += 20;
+      
+      // Suspicious domains (simulated)
+      if (Math.random() > 0.85) riskScore += 30;
+      
+      // Mismatched info (simulated)
+      if (Math.random() > 0.9) riskScore += 40;
+      
+      // Determine risk level
+      let riskLevel: 'Low' | 'Medium' | 'High';
+      if (riskScore > 70) riskLevel = 'High';
+      else if (riskScore > 30) riskLevel = 'Medium';
+      else riskLevel = 'Low';
+      
+      return { riskScore, riskLevel };
+    },
+    
+    // Determine if submission needs admin review
+    needsAdminReview: (aiRecommendation: string, riskLevel: string): boolean => {
+      // High risk always needs review
+      if (riskLevel === 'High') return true;
+      
+      // Medium risk needs review if not approved
+      if (riskLevel === 'Medium' && aiRecommendation !== 'approve') return true;
+      
+      // Low risk only needs review if rejected
+      if (riskLevel === 'Low' && aiRecommendation === 'reject') return true;
+      
+      return false;
+    }
+  };
+
   const updateUserData = (newData: Partial<UserData>) => {
     setUserData(prev => {
       if (!prev) return null;
-      const updated = { ...prev, ...newData };
+      const updatedVerification = newData.verification 
+        ? { ...prev.verification, ...newData.verification } 
+        : prev.verification;
+      
+      const profileCompletion = getProfileCompletionPercentageInternal(prev);
+      const trustScore = calculateTrustScore(updatedVerification, profileCompletion, 0); // Account age bonus can be added later
+      const verificationLevel = calculateVerificationLevel(trustScore);
+      
+      const updated = { 
+        ...prev, 
+        ...newData,
+        verification: {
+          ...updatedVerification,
+          trustScore,
+          verificationLevel
+        }
+      };
       
       if (user) {
         // Logged-in user: save to Firestore and localStorage
@@ -1214,6 +1197,22 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return updated;
     });
+  };
+  
+  // Helper to calculate profile completion without relying on userData state
+  const getProfileCompletionPercentageInternal = (userData: UserData) => {
+    const fields = [
+      !!userData.profile.name,
+      !!userData.profile.title,
+      !!userData.profile.bio,
+      !!userData.profile.location,
+      !!userData.profile.profileImage,
+      !!userData.profile.linkedin,
+      !!userData.profile.website,
+      !!userData.profile.twitter
+    ];
+    const completed = fields.filter(Boolean).length;
+    return Math.round((completed / fields.length) * 100);
   };
 
   const updateSettings = (newSettings: Partial<SettingsData>) => {
@@ -1301,7 +1300,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       userData, 
       loading,
       isDemo: false,
-      userName: userData?.profile?.name,
+      userName: userData?.profile?.name || '',
       userUsername: userData?.username || '',
       userEmail: userData?.email || '',
       userRole: userData?.mainRole || 'ARCHITECT',
@@ -1318,7 +1317,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       followUser,
       unfollowUser,
       getProfileCompletionPercentage,
-      getVerificationCompletionPercentage
+      getVerificationCompletionPercentage,
+      aiVerificationEngine,
+      riskEngine
     }}>
       {children}
     </UserContext.Provider>
