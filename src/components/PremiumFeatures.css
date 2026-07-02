@@ -1,0 +1,207 @@
+/* Premium Features CSS - Dropdown, Modal, Role Switching */
+
+.relative {
+  position: relative;
+}
+
+.premium-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: rgba(10, 10, 20, 0.98);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--gold-soft);
+  border-radius: 12px;
+  min-width: 200px;
+  padding: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: dropdownFadeIn 0.2s ease-out;
+  z-index: 1000;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.premium-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-gray);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.premium-dropdown-item:hover {
+  background: rgba(184, 134, 11, 0.1);
+  color: var(--text-white);
+  transform: translateX(2px);
+}
+
+.premium-dropdown-item svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.premium-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: modalOverlayFadeIn 0.2s ease-out;
+}
+
+@keyframes modalOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.premium-modal {
+  background: rgba(10, 10, 20, 0.98);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(184, 134, 11, 0.2);
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
+  animation: modalFadeInUp 0.3s ease-out;
+}
+
+@keyframes modalFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.premium-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.premium-modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.premium-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-gray);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.premium-modal-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-white);
+}
+
+.premium-modal-content {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.premium-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.premium-modal-content::-webkit-scrollbar-track {
+  background: rgba(30, 30, 45, 0.5);
+  border-radius: 3px;
+}
+
+.premium-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 120, 0.4);
+  border-radius: 3px;
+}
+
+.premium-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 140, 0.6);
+}
+
+.premium-modal-content p {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  margin-bottom: 20px;
+}
+
+.premium-role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.premium-role-option {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--gold-soft);
+  border-radius: 12px;
+  color: var(--text-white);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.premium-role-option:hover {
+  background: rgba(184, 134, 11, 0.12);
+  border-color: rgba(184, 134, 11, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px var(--gold-soft);
+}
+
+.premium-badge.purple {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+}
+
+/* Ensure smooth transitions */
+.premium-profile-content {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
